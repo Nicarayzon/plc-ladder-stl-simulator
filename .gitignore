@@ -1,0 +1,55 @@
+# Dependencias (se instalan con «npm install»)
+node_modules/
+
+# Compilación y empaquetado (npm run build / npm run dist)
+dist/
+release/
+build/icon.png
+build/icon.iconset/
+
+# Instaladores: van en las Releases de GitHub (límite de 100 MB por fichero en el repositorio)
+*.dmg
+*.exe
+*.zip
+*.blockmap
+builder-debug.yml
+
+# Pruebas
+test-results/
+playwright-report/
+coverage/
+
+# Variables de entorno y claves secretas
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.provisionprofile
+
+# Datos y bases de datos locales (los proyectos del alumno están en ~/Library/Application Support/Automatizacion)
+*.db
+*.sqlite
+*.sqlite3
+
+# Python (tools/interprete_referencia.py)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Registros
+*.log
+npm-debug.log*
+
+# Notas locales de desarrollo y configuración de Claude Code
+DESARROLLO.md
+CLAUDE.md
+.claude/
+
+# Sistema y editores
+.DS_Store
+.vscode/
+.idea/

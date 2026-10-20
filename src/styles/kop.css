@@ -1,0 +1,50 @@
+/* ───────── KOP ───────── */
+.kop-editor { background: var(--code-bg); border-radius: 0 0 var(--radius) var(--radius); }
+.kop-tools { display: flex; align-items: center; gap: 4px; padding: 5px 8px; border-bottom: 1px solid var(--border); flex-wrap: wrap; background: var(--bg-elev); }
+.kop-tools .btn.small { height: 23px; }
+.kop-canvas { position: relative; overflow-x: auto; padding: 4px 0 6px; outline: none; }
+.kop-canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.kop-svg { display: block; font-family: var(--mono); user-select: none; }
+.kop-svg .rail { stroke: var(--text-dim); stroke-width: 3; }
+.kop-svg .rail.on { stroke: var(--power); }
+.kop-svg .rail.skip { stroke: var(--skipped); }
+.kop-svg .w { stroke: var(--kop-wire); stroke-width: 1.6; fill: none; }
+.kop-svg .w.on { stroke: var(--power); stroke-width: 3; }
+.kop-svg .w.off { stroke: var(--nopower); stroke-dasharray: 5 4; stroke-width: 1.6; }
+.kop-svg .w.skip { stroke: var(--skipped); stroke-width: 1.4; }
+.kop-svg .dot { fill: var(--kop-wire); stroke: none; }
+.kop-svg .dot.on { fill: var(--power); }
+.kop-svg .dot.off { fill: var(--nopower); }
+.kop-svg .dot.skip { fill: var(--skipped); }
+.kop-svg .sym-line { stroke: var(--text); stroke-width: 2; fill: none; }
+.kop-svg .sym-line.c-on { stroke: var(--power); }
+.kop-svg .sym-line.c-off { stroke: var(--nopower); }
+.kop-svg .sym-box { fill: var(--bg-elev); stroke: var(--text-dim); stroke-width: 1.4; }
+.kop-svg .sym-box.box { fill: var(--bg-elev); }
+.kop-svg .sym-box.c-on { stroke: var(--power); stroke-width: 2.2; }
+.kop-svg .sym-box.c-off { stroke: var(--nopower); }
+.kop-svg .boxtxt { font-size: 11px; font-weight: 700; fill: var(--text); }
+.kop-svg .pin { font-size: 10.5px; fill: var(--text-dim); }
+.kop-svg .op { font-size: 12px; fill: var(--text); font-weight: 600; }
+.kop-svg .op.missing { fill: var(--err); }
+.kop-svg .op.optional { fill: var(--text-faint); font-weight: 400; }
+.kop-svg .op.bad { fill: var(--err); text-decoration: underline wavy; }
+.kop-svg .sym { font-size: 10px; fill: var(--text-faint); font-family: var(--font); }
+.kop-svg .live { font-size: 10px; fill: var(--power); font-weight: 600; }
+.kop-svg .op-hit { cursor: text; }
+.kop-svg .el { cursor: pointer; }
+.kop-svg .hit { fill: transparent; stroke: transparent; }
+.kop-svg .el:hover .hit { fill: color-mix(in srgb, var(--accent) 7%, transparent); }
+.kop-svg .hit.sel { fill: color-mix(in srgb, var(--kop-sel) 14%, transparent) !important; stroke: var(--kop-sel); stroke-width: 1.5; }
+.kop-svg .hit.err { stroke: var(--err); stroke-dasharray: 3 2; }
+.kop-svg .slot { fill: transparent; stroke: transparent; cursor: pointer; }
+.kop-svg .slot:hover { stroke: var(--border-strong); stroke-dasharray: 3 3; }
+.kop-svg .slot.sel { stroke: var(--kop-sel); stroke-dasharray: 3 3; fill: color-mix(in srgb, var(--kop-sel) 10%, transparent); }
+.kop-svg .pin-stub { cursor: copy; }
+.kop-svg .stub { fill: var(--bg); stroke: var(--text-faint); stroke-width: 1.4; }
+.kop-svg .pin-stub:hover .stub { stroke: var(--accent); fill: var(--accent-bg); }
+.kop-op-input { position: absolute; height: 22px; padding: 0 5px; border: 1px solid var(--accent); border-radius: 4px; background: var(--bg); z-index: 5; font-size: 12px; }
+.cat-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 7px 10px; border: 0; background: none; border-radius: 6px; cursor: pointer; text-align: left; }
+.cat-item:hover { background: var(--bg-hover); }
+.cat-label { min-width: 120px; font-weight: 600; }
+.kop-ascii { font-family: var(--mono); font-size: 12.5px; line-height: 1.3; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; overflow-x: auto; white-space: pre; margin: 0; }

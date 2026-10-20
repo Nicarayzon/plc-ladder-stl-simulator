@@ -1,0 +1,3316 @@
+{
+  "formato": "banco-kop-awl-v1",
+  "fuente": "02_ejemplos_KOP_AWL.md",
+  "convenciones": {
+    "ciclo_ms_por_defecto": 10,
+    "orden_del_ciclo": [
+      "actualizar temporizadores",
+      "leer PAE",
+      "ejecutar OB1",
+      "escribir PAA"
+    ],
+    "tipos_de_ejercicio": {
+      "E": "ejemplo",
+      "Q": "predice",
+      "C": "traduce",
+      "P": "programa",
+      "M": "teoria",
+      "T": "traza",
+      "R": "cronograma"
+    }
+  },
+  "ejercicios": [
+    {
+      "id": "E01",
+      "titulo": "Contacto NA y contacto NC",
+      "categoria": "A. Lógica combinacional",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      =     A 4.0\n      UN    E 0.0\n      =     A 4.1\n",
+      "kop_ascii": "     E0.0               A4.0\n |---| |----------------( )\n     E0.0               A4.1\n |---|/|----------------( )\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: el piloto A4.0 se enciende cuando E0.0 = 1, y el piloto A4.1 cuando E0.0 = 0.\n**Conceptos**: un contacto **pregunta** el estado de un bit (§1.3 y §6.2 de la referencia).\n\n```text\n     E0.0               A4.0\n |---| |----------------( )\n     E0.0               A4.1\n |---|/|----------------( )\n```\n\n```awl\n      U     E 0.0\n      =     A 4.0\n      UN    E 0.0\n      =     A 4.1\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0, A4.1: 1}\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 1, A4.1: 0}\n```"
+    },
+    {
+      "id": "E02",
+      "titulo": "Y (serie) y O (paralelo)",
+      "categoria": "A. Lógica combinacional",
+      "tipo": "ejemplo",
+      "awl": "// Segmento 1: Y\n      U     E 0.0\n      U     E 0.1\n      =     A 4.0\n// Segmento 2: O\n      O     E 0.0\n      O     E 0.1\n      =     A 4.1\n",
+      "kop_ascii": "     E0.0     E0.1      A4.0\n |---| |------| |-------( )\n\n     E0.0               A4.1\n |---| |----+-----------( )\n |   E0.1   |\n |---| |----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.0 = E0.0 Y E0.1. A4.1 = E0.0 O E0.1.\n\n```text\n     E0.0     E0.1      A4.0\n |---| |------| |-------( )\n\n     E0.0               A4.1\n |---| |----+-----------( )\n |   E0.1   |\n |---| |----+\n```\n\n```awl\n// Segmento 1: Y\n      U     E 0.0\n      U     E 0.1\n      =     A 4.0\n// Segmento 2: O\n      O     E 0.0\n      O     E 0.1\n      =     A 4.1\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 0, E0.1: 0}\n    esperar: {A4.0: 0, A4.1: 0}\n  - poner: {E0.0: 0, E0.1: 1}\n    esperar: {A4.0: 0, A4.1: 1}\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 0, A4.1: 1}\n  - poner: {E0.0: 1, E0.1: 1}\n    esperar: {A4.0: 1, A4.1: 1}\n```"
+    },
+    {
+      "id": "E03",
+      "titulo": "NAND, NOR y O-exclusiva",
+      "categoria": "A. Lógica combinacional",
+      "tipo": "ejemplo",
+      "awl": "// NAND\n      U     E 0.0\n      U     E 0.1\n      NOT\n      =     A 4.0\n// NOR\n      O     E 0.0\n      O     E 0.1\n      NOT\n      =     A 4.1\n// XOR (en AWL existe la instrucción X)\n      X     E 0.0\n      X     E 0.1\n      =     A 4.2\n",
+      "kop_ascii": "     E0.0     E0.1            A4.0\n |---| |------| |-----|NOT|---( )\n\n     E0.0                     A4.1\n |---| |----+-------|NOT|-----( )\n |   E0.1   |\n |---| |----+\n\n     E0.0     E0.1            A4.2\n |---| |------|/|-----+-------( )\n |   E0.0     E0.1    |\n |---|/|------| |-----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 1,
+              "A4.2": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 0,
+              "A4.2": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 0,
+              "A4.2": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 0,
+              "A4.2": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.0 = NAND, A4.1 = NOR y A4.2 = XOR de E0.0 y E0.1.\n\n```text\n     E0.0     E0.1            A4.0\n |---| |------| |-----|NOT|---( )\n\n     E0.0                     A4.1\n |---| |----+-------|NOT|-----( )\n |   E0.1   |\n |---| |----+\n\n     E0.0     E0.1            A4.2\n |---| |------|/|-----+-------( )\n |   E0.0     E0.1    |\n |---|/|------| |-----+\n```\n\n```awl\n// NAND\n      U     E 0.0\n      U     E 0.1\n      NOT\n      =     A 4.0\n// NOR\n      O     E 0.0\n      O     E 0.1\n      NOT\n      =     A 4.1\n// XOR (en AWL existe la instrucción X)\n      X     E 0.0\n      X     E 0.1\n      =     A 4.2\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 0, E0.1: 0}\n    esperar: {A4.0: 1, A4.1: 1, A4.2: 0}\n  - poner: {E0.0: 0, E0.1: 1}\n    esperar: {A4.0: 1, A4.1: 0, A4.2: 1}\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 1, A4.1: 0, A4.2: 1}\n  - poner: {E0.0: 1, E0.1: 1}\n    esperar: {A4.0: 0, A4.1: 0, A4.2: 0}\n```"
+    },
+    {
+      "id": "E04",
+      "titulo": "\"Y antes de O\" con `O` sin operando",
+      "categoria": "A. Lógica combinacional",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n",
+      "kop_ascii": "     E0.0     E0.1      A4.0\n |---| |------| |---+---( )\n |   E0.2     E0.3  |\n |---| |------| |---+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 0,
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0,
+              "E0.2": 1,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 1,
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 1,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1,
+              "E0.2": 0,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.0 = (E0.0 ∧ E0.1) ∨ (E0.2 ∧ E0.3).\n**Conceptos**: el bit OR y la primera consulta (§7.4 de la referencia).\n\n```text\n     E0.0     E0.1      A4.0\n |---| |------| |---+---( )\n |   E0.2     E0.3  |\n |---| |------| |---+\n```\n\n```awl\n      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 0, E0.3: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 0, E0.2: 1, E0.3: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 1, E0.3: 0}\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 1, E0.3: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 1, E0.2: 0, E0.3: 1}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "E05",
+      "titulo": "Paréntesis: Y con un grupo O",
+      "categoria": "A. Lógica combinacional",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      U(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.1\n",
+      "kop_ascii": "     E0.0     E0.1           A4.1\n |---| |---+--| |----+-------( )\n |         |  E0.2   |\n |         +--| |----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.1": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1,
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.1": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.1 = E0.0 ∧ (E0.1 ∨ E0.2).\n\n```text\n     E0.0     E0.1           A4.1\n |---| |---+--| |----+-------( )\n |         |  E0.2   |\n |         +--| |----+\n```\n\n```awl\n      U     E 0.0\n      U(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.1\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 0}\n    esperar: {A4.1: 0}\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 0}\n    esperar: {A4.1: 1}\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 1}\n    esperar: {A4.1: 1}\n  - poner: {E0.0: 0, E0.1: 1, E0.2: 1}\n    esperar: {A4.1: 0}\n```"
+    },
+    {
+      "id": "E06",
+      "titulo": "Marcha y paro con enclavamiento (prioridad al paro)",
+      "categoria": "B. Memoria y enclavamientos",
+      "tipo": "ejemplo",
+      "awl": "      U(\n      O     E 0.0       // marcha\n      O     A 4.0       // realimentación (enclavamiento)\n      )\n      U     E 0.1       // paro NC: 1 = no pulsado\n      =     A 4.0\n",
+      "kop_ascii": "     E0.0 Marcha   E0.1 Paro(NC)        A4.0 Motor\n |---| |------+-------| |---------------( )\n |            |\n |   A4.0     |\n |---| |------+\n",
+      "prueba": {
+        "inicial": {
+          "E0.1": 1
+        },
+        "pasos": [
+          {
+            "ciclos": 1,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: E0.0 = marcha (pulsador NA). E0.1 = paro (**pulsador NC cableado**, así que vale 1 en reposo). A4.0 = motor.\n**Conceptos**: autorretención, seguridad por cableado y prioridad al paro.\n\n```text\n     E0.0 Marcha   E0.1 Paro(NC)        A4.0 Motor\n |---| |------+-------| |---------------( )\n |            |\n |   A4.0     |\n |---| |------+\n```\n\n```awl\n      U(\n      O     E 0.0       // marcha\n      O     A 4.0       // realimentación (enclavamiento)\n      )\n      U     E 0.1       // paro NC: 1 = no pulsado\n      =     A 4.0\n```\n\n```yaml\ninicial: {E0.1: 1}\npasos:\n  - ciclos: 1\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 1}          # se mantiene por el enclavamiento\n  - poner: {E0.1: 0}\n    esperar: {A4.0: 0}          # paro pulsado\n  - poner: {E0.1: 1}\n    esperar: {A4.0: 0}          # al soltar el paro sigue parado\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 0}          # las dos a la vez: gana el paro\n```"
+    },
+    {
+      "id": "E07",
+      "titulo": "Marcha y paro con Set/Reset (prioridad al paro)",
+      "categoria": "B. Memoria y enclavamientos",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      S     A 4.0\n      UN    E 0.1       // paro pulsado (E0.1 = 0)\n      R     A 4.0       // R al final → prioridad al paro\n",
+      "kop_ascii": "     E0.0                 A4.0\n |---| |------------------(S)\n     E0.1 (NC)            A4.0\n |---|/|------------------(R)\n",
+      "prueba": {
+        "inicial": {
+          "E0.1": 1
+        },
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Conceptos**: la prioridad la da el **orden**: la última instrucción gana.\n\n```text\n     E0.0                 A4.0\n |---| |------------------(S)\n     E0.1 (NC)            A4.0\n |---|/|------------------(R)\n```\n\n```awl\n      U     E 0.0\n      S     A 4.0\n      UN    E 0.1       // paro pulsado (E0.1 = 0)\n      R     A 4.0       // R al final → prioridad al paro\n```\n\n```yaml\ninicial: {E0.1: 1}\npasos:\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.1: 0}\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 0}          # marcha y paro a la vez → 0\n  - poner: {E0.1: 1}\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E08",
+      "titulo": "Marcha y paro con prioridad a la marcha",
+      "categoria": "B. Memoria y enclavamientos",
+      "tipo": "ejemplo",
+      "awl": "      UN    E 0.1\n      R     A 4.0\n      U     E 0.0\n      S     A 4.0\n",
+      "kop_ascii": "     E0.1 (NC)            A4.0\n |---|/|------------------(R)\n     E0.0                 A4.0\n |---| |------------------(S)      ← S al final\n",
+      "prueba": {
+        "inicial": {
+          "E0.1": 1
+        },
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 1,
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: igual que E07, pero si se pulsan los dos debe ganar la marcha.\n\n```text\n     E0.1 (NC)            A4.0\n |---|/|------------------(R)\n     E0.0                 A4.0\n |---| |------------------(S)      ← S al final\n```\n\n```awl\n      UN    E 0.1\n      R     A 4.0\n      U     E 0.0\n      S     A 4.0\n```\n\n```yaml\ninicial: {E0.1: 1}\npasos:\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 1}          # las dos → gana la marcha\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0}          # el paro sigue pulsado\n  - poner: {E0.1: 1, E0.0: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E09",
+      "titulo": "Doble asignación (error típico)",
+      "categoria": "B. Memoria y enclavamientos",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      =     A 4.0\n      U     E 0.1\n      =     A 4.0       // sobrescribe la anterior\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: se quiere que A4.0 se encienda con E0.0 **o** con E0.1. Este programa **está mal**.\n**Conceptos**: la PAA se escribe al final del ciclo, así que solo cuenta la última asignación.\n\n```awl\n      U     E 0.0\n      =     A 4.0\n      U     E 0.1\n      =     A 4.0       // sobrescribe la anterior\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 0}          # ¡no se enciende!\n  - poner: {E0.0: 0, E0.1: 1}\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E09b",
+      "titulo": "Doble asignación corregida",
+      "categoria": "B. Memoria y enclavamientos",
+      "tipo": "ejemplo",
+      "awl": "      O     E 0.0\n      O     E 0.1\n      =     A 4.0\n",
+      "kop_ascii": "     E0.0               A4.0\n |---| |----+-----------( )\n |   E0.1   |\n |---| |----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```text\n     E0.0               A4.0\n |---| |----+-----------( )\n |   E0.1   |\n |---| |----+\n```\n\n```awl\n      O     E 0.0\n      O     E 0.1\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 0}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "E10",
+      "titulo": "Flanco positivo y negativo",
+      "categoria": "C. Flancos",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      FP    M 10.0\n      =     M 10.1\n      U     E 0.0\n      FN    M 10.2\n      =     M 10.3\n",
+      "kop_ascii": "     E0.0     M10.0          M10.1\n |---| |-------(P)-----------( )\n     E0.0     M10.2          M10.3\n |---| |-------(N)-----------( )\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "M10.1": 1,
+              "M10.3": 0
+            }
+          },
+          {
+            "ciclos": 1,
+            "esperar": {
+              "M10.1": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "M10.3": 1,
+              "M10.1": 0
+            }
+          },
+          {
+            "ciclos": 1,
+            "esperar": {
+              "M10.3": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: M10.1 = impulso de un ciclo al pulsar E0.0. M10.3 = impulso de un ciclo al soltarlo.\n**Conceptos**: cada flanco necesita **su propia** marca de flanco (M10.0 y M10.2).\n\n```text\n     E0.0     M10.0          M10.1\n |---| |-------(P)-----------( )\n     E0.0     M10.2          M10.3\n |---| |-------(N)-----------( )\n```\n\n```awl\n      U     E 0.0\n      FP    M 10.0\n      =     M 10.1\n      U     E 0.0\n      FN    M 10.2\n      =     M 10.3\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    esperar: {M10.1: 1, M10.3: 0}\n  - ciclos: 1\n    esperar: {M10.1: 0}         # solo dura un ciclo\n  - poner: {E0.0: 0}\n    esperar: {M10.3: 1, M10.1: 0}\n  - ciclos: 1\n    esperar: {M10.3: 0}\n```"
+    },
+    {
+      "id": "E11",
+      "titulo": "Telerruptor (un pulsador enciende y apaga)",
+      "categoria": "C. Flancos",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      FP    M 10.0\n      =     M 10.1      // impulso\n      U     M 10.1\n      UN    A 4.0\n      O\n      UN    M 10.1\n      U     A 4.0\n      =     A 4.0\n",
+      "kop_ascii": "     E0.0     M10.0          M10.1\n |---| |-------(P)-----------( )\n\n     M10.1    A4.0           A4.0\n |---| |------|/|-----+------( )\n |   M10.1    A4.0    |\n |---|/|------| |-----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "ciclos": 5,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: cada pulsación de E0.0 cambia el estado de la lámpara A4.0.\n**Conceptos**: flanco + autorretención con dos ramas.\n\n```text\n     E0.0     M10.0          M10.1\n |---| |-------(P)-----------( )\n\n     M10.1    A4.0           A4.0\n |---| |------|/|-----+------( )\n |   M10.1    A4.0    |\n |---|/|------| |-----+\n```\n\n```awl\n      U     E 0.0\n      FP    M 10.0\n      =     M 10.1      // impulso\n      U     M 10.1\n      UN    A 4.0\n      O\n      UN    M 10.1\n      U     A 4.0\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 1}\n    ciclos: 5\n    esperar: {A4.0: 0}          # cambia una sola vez aunque se mantenga pulsado\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0}\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E11b",
+      "titulo": "Telerruptor con O-exclusiva (solo AWL)",
+      "categoria": "C. Flancos",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      FP    M 10.0\n      =     M 10.1\n      U     M 10.1\n      X     A 4.0       // impulso XOR estado actual\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "veces": 3,
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      U     E 0.0\n      FP    M 10.0\n      =     M 10.1\n      U     M 10.1\n      X     A 4.0       // impulso XOR estado actual\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n  - pulso: E0.0\n    esperar: {A4.0: 0}\n  - pulso: E0.0\n    veces: 3\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E12",
+      "titulo": "Retardo a la conexión (SE / S_EVERZ)",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      L     S5T#5S\n      SE    T 1\n      U     E 0.1\n      R     T 1\n      L     T 1         // tiempo restante (binario, en unidades de 10 ms)\n      T     MW 10\n      LC    T 1         // tiempo restante en BCD con base\n      T     MW 12\n      U     T 1\n      =     A 4.0\n",
+      "kop_ascii": "                 T1\n             +-----------+\n   E0.0      | S_EVERZ   |                       A4.0\n |---| |-----|S         Q|-----------------------( )\n S5T#5S -----|TW     DUAL|-- MW10\n   E0.1      |        DEZ|-- MW12\n |---| |-----|R          |\n             +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 0,
+              "MW10": 500,
+              "MW12:WORD": "W#16#0500"
+            }
+          },
+          {
+            "tiempo_ms": 1000,
+            "esperar": {
+              "A4.0": 0,
+              "MW10": 400,
+              "MW12:WORD": "W#16#0400"
+            }
+          },
+          {
+            "tiempo_ms": 3900,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "tiempo_ms": 200,
+            "esperar": {
+              "A4.0": 1,
+              "MW10": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "tiempo_ms": 3000,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "tiempo_ms": 4900,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "tiempo_ms": 200,
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "tiempo_ms": 6000,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "ciclos": 1
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "tiempo_ms": 5100,
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.0 se enciende 5 s después de activar E0.0, y solo si E0.0 sigue a 1. E0.1 hace reset. MW10 guarda el tiempo restante en binario y MW12 en BCD.\n\n```text\n                 T1\n             +-----------+\n   E0.0      | S_EVERZ   |                       A4.0\n |---| |-----|S         Q|-----------------------( )\n S5T#5S -----|TW     DUAL|-- MW10\n   E0.1      |        DEZ|-- MW12\n |---| |-----|R          |\n             +-----------+\n```\n\n```awl\n      U     E 0.0\n      L     S5T#5S\n      SE    T 1\n      U     E 0.1\n      R     T 1\n      L     T 1         // tiempo restante (binario, en unidades de 10 ms)\n      T     MW 10\n      LC    T 1         // tiempo restante en BCD con base\n      T     MW 12\n      U     T 1\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 0, MW10: 500, \"MW12:WORD\": \"W#16#0500\"}\n  - tiempo_ms: 1000\n    esperar: {A4.0: 0, MW10: 400, \"MW12:WORD\": \"W#16#0400\"}\n  - tiempo_ms: 3900\n    esperar: {A4.0: 0}\n  - tiempo_ms: 200\n    esperar: {A4.0: 1, MW10: 0}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0}\n  # una activación más corta que el tiempo no enciende la salida\n  - poner: {E0.0: 1}\n    tiempo_ms: 3000\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 1}\n    tiempo_ms: 4900\n    esperar: {A4.0: 0}\n  - tiempo_ms: 200\n    esperar: {A4.0: 1}\n  # reset con la condición mantenida\n  - poner: {E0.1: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.1: 0}\n    tiempo_ms: 6000\n    esperar: {A4.0: 0}          # sin un flanco nuevo no rearranca\n  - poner: {E0.0: 0}\n    ciclos: 1\n  - poner: {E0.0: 1}\n    tiempo_ms: 5100\n    esperar: {A4.0: 1}\n```"
+    },
+    {
+      "id": "E13",
+      "titulo": "Retardo a la desconexión (SA / S_AVERZ)",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.2\n      L     S5T#3S\n      SA    T 2\n      U     T 2\n      =     A 4.1\n",
+      "kop_ascii": "                 T2\n             +-----------+\n   E0.2      | S_AVERZ   |                       A4.1\n |---| |-----|S         Q|-----------------------( )\n S5T#3S -----|TW         |\n             +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "tiempo_ms": 2800,
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.1": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "tiempo_ms": 1500,
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 1
+            },
+            "tiempo_ms": 5000,
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "tiempo_ms": 2900,
+            "esperar": {
+              "A4.1": 1
+            }
+          },
+          {
+            "tiempo_ms": 200,
+            "esperar": {
+              "A4.1": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: el ventilador A4.1 funciona mientras E0.2 = 1 y sigue 3 s más después de apagarlo.\n\n```text\n                 T2\n             +-----------+\n   E0.2      | S_AVERZ   |                       A4.1\n |---| |-----|S         Q|-----------------------( )\n S5T#3S -----|TW         |\n             +-----------+\n```\n\n```awl\n      U     E 0.2\n      L     S5T#3S\n      SA    T 2\n      U     T 2\n      =     A 4.1\n```\n\n```yaml\npasos:\n  - poner: {E0.2: 1}\n    esperar: {A4.1: 1}          # se enciende sin retardo\n  - poner: {E0.2: 0}\n    esperar: {A4.1: 1}\n  - tiempo_ms: 2800\n    esperar: {A4.1: 1}\n  - tiempo_ms: 300\n    esperar: {A4.1: 0}\n  # si vuelve a 1 mientras cuenta, el tiempo se anula\n  - poner: {E0.2: 1}\n    esperar: {A4.1: 1}\n  - poner: {E0.2: 0}\n    tiempo_ms: 1500\n    esperar: {A4.1: 1}\n  - poner: {E0.2: 1}\n    tiempo_ms: 5000\n    esperar: {A4.1: 1}\n  - poner: {E0.2: 0}\n    tiempo_ms: 2900\n    esperar: {A4.1: 1}\n  - tiempo_ms: 200\n    esperar: {A4.1: 0}\n```"
+    },
+    {
+      "id": "E14",
+      "titulo": "Impulso (SI / S_IMPULS)",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.3\n      L     S5T#2S\n      SI    T 3\n      U     T 3\n      =     A 4.2\n",
+      "kop_ascii": "                 T3\n             +-----------+\n   E0.3      | S_IMPULS  |                       A4.2\n |---| |-----|S         Q|-----------------------( )\n S5T#2S -----|TW         |\n             +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.2": 1
+            }
+          },
+          {
+            "tiempo_ms": 1800,
+            "esperar": {
+              "A4.2": 1
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.2": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.2": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 1
+            },
+            "tiempo_ms": 500,
+            "esperar": {
+              "A4.2": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.2": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: A4.2 = 1 como máximo 2 s mientras E0.3 está pulsado.\n\n```text\n                 T3\n             +-----------+\n   E0.3      | S_IMPULS  |                       A4.2\n |---| |-----|S         Q|-----------------------( )\n S5T#2S -----|TW         |\n             +-----------+\n```\n\n```awl\n      U     E 0.3\n      L     S5T#2S\n      SI    T 3\n      U     T 3\n      =     A 4.2\n```\n\n```yaml\npasos:\n  - poner: {E0.3: 1}\n    esperar: {A4.2: 1}\n  - tiempo_ms: 1800\n    esperar: {A4.2: 1}\n  - tiempo_ms: 300\n    esperar: {A4.2: 0}          # se acaba aunque E0.3 siga pulsado\n  - poner: {E0.3: 0}\n    esperar: {A4.2: 0}\n  - poner: {E0.3: 1}\n    tiempo_ms: 500\n    esperar: {A4.2: 1}\n  - poner: {E0.3: 0}\n    esperar: {A4.2: 0}          # al soltar antes de tiempo, Q cae enseguida\n```"
+    },
+    {
+      "id": "E15",
+      "titulo": "Impulso prolongado (SV / S_VIMP)",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.4\n      L     S5T#2S\n      SV    T 4\n      U     T 4\n      =     A 4.3\n",
+      "kop_ascii": "                 T4\n             +-----------+\n   E0.4      | S_VIMP    |                       A4.3\n |---| |-----|S         Q|-----------------------( )\n S5T#2S -----|TW         |\n             +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.4": 1
+            },
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.4": 0
+            },
+            "tiempo_ms": 1800,
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.3": 0
+            }
+          },
+          {
+            "pulso": "E0.4",
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "tiempo_ms": 1500,
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "pulso": "E0.4",
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "tiempo_ms": 1800,
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.3": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: un pulso corto en E0.4 mantiene A4.3 encendida 2 s. Un pulso nuevo reinicia el tiempo.\n\n```text\n                 T4\n             +-----------+\n   E0.4      | S_VIMP    |                       A4.3\n |---| |-----|S         Q|-----------------------( )\n S5T#2S -----|TW         |\n             +-----------+\n```\n\n```awl\n      U     E 0.4\n      L     S5T#2S\n      SV    T 4\n      U     T 4\n      =     A 4.3\n```\n\n```yaml\npasos:\n  - poner: {E0.4: 1}\n    esperar: {A4.3: 1}\n  - poner: {E0.4: 0}\n    tiempo_ms: 1800\n    esperar: {A4.3: 1}          # sigue aunque E0.4 haya caído\n  - tiempo_ms: 300\n    esperar: {A4.3: 0}\n  - pulso: E0.4\n    esperar: {A4.3: 1}\n  - tiempo_ms: 1500\n    esperar: {A4.3: 1}\n  - pulso: E0.4                 # redisparo\n    esperar: {A4.3: 1}\n  - tiempo_ms: 1800\n    esperar: {A4.3: 1}\n  - tiempo_ms: 300\n    esperar: {A4.3: 0}\n```"
+    },
+    {
+      "id": "E16",
+      "titulo": "Retardo a la conexión con memoria (SS / S_SEVERZ)",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.5\n      L     S5T#3S\n      SS    T 5\n      U     E 0.6\n      R     T 5\n      U     T 5\n      =     A 4.4\n",
+      "kop_ascii": "                 T5\n             +-----------+\n   E0.5      | S_SEVERZ  |                       A4.4\n |---| |-----|S         Q|-----------------------( )\n S5T#3S -----|TW         |\n   E0.6      |           |\n |---| |-----|R          |\n             +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.5": 1
+            },
+            "esperar": {
+              "A4.4": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.5": 0
+            },
+            "tiempo_ms": 2800,
+            "esperar": {
+              "A4.4": 0
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.4": 1
+            }
+          },
+          {
+            "tiempo_ms": 10000,
+            "esperar": {
+              "A4.4": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.6": 1
+            },
+            "esperar": {
+              "A4.4": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.6": 0
+            },
+            "tiempo_ms": 5000,
+            "esperar": {
+              "A4.4": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: un pulso en E0.5 enciende A4.4 a los 3 s, y queda encendida hasta que se pulse el reset E0.6.\n\n```text\n                 T5\n             +-----------+\n   E0.5      | S_SEVERZ  |                       A4.4\n |---| |-----|S         Q|-----------------------( )\n S5T#3S -----|TW         |\n   E0.6      |           |\n |---| |-----|R          |\n             +-----------+\n```\n\n```awl\n      U     E 0.5\n      L     S5T#3S\n      SS    T 5\n      U     E 0.6\n      R     T 5\n      U     T 5\n      =     A 4.4\n```\n\n```yaml\npasos:\n  - poner: {E0.5: 1}\n    esperar: {A4.4: 0}\n  - poner: {E0.5: 0}\n    tiempo_ms: 2800\n    esperar: {A4.4: 0}          # sigue contando aunque E0.5 = 0\n  - tiempo_ms: 300\n    esperar: {A4.4: 1}\n  - tiempo_ms: 10000\n    esperar: {A4.4: 1}          # memorizado\n  - poner: {E0.6: 1}\n    esperar: {A4.4: 0}\n  - poner: {E0.6: 0}\n    tiempo_ms: 5000\n    esperar: {A4.4: 0}\n```"
+    },
+    {
+      "id": "E17",
+      "titulo": "Intermitente (1 s encendido / 1 s apagado) con dos temporizadores",
+      "categoria": "D. Temporizadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.7\n      UN    T 7\n      L     S5T#1S\n      SE    T 6         // tiempo apagado\n      U     T 6\n      L     S5T#1S\n      SE    T 7         // tiempo encendido\n      U     T 6\n      =     A 4.5\n",
+      "kop_ascii": "     E0.7     T7                 T6\n |---| |------|/|-----------+--------+\n |                          |S_EVERZ |\n |              S5T#1S -----|TW     Q|\n |                          +--------+\n     T6                          T7\n |---| |--------------------+--------+\n |                          |S_EVERZ |\n |              S5T#1S -----|TW     Q|\n |                          +--------+\n     T6                        A4.5\n |---| |-----------------------( )\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.7": 1
+            },
+            "esperar": {
+              "A4.5": 0
+            }
+          },
+          {
+            "tiempo_ms": 500,
+            "esperar": {
+              "A4.5": 0
+            }
+          },
+          {
+            "tiempo_ms": 1000,
+            "esperar": {
+              "A4.5": 1
+            }
+          },
+          {
+            "tiempo_ms": 1000,
+            "esperar": {
+              "A4.5": 0
+            }
+          },
+          {
+            "tiempo_ms": 1000,
+            "esperar": {
+              "A4.5": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.7": 0
+            },
+            "esperar": {
+              "A4.5": 0
+            }
+          },
+          {
+            "tiempo_ms": 3000,
+            "esperar": {
+              "A4.5": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: mientras E0.7 = 1, el piloto A4.5 parpadea.\n**Conceptos**: cada temporizador reinicia al otro. Alternativa: usar una marca de ciclo (§2.4 de la referencia).\n\n```text\n     E0.7     T7                 T6\n |---| |------|/|-----------+--------+\n |                          |S_EVERZ |\n |              S5T#1S -----|TW     Q|\n |                          +--------+\n     T6                          T7\n |---| |--------------------+--------+\n |                          |S_EVERZ |\n |              S5T#1S -----|TW     Q|\n |                          +--------+\n     T6                        A4.5\n |---| |-----------------------( )\n```\n\n```awl\n      U     E 0.7\n      UN    T 7\n      L     S5T#1S\n      SE    T 6         // tiempo apagado\n      U     T 6\n      L     S5T#1S\n      SE    T 7         // tiempo encendido\n      U     T 6\n      =     A 4.5\n```\n\n```yaml\npasos:\n  - poner: {E0.7: 1}\n    esperar: {A4.5: 0}\n  - tiempo_ms: 500\n    esperar: {A4.5: 0}\n  - tiempo_ms: 1000\n    esperar: {A4.5: 1}\n  - tiempo_ms: 1000\n    esperar: {A4.5: 0}\n  - tiempo_ms: 1000\n    esperar: {A4.5: 1}\n  - poner: {E0.7: 0}\n    esperar: {A4.5: 0}\n  - tiempo_ms: 3000\n    esperar: {A4.5: 0}\n```"
+    },
+    {
+      "id": "E18",
+      "titulo": "Aparcamiento de 10 plazas",
+      "categoria": "E. Contadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 1.0\n      ZV    Z 1\n      U     E 1.1\n      ZR    Z 1\n      U     E 1.2\n      L     C#5\n      S     Z 1\n      U     E 1.3\n      R     Z 1\n      L     Z 1\n      T     MW 30\n      L     10          // ACU2 = ocupación, ACU1 = 10\n      >=I\n      =     A 5.0\n      U     Z 1\n      =     A 5.1\n",
+      "kop_ascii": "                 Z1\n             +-----------+\n   E1.0      | ZAEHLER   |                       A5.1\n |---| |-----|ZV        Q|-----------------------( )\n   E1.1      |           |\n |---| |-----|ZR         |\n   E1.2      |           |\n |---| |-----|S      DUAL|-- MW30\n C#5 --------|ZW         |\n   E1.3      |           |\n |---| |-----|R          |\n             +-----------+\n                CMP >=I                          A5.0\n |-------------+--------+------------------------( )\n        MW30 --|IN1     |\n        10   --|IN2     |\n               +--------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "ciclos": 1,
+            "esperar": {
+              "MW30": 0,
+              "A5.0": 0,
+              "A5.1": 0
+            }
+          },
+          {
+            "pulso": "E1.0",
+            "veces": 3,
+            "esperar": {
+              "MW30": 3,
+              "A5.1": 1,
+              "A5.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E1.0": 1
+            },
+            "ciclos": 10,
+            "esperar": {
+              "MW30": 4
+            }
+          },
+          {
+            "poner": {
+              "E1.0": 0
+            },
+            "ciclos": 1
+          },
+          {
+            "pulso": "E1.1",
+            "esperar": {
+              "MW30": 3
+            }
+          },
+          {
+            "pulso": "E1.0",
+            "veces": 7,
+            "esperar": {
+              "MW30": 10,
+              "A5.0": 1
+            }
+          },
+          {
+            "pulso": "E1.3",
+            "esperar": {
+              "MW30": 0,
+              "A5.0": 0,
+              "A5.1": 0
+            }
+          },
+          {
+            "pulso": "E1.2",
+            "esperar": {
+              "MW30": 5,
+              "A5.1": 1
+            }
+          },
+          {
+            "pulso": "E1.1",
+            "veces": 7,
+            "esperar": {
+              "MW30": 0,
+              "A5.1": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**:\n- E1.0 = coche que entra; E1.1 = coche que sale.\n- E1.2 carga una ocupación inicial de 5; E1.3 pone el contador a cero.\n- MW30 = ocupación. A5.0 = \"COMPLETO\" (ocupación ≥ 10). A5.1 = hay algún coche.\n\n```text\n                 Z1\n             +-----------+\n   E1.0      | ZAEHLER   |                       A5.1\n |---| |-----|ZV        Q|-----------------------( )\n   E1.1      |           |\n |---| |-----|ZR         |\n   E1.2      |           |\n |---| |-----|S      DUAL|-- MW30\n C#5 --------|ZW         |\n   E1.3      |           |\n |---| |-----|R          |\n             +-----------+\n                CMP >=I                          A5.0\n |-------------+--------+------------------------( )\n        MW30 --|IN1     |\n        10   --|IN2     |\n               +--------+\n```\n\n```awl\n      U     E 1.0\n      ZV    Z 1\n      U     E 1.1\n      ZR    Z 1\n      U     E 1.2\n      L     C#5\n      S     Z 1\n      U     E 1.3\n      R     Z 1\n      L     Z 1\n      T     MW 30\n      L     10          // ACU2 = ocupación, ACU1 = 10\n      >=I\n      =     A 5.0\n      U     Z 1\n      =     A 5.1\n```\n\n```yaml\npasos:\n  - ciclos: 1\n    esperar: {MW30: 0, A5.0: 0, A5.1: 0}\n  - pulso: E1.0\n    veces: 3\n    esperar: {MW30: 3, A5.1: 1, A5.0: 0}\n  - poner: {E1.0: 1}\n    ciclos: 10\n    esperar: {MW30: 4}          # mantenerla pulsada solo cuenta una vez\n  - poner: {E1.0: 0}\n    ciclos: 1\n  - pulso: E1.1\n    esperar: {MW30: 3}\n  - pulso: E1.0\n    veces: 7\n    esperar: {MW30: 10, A5.0: 1}\n  - pulso: E1.3\n    esperar: {MW30: 0, A5.0: 0, A5.1: 0}\n  - pulso: E1.2\n    esperar: {MW30: 5, A5.1: 1}\n  - pulso: E1.1\n    veces: 7\n    esperar: {MW30: 0, A5.1: 0}   # no baja de 0\n```"
+    },
+    {
+      "id": "E19",
+      "titulo": "Cuenta atrás",
+      "categoria": "E. Contadores",
+      "tipo": "ejemplo",
+      "awl": "      U     E 1.4\n      L     C#3\n      S     Z 2\n      U     E 1.5\n      ZR    Z 2\n      UN    Z 2         // Q = 0 → valor = 0\n      =     A 5.2\n      LC    Z 2\n      T     MW 32\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "ciclos": 1,
+            "esperar": {
+              "A5.2": 1
+            }
+          },
+          {
+            "pulso": "E1.4",
+            "esperar": {
+              "A5.2": 0,
+              "Z2:VALOR": 3,
+              "MW32:WORD": "W#16#0003"
+            }
+          },
+          {
+            "pulso": "E1.5",
+            "veces": 2,
+            "esperar": {
+              "A5.2": 0,
+              "Z2:VALOR": 1
+            }
+          },
+          {
+            "pulso": "E1.5",
+            "esperar": {
+              "A5.2": 1,
+              "Z2:VALOR": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: E1.4 carga 3. Cada pulso de E1.5 descuenta 1. A5.2 = fin de la cuenta (valor 0). MW32 = valor en BCD.\n\n```awl\n      U     E 1.4\n      L     C#3\n      S     Z 2\n      U     E 1.5\n      ZR    Z 2\n      UN    Z 2         // Q = 0 → valor = 0\n      =     A 5.2\n      LC    Z 2\n      T     MW 32\n```\n\n```yaml\npasos:\n  - ciclos: 1\n    esperar: {A5.2: 1}\n  - pulso: E1.4\n    esperar: {A5.2: 0, \"Z2:VALOR\": 3, \"MW32:WORD\": \"W#16#0003\"}\n  - pulso: E1.5\n    veces: 2\n    esperar: {A5.2: 0, \"Z2:VALOR\": 1}\n  - pulso: E1.5\n    esperar: {A5.2: 1, \"Z2:VALOR\": 0}\n```"
+    },
+    {
+      "id": "E20",
+      "titulo": "Comparación de nivel",
+      "categoria": "F. Comparación y aritmética",
+      "tipo": "ejemplo",
+      "awl": "      L     MW 30\n      L     500\n      >I\n      =     A 5.4\n      L     MW 30\n      L     100\n      <I\n      =     A 5.5\n      U     E 2.0\n      U(\n      L     MW 30\n      L     500\n      >I\n      )\n      =     A 5.6\n",
+      "kop_ascii": "               CMP >I                    A5.4\n |------------+-------+------------------( )\n       MW30 --|IN1    |\n       500  --|IN2    |\n              +-------+\n     E2.0      CMP >I                    A5.6\n |---| |------+-------+------------------( )\n       MW30 --|IN1    |\n       500  --|IN2    |\n              +-------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW30": 600,
+              "E2.0": 0
+            },
+            "esperar": {
+              "A5.4": 1,
+              "A5.5": 0,
+              "A5.6": 0
+            }
+          },
+          {
+            "poner": {
+              "E2.0": 1
+            },
+            "esperar": {
+              "A5.6": 1
+            }
+          },
+          {
+            "poner": {
+              "MW30": 50
+            },
+            "esperar": {
+              "A5.4": 0,
+              "A5.5": 1,
+              "A5.6": 0
+            }
+          },
+          {
+            "poner": {
+              "MW30": 500
+            },
+            "esperar": {
+              "A5.4": 0,
+              "A5.5": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: MW30 = nivel en litros.\n- A5.4 = nivel alto (> 500).\n- A5.5 = nivel bajo (< 100).\n- A5.6 = alarma de nivel alto, solo si E2.0 (habilitación) = 1.\n\n**Conceptos**: la comparación **sustituye** el RLO, así que para combinarla con un contacto va entre paréntesis.\n\n```text\n               CMP >I                    A5.4\n |------------+-------+------------------( )\n       MW30 --|IN1    |\n       500  --|IN2    |\n              +-------+\n     E2.0      CMP >I                    A5.6\n |---| |------+-------+------------------( )\n       MW30 --|IN1    |\n       500  --|IN2    |\n              +-------+\n```\n\n```awl\n      L     MW 30\n      L     500\n      >I\n      =     A 5.4\n      L     MW 30\n      L     100\n      <I\n      =     A 5.5\n      U     E 2.0\n      U(\n      L     MW 30\n      L     500\n      >I\n      )\n      =     A 5.6\n```\n\n```yaml\npasos:\n  - poner: {MW30: 600, E2.0: 0}\n    esperar: {A5.4: 1, A5.5: 0, A5.6: 0}\n  - poner: {E2.0: 1}\n    esperar: {A5.6: 1}\n  - poner: {MW30: 50}\n    esperar: {A5.4: 0, A5.5: 1, A5.6: 0}\n  - poner: {MW30: 500}\n    esperar: {A5.4: 0, A5.5: 0}\n```"
+    },
+    {
+      "id": "E21",
+      "titulo": "Suma con detección de desbordamiento",
+      "categoria": "F. Comparación y aritmética",
+      "tipo": "ejemplo",
+      "awl": "      L     MW 40\n      L     MW 42\n      +I\n      T     MW 44\n      U     OV\n      =     M 1.0\n      U     OS\n      S     M 1.1\n      U     E 0.0\n      R     M 1.1\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW40": 1000,
+              "MW42": 234
+            },
+            "esperar": {
+              "MW44": 1234,
+              "M1.0": 0,
+              "M1.1": 0
+            }
+          },
+          {
+            "poner": {
+              "MW40": 30000,
+              "MW42": 10000
+            },
+            "esperar": {
+              "MW44": -25536,
+              "M1.0": 1,
+              "M1.1": 1
+            }
+          },
+          {
+            "poner": {
+              "MW40": -20000,
+              "MW42": -20000
+            },
+            "esperar": {
+              "MW44": 25536,
+              "M1.0": 1
+            }
+          },
+          {
+            "poner": {
+              "MW40": 5,
+              "MW42": 5
+            },
+            "esperar": {
+              "MW44": 10,
+              "M1.0": 0,
+              "M1.1": 1
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "M1.1": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: MW44 = MW40 + MW42. M1.0 = hubo desbordamiento en esta suma. M1.1 = memoria de desbordamiento (se borra con E0.0).\n\n```awl\n      L     MW 40\n      L     MW 42\n      +I\n      T     MW 44\n      U     OV\n      =     M 1.0\n      U     OS\n      S     M 1.1\n      U     E 0.0\n      R     M 1.1\n```\n\n```yaml\npasos:\n  - poner: {MW40: 1000, MW42: 234}\n    esperar: {MW44: 1234, M1.0: 0, M1.1: 0}\n  - poner: {MW40: 30000, MW42: 10000}\n    esperar: {MW44: -25536, M1.0: 1, M1.1: 1}\n  - poner: {MW40: -20000, MW42: -20000}\n    esperar: {MW44: 25536, M1.0: 1}\n  - poner: {MW40: 5, MW42: 5}\n    esperar: {MW44: 10, M1.0: 0, M1.1: 1}\n  - pulso: E0.0\n    esperar: {M1.1: 0}\n```"
+    },
+    {
+      "id": "E22",
+      "titulo": "Multiplicación y división entera (cociente y resto)",
+      "categoria": "F. Comparación y aritmética",
+      "tipo": "ejemplo",
+      "awl": "      L     MW 50\n      L     MW 52\n      *I\n      T     MD 54       // producto completo (32 bits)\n      L     MW 50\n      L     MW 52\n      /I\n      T     MW 58       // cociente\n      SRD   16          // trae el resto (ACU1-H) a la parte baja\n      T     MW 60       // resto\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW50": 17,
+              "MW52": 5
+            },
+            "esperar": {
+              "MD54": 85,
+              "MW58": 3,
+              "MW60": 2
+            }
+          },
+          {
+            "poner": {
+              "MW50": -17,
+              "MW52": 5
+            },
+            "esperar": {
+              "MD54": -85,
+              "MW58": -3,
+              "MW60": -2
+            }
+          },
+          {
+            "poner": {
+              "MW50": 300,
+              "MW52": 200
+            },
+            "esperar": {
+              "MD54": 60000,
+              "MW58": 1,
+              "MW60": 100
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Conceptos**: `*I` deja un DINT en ACU1. `/I` deja el cociente en ACU1-L y el resto en ACU1-H.\n\n```awl\n      L     MW 50\n      L     MW 52\n      *I\n      T     MD 54       // producto completo (32 bits)\n      L     MW 50\n      L     MW 52\n      /I\n      T     MW 58       // cociente\n      SRD   16          // trae el resto (ACU1-H) a la parte baja\n      T     MW 60       // resto\n```\n\n```yaml\npasos:\n  - poner: {MW50: 17, MW52: 5}\n    esperar: {MD54: 85, MW58: 3, MW60: 2}\n  - poner: {MW50: -17, MW52: 5}\n    esperar: {MD54: -85, MW58: -3, MW60: -2}\n  - poner: {MW50: 300, MW52: 200}\n    esperar: {MD54: 60000, MW58: 1, MW60: 100}\n```"
+    },
+    {
+      "id": "E23",
+      "titulo": "Escalado analógico a % (REAL)",
+      "categoria": "F. Comparación y aritmética",
+      "tipo": "ejemplo",
+      "awl": "      L     PEW 256\n      ITD\n      DTR\n      L     2.764800e+004\n      /R\n      L     1.000000e+002\n      *R\n      T     MD 100\n      L     MD 100\n      L     8.000000e+001\n      >R\n      =     A 5.7\n",
+      "kop_ascii": " I_DI  (IN = PEW256        → OUT = MD104)\n DI_R  (IN = MD104         → OUT = MD108)\n DIV_R (IN1 = MD108, IN2 = 27648.0 → OUT = MD112)\n MUL_R (IN1 = MD112, IN2 = 100.0   → OUT = MD100)\n CMP >R (IN1 = MD100, IN2 = 80.0)  → bobina A5.7\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "PEW256": 13824
+            },
+            "esperar": {
+              "MD100:REAL": 50.0,
+              "A5.7": 0
+            }
+          },
+          {
+            "poner": {
+              "PEW256": 27648
+            },
+            "esperar": {
+              "MD100:REAL": 100.0,
+              "A5.7": 1
+            }
+          },
+          {
+            "poner": {
+              "PEW256": 0
+            },
+            "esperar": {
+              "MD100:REAL": 0.0,
+              "A5.7": 0
+            }
+          },
+          {
+            "poner": {
+              "PEW256": 22118
+            },
+            "esperar": {
+              "A5.7": 0
+            }
+          },
+          {
+            "poner": {
+              "PEW256": 22200
+            },
+            "esperar": {
+              "A5.7": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: PEW256 (0..27648) → MD100 = 0,0..100,0 %. A5.7 = alarma por encima del 80 %.\n\n**En KOP** es una cadena de cuadros unidos ENO → EN, con resultados intermedios en marcas o temporales:\n\n```text\n I_DI  (IN = PEW256        → OUT = MD104)\n DI_R  (IN = MD104         → OUT = MD108)\n DIV_R (IN1 = MD108, IN2 = 27648.0 → OUT = MD112)\n MUL_R (IN1 = MD112, IN2 = 100.0   → OUT = MD100)\n CMP >R (IN1 = MD100, IN2 = 80.0)  → bobina A5.7\n```\n\n```awl\n      L     PEW 256\n      ITD\n      DTR\n      L     2.764800e+004\n      /R\n      L     1.000000e+002\n      *R\n      T     MD 100\n      L     MD 100\n      L     8.000000e+001\n      >R\n      =     A 5.7\n```\n\n```yaml\npasos:\n  - poner: {PEW256: 13824}\n    esperar: {\"MD100:REAL\": 50.0, A5.7: 0}\n  - poner: {PEW256: 27648}\n    esperar: {\"MD100:REAL\": 100.0, A5.7: 1}\n  - poner: {PEW256: 0}\n    esperar: {\"MD100:REAL\": 0.0, A5.7: 0}\n  - poner: {PEW256: 22118}\n    esperar: {A5.7: 0}          # 79,998 %\n  - poner: {PEW256: 22200}\n    esperar: {A5.7: 1}          # 80,295 %\n```"
+    },
+    {
+      "id": "E24",
+      "titulo": "Rueda de dígitos BCD y display",
+      "categoria": "G. Conversiones",
+      "tipo": "ejemplo",
+      "awl": "      L     EW 2\n      BTI\n      T     MW 70\n      L     MW 70\n      L     1\n      +I\n      T     MW 72\n      L     MW 72\n      ITB\n      T     AW 6\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "EW2:WORD": "W#16#0123"
+            },
+            "esperar": {
+              "MW70": 123,
+              "MW72": 124,
+              "AW6:WORD": "W#16#0124",
+              "A6.0": 1,
+              "A7.2": 1,
+              "A7.5": 1,
+              "A7.0": 0
+            }
+          },
+          {
+            "poner": {
+              "EW2:WORD": "W#16#0950"
+            },
+            "esperar": {
+              "MW70": 950,
+              "AW6:WORD": "W#16#0951"
+            }
+          },
+          {
+            "poner": {
+              "EW2:WORD": "W#16#00A1"
+            },
+            "esperar_estado": "STOP"
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**:\n- EW2 = rueda de 3 dígitos en BCD. MW70 = su valor entero.\n- MW72 = MW70 + 1.\n- AW6 = MW72 en BCD, para un display de 3 dígitos.\n\n**Conceptos**: BCD y orden de bytes. AW6 = AB6 (byte alto) + AB7 (byte bajo).\n\n```awl\n      L     EW 2\n      BTI\n      T     MW 70\n      L     MW 70\n      L     1\n      +I\n      T     MW 72\n      L     MW 72\n      ITB\n      T     AW 6\n```\n\n```yaml\npasos:\n  - poner: {\"EW2:WORD\": \"W#16#0123\"}\n    esperar: {MW70: 123, MW72: 124, \"AW6:WORD\": \"W#16#0124\", A6.0: 1, A7.2: 1, A7.5: 1, A7.0: 0}\n  - poner: {\"EW2:WORD\": \"W#16#0950\"}\n    esperar: {MW70: 950, \"AW6:WORD\": \"W#16#0951\"}\n  - poner: {\"EW2:WORD\": \"W#16#00A1\"}\n    esperar_estado: STOP        # A1 no es BCD → error de conversión (OB121) → STOP\n```"
+    },
+    {
+      "id": "E25",
+      "titulo": "REAL → DINT: RND, TRUNC, RND+ y RND−",
+      "categoria": "G. Conversiones",
+      "tipo": "ejemplo",
+      "awl": "      L     MD 100\n      RND\n      T     MD 104\n      L     MD 100\n      TRUNC\n      T     MD 108\n      L     MD 100\n      RND+\n      T     MD 112\n      L     MD 100\n      RND-\n      T     MD 116\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MD100:REAL": 2.7
+            },
+            "esperar": {
+              "MD104": 3,
+              "MD108": 2,
+              "MD112": 3,
+              "MD116": 2
+            }
+          },
+          {
+            "poner": {
+              "MD100:REAL": -2.7
+            },
+            "esperar": {
+              "MD104": -3,
+              "MD108": -2,
+              "MD112": -2,
+              "MD116": -3
+            }
+          },
+          {
+            "poner": {
+              "MD100:REAL": 3.2
+            },
+            "esperar": {
+              "MD104": 3,
+              "MD108": 3,
+              "MD112": 4,
+              "MD116": 3
+            }
+          },
+          {
+            "poner": {
+              "MD100:REAL": -3.2
+            },
+            "esperar": {
+              "MD104": -3,
+              "MD108": -3,
+              "MD112": -3,
+              "MD116": -4
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      L     MD 100\n      RND\n      T     MD 104\n      L     MD 100\n      TRUNC\n      T     MD 108\n      L     MD 100\n      RND+\n      T     MD 112\n      L     MD 100\n      RND-\n      T     MD 116\n```\n\n```yaml\npasos:\n  - poner: {\"MD100:REAL\": 2.7}\n    esperar: {MD104: 3, MD108: 2, MD112: 3, MD116: 2}\n  - poner: {\"MD100:REAL\": -2.7}\n    esperar: {MD104: -3, MD108: -2, MD112: -2, MD116: -3}\n  - poner: {\"MD100:REAL\": 3.2}\n    esperar: {MD104: 3, MD108: 3, MD112: 4, MD116: 3}\n  - poner: {\"MD100:REAL\": -3.2}\n    esperar: {MD104: -3, MD108: -3, MD112: -3, MD116: -4}\n```"
+    },
+    {
+      "id": "E26",
+      "titulo": "Sumar o restar según un selector (saltos)",
+      "categoria": "H. Saltos, bucles e indirecto",
+      "tipo": "ejemplo",
+      "awl": "      U     E 0.0\n      SPB   SUMA\n      L     MW 30\n      L     MW 32\n      -I\n      T     MW 34\n      SPA   FIN\nSUMA: L     MW 30\n      L     MW 32\n      +I\n      T     MW 34\nFIN:  NOP   0\n",
+      "kop_ascii": " Segmento 1:  E0.0          SUMA\n          |---| |-----------(JMP)\n Segmento 2:  SUB_I (MW30 − MW32 → MW34) y luego (JMP) incondicional a FIN\n Segmento 3:  LABEL SUMA → ADD_I (MW30 + MW32 → MW34)\n Segmento 4:  LABEL FIN\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW30": 20,
+              "MW32": 7,
+              "E0.0": 0
+            },
+            "esperar": {
+              "MW34": 13
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "MW34": 27
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: si E0.0 = 1, MW34 = MW30 + MW32. Si no, MW34 = MW30 − MW32.\n\n```text\n Segmento 1:  E0.0          SUMA\n          |---| |-----------(JMP)\n Segmento 2:  SUB_I (MW30 − MW32 → MW34) y luego (JMP) incondicional a FIN\n Segmento 3:  LABEL SUMA → ADD_I (MW30 + MW32 → MW34)\n Segmento 4:  LABEL FIN\n```\n\n```awl\n      U     E 0.0\n      SPB   SUMA\n      L     MW 30\n      L     MW 32\n      -I\n      T     MW 34\n      SPA   FIN\nSUMA: L     MW 30\n      L     MW 32\n      +I\n      T     MW 34\nFIN:  NOP   0\n```\n\n```yaml\npasos:\n  - poner: {MW30: 20, MW32: 7, E0.0: 0}\n    esperar: {MW34: 13}\n  - poner: {E0.0: 1}\n    esperar: {MW34: 27}\n```"
+    },
+    {
+      "id": "E27",
+      "titulo": "Factorial con LOOP",
+      "categoria": "H. Saltos, bucles e indirecto",
+      "tipo": "ejemplo",
+      "awl": "      L     L#1\n      T     MD 100      // resultado = 1\n      L     MW 30       // N\n      L     1\n      <=I               // ¿N <= 1?\n      SPB   FIN\n      L     MW 30\nSIG:  T     MW 32       // contador del bucle\n      L     MD 100\n      L     MW 32\n      *D\n      T     MD 100\n      L     MW 32\n      LOOP  SIG\nFIN:  NOP   0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW30": 5
+            },
+            "esperar": {
+              "MD100": 120
+            }
+          },
+          {
+            "poner": {
+              "MW30": 0
+            },
+            "esperar": {
+              "MD100": 1
+            }
+          },
+          {
+            "poner": {
+              "MW30": 1
+            },
+            "esperar": {
+              "MD100": 1
+            }
+          },
+          {
+            "poner": {
+              "MW30": 7
+            },
+            "esperar": {
+              "MD100": 5040
+            }
+          },
+          {
+            "poner": {
+              "MW30": 10
+            },
+            "esperar": {
+              "MD100": 3628800
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: MD100 = MW30! Si MW30 ≤ 1, el resultado es 1.\n**Conceptos**: `LOOP` decrementa ACU1-L y salta mientras sea ≠ 0. Hay que **proteger el caso 0**: si no, `LOOP` pasaría de 0 a 65535 y repetiría el bucle otras 65535 veces.\n\n```awl\n      L     L#1\n      T     MD 100      // resultado = 1\n      L     MW 30       // N\n      L     1\n      <=I               // ¿N <= 1?\n      SPB   FIN\n      L     MW 30\nSIG:  T     MW 32       // contador del bucle\n      L     MD 100\n      L     MW 32\n      *D\n      T     MD 100\n      L     MW 32\n      LOOP  SIG\nFIN:  NOP   0\n```\n\n```yaml\npasos:\n  - poner: {MW30: 5}\n    esperar: {MD100: 120}\n  - poner: {MW30: 0}\n    esperar: {MD100: 1}\n  - poner: {MW30: 1}\n    esperar: {MD100: 1}\n  - poner: {MW30: 7}\n    esperar: {MD100: 5040}\n  - poner: {MW30: 10}\n    esperar: {MD100: 3628800}\n```"
+    },
+    {
+      "id": "E29",
+      "titulo": "Suma de una tabla con direccionamiento indirecto",
+      "categoria": "H. Saltos, bucles e indirecto",
+      "tipo": "ejemplo",
+      "awl": "      L     P#100.0\n      T     MD 30       // puntero al primer elemento (100 × 8 = 800)\n      L     0\n      T     MW 40       // suma = 0\n      L     10          // 10 elementos\nSIG:  T     MW 34       // contador del bucle\n      L     MW 40\n      L     MW [MD 30]\n      +I\n      T     MW 40\n      L     MD 30\n      L     P#2.0       // avanza una palabra (2 bytes = 16)\n      +D\n      T     MD 30\n      L     MW 34\n      LOOP  SIG\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW100": 1,
+              "MW102": 2,
+              "MW104": 3,
+              "MW106": 4,
+              "MW108": 5,
+              "MW110": 6,
+              "MW112": 7,
+              "MW114": 8,
+              "MW116": 9,
+              "MW118": 10
+            },
+            "esperar": {
+              "MW40": 55,
+              "MD30": 960
+            }
+          },
+          {
+            "poner": {
+              "MW118": -10
+            },
+            "esperar": {
+              "MW40": 35
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: MW40 = suma de las 10 palabras MW100, MW102, …, MW118.\n**Conceptos**: puntero de área (`P#byte.bit` = byte × 8 + bit), `L MW [MD 30]` y `LOOP` (§7.19 de la referencia). Solo existe en AWL: no tiene representación en KOP.\n\n```awl\n      L     P#100.0\n      T     MD 30       // puntero al primer elemento (100 × 8 = 800)\n      L     0\n      T     MW 40       // suma = 0\n      L     10          // 10 elementos\nSIG:  T     MW 34       // contador del bucle\n      L     MW 40\n      L     MW [MD 30]\n      +I\n      T     MW 40\n      L     MD 30\n      L     P#2.0       // avanza una palabra (2 bytes = 16)\n      +D\n      T     MD 30\n      L     MW 34\n      LOOP  SIG\n```\n\n```yaml\npasos:\n  - poner: {MW100: 1, MW102: 2, MW104: 3, MW106: 4, MW108: 5, MW110: 6, MW112: 7, MW114: 8, MW116: 9, MW118: 10}\n    esperar: {MW40: 55, MD30: 960}\n  - poner: {MW118: -10}\n    esperar: {MW40: 35}\n```"
+    },
+    {
+      "id": "E28",
+      "titulo": "Semáforo con marcas de etapa (estilo GRAFCET)",
+      "categoria": "I. Secuencias",
+      "tipo": "ejemplo",
+      "awl": "// Etapa inicial: marcha y ninguna etapa activa\n      U     E 0.0\n      UN    M 20.0\n      UN    M 20.1\n      UN    M 20.2\n      S     M 20.0\n// Etapa 1: verde (5 s)\n      U     M 20.0\n      L     S5T#5S\n      SE    T 10\n      U     T 10\n      S     M 20.1\n      R     M 20.0\n// Etapa 2: ámbar (2 s)\n      U     M 20.1\n      L     S5T#2S\n      SE    T 11\n      U     T 11\n      S     M 20.2\n      R     M 20.1\n// Etapa 3: rojo (5 s)\n      U     M 20.2\n      L     S5T#5S\n      SE    T 12\n      U     T 12\n      S     M 20.0\n      R     M 20.2\n// Paro: borrar todas las etapas\n      UN    E 0.0\n      R     M 20.0\n      R     M 20.1\n      R     M 20.2\n// Salidas\n      U     M 20.0\n      =     A 4.0\n      U     M 20.1\n      =     A 4.1\n      U     M 20.2\n      =     A 4.2\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 0,
+              "A4.2": 0
+            }
+          },
+          {
+            "tiempo_ms": 4800,
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 400,
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 1
+            }
+          },
+          {
+            "tiempo_ms": 2000,
+            "esperar": {
+              "A4.1": 0,
+              "A4.2": 1
+            }
+          },
+          {
+            "tiempo_ms": 5000,
+            "esperar": {
+              "A4.2": 0,
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 0,
+              "A4.2": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: con el interruptor E0.0 = 1, el semáforo hace un ciclo continuo:\n- **verde** A4.0 durante 5 s,\n- **ámbar** A4.1 durante 2 s,\n- **rojo** A4.2 durante 5 s.\n\nCon E0.0 = 0, todo se apaga.\n\n**Conceptos**: cada etapa es una marca (M20.0, M20.1, M20.2). Una transición activa la siguiente etapa con `S` y desactiva la actual con `R`. Las salidas se asignan **una sola vez**, al final.\n\n```awl\n// Etapa inicial: marcha y ninguna etapa activa\n      U     E 0.0\n      UN    M 20.0\n      UN    M 20.1\n      UN    M 20.2\n      S     M 20.0\n// Etapa 1: verde (5 s)\n      U     M 20.0\n      L     S5T#5S\n      SE    T 10\n      U     T 10\n      S     M 20.1\n      R     M 20.0\n// Etapa 2: ámbar (2 s)\n      U     M 20.1\n      L     S5T#2S\n      SE    T 11\n      U     T 11\n      S     M 20.2\n      R     M 20.1\n// Etapa 3: rojo (5 s)\n      U     M 20.2\n      L     S5T#5S\n      SE    T 12\n      U     T 12\n      S     M 20.0\n      R     M 20.2\n// Paro: borrar todas las etapas\n      UN    E 0.0\n      R     M 20.0\n      R     M 20.1\n      R     M 20.2\n// Salidas\n      U     M 20.0\n      =     A 4.0\n      U     M 20.1\n      =     A 4.1\n      U     M 20.2\n      =     A 4.2\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 1, A4.1: 0, A4.2: 0}\n  - tiempo_ms: 4800\n    esperar: {A4.0: 1}\n  - tiempo_ms: 400\n    esperar: {A4.0: 0, A4.1: 1}\n  - tiempo_ms: 2000\n    esperar: {A4.1: 0, A4.2: 1}\n  - tiempo_ms: 5000\n    esperar: {A4.2: 0, A4.0: 1}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0, A4.1: 0, A4.2: 0}\n```"
+    },
+    {
+      "id": "Q01",
+      "titulo": "AWL se evalúa de forma secuencial",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      O     E 0.1\n      U     E 0.2\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Con E0.0 = 1, E0.1 = 0 y E0.2 = 0, ¿cuánto vale A4.0?\n\n```awl\n      U     E 0.0\n      O     E 0.1\n      U     E 0.2\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\n**A4.0 = 0**. Se calcula (E0.0 ∨ E0.1) ∧ E0.2 = (1 ∨ 0) ∧ 0 = 0, no 1 ∨ (0 ∧ 0).\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 0}\n    esperar: {A4.0: 0}\n```\n</details>"
+    },
+    {
+      "id": "Q02",
+      "titulo": "`O` sin operando",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      O\n      U     E 0.1\n      U     E 0.2\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Mismas entradas que en Q01. ¿Cuánto vale A4.0?\n\n```awl\n      U     E 0.0\n      O\n      U     E 0.1\n      U     E 0.2\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\n**A4.0 = 1**. Se calcula E0.0 ∨ (E0.1 ∧ E0.2).\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 0}\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q03",
+      "titulo": "¿T depende del RLO?",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      L     5\n      T     MW 30\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "MW30": 5,
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Con E0.0 = 0, ¿cuánto valen MW30 y A4.0?\n\n```awl\n      U     E 0.0\n      L     5\n      T     MW 30\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\n**MW30 = 5** (T es incondicional) y **A4.0 = 0** (L y T no tocan el RLO).\n\n```yaml\npasos:\n  - poner: {E0.0: 0}\n    esperar: {MW30: 5, A4.0: 0}\n```\n</details>"
+    },
+    {
+      "id": "Q04",
+      "titulo": "Comparación detrás de un contacto",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      L     MW 30\n      L     5\n      >I\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0,
+              "MW30": 10
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Con E0.0 = 0 y MW30 = 10, ¿cuánto vale A4.0?\n\n```awl\n      U     E 0.0\n      L     MW 30\n      L     5\n      >I\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\n**A4.0 = 1**. La comparación sustituye el RLO, así que el `U E 0.0` se pierde. La forma correcta es `U E0.0 / U( / L MW30 / L 5 / >I / ) / = A4.0`.\n\n```yaml\npasos:\n  - poner: {E0.0: 0, MW30: 10}\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q05",
+      "titulo": "INC",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      L     255\n      INC   1\n      T     MW 30\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "ciclos": 1,
+            "esperar": {
+              "MW30": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "¿Cuánto vale MW30?\n\n```awl\n      L     255\n      INC   1\n      T     MW 30\n```\n\n<details><summary>Solución</summary>\n\n**MW30 = 0**. INC solo actúa sobre el byte bajo de ACU1: 255 + 1 = 0, sin acarreo.\n\n```yaml\npasos:\n  - ciclos: 1\n    esperar: {MW30: 0}\n```\n</details>"
+    },
+    {
+      "id": "Q06",
+      "titulo": "Orden de bytes",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      L     EW 0\n      T     MW 30\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "MW30": 256
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E1.0": 1
+            },
+            "esperar": {
+              "MW30": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Si solo E0.0 = 1, ¿cuánto vale MW30? ¿Y si solo E1.0 = 1?\n\n```awl\n      L     EW 0\n      T     MW 30\n```\n\n<details><summary>Solución</summary>\n\n- Solo E0.0 = 1: **256**. EB0 es el byte alto de EW0.\n- Solo E1.0 = 1: **1**.\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    esperar: {MW30: 256}\n  - poner: {E0.0: 0, E1.0: 1}\n    esperar: {MW30: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q07",
+      "titulo": "L de un INT negativo",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      L     MW 30\n      L     L#1\n      +D\n      T     MD 40\n      L     MW 30\n      ITD\n      L     L#1\n      +D\n      T     MD 44\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "MW30": -1
+            },
+            "esperar": {
+              "MD40": 65536,
+              "MD44": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Con MW30 = −1, ¿cuánto valen MD40 y MD44?\n\n```awl\n      L     MW 30\n      L     L#1\n      +D\n      T     MD 40\n      L     MW 30\n      ITD\n      L     L#1\n      +D\n      T     MD 44\n```\n\n<details><summary>Solución</summary>\n\n- **MD40 = 65536**: `L MW` rellena con ceros, así que ACU1 = 65535.\n- **MD44 = 0**: `ITD` extiende el signo, así que ACU1 = −1.\n\n```yaml\npasos:\n  - poner: {MW30: -1}\n    esperar: {MD40: 65536, MD44: 0}\n```\n</details>"
+    },
+    {
+      "id": "Q08",
+      "titulo": "SPB no tomado",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      SPB   FIN\n      =     A 4.0\nFIN:  NOP   0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "¿Qué vale A4.0 en cada paso? Las entradas van cambiando: primero E0.0 = 1, luego E0.0 = 0 y luego E0.0 = 1.\n\n```awl\n      U     E 0.0\n      SPB   FIN\n      =     A 4.0\nFIN:  NOP   0\n```\n\n<details><summary>Solución</summary>\n\n- Con E0.0 = 1: salta y A4.0 **no se escribe**, así que sigue a 0.\n- Con E0.0 = 0: **no salta, pero SPB deja RLO = 1**, así que A4.0 = 1.\n- Con E0.0 = 1 otra vez: salta y A4.0 **se queda a 1**.\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 1}\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q09",
+      "titulo": "UN( … )",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      UN(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Con E0.0 = 1, E0.1 = 0 y E0.2 = 1, ¿cuánto vale A4.0? ¿Y con E0.2 = 0?\n\n```awl\n      U     E 0.0\n      UN(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\n- Con E0.2 = 1: 1 ∧ ¬(0 ∨ 1) = **0**.\n- Con E0.2 = 0: 1 ∧ ¬(0 ∨ 0) = **1**.\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.2: 0}\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q10",
+      "titulo": "Valor de tiempo mal cargado",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 0.0\n      L     500\n      SE    T 1\n      U     T 1\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            },
+            "esperar_estado": "RUN"
+          },
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "esperar_estado": "STOP"
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "¿Qué pasa al activar E0.0?\n\n```awl\n      U     E 0.0\n      L     500\n      SE    T 1\n      U     T 1\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\nLa CPU pasa a **STOP**. 500 = W#16#01F4 no es un S5TIME válido (la cifra F no es BCD), así que hay un error de programación (OB121). Mientras E0.0 = 0 no ocurre nada, porque el valor solo se evalúa al arrancar el temporizador.\n\n```yaml\npasos:\n  - poner: {E0.0: 0}\n    esperar: {A4.0: 0}\n    esperar_estado: RUN\n  - poner: {E0.0: 1}\n    esperar_estado: STOP\n```\n</details>"
+    },
+    {
+      "id": "Q11",
+      "titulo": "Contador sin flanco",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     E 1.0\n      ZV    Z 1\n      L     Z 1\n      T     MW 30\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E1.0": 1
+            },
+            "ciclos": 10,
+            "esperar": {
+              "MW30": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "E1.0 se mantiene a 1 durante 10 ciclos. ¿Cuánto vale MW30?\n\n```awl\n      U     E 1.0\n      ZV    Z 1\n      L     Z 1\n      T     MW 30\n```\n\n<details><summary>Solución</summary>\n\n**MW30 = 1**. El contador solo cuenta en el flanco.\n\n```yaml\npasos:\n  - poner: {E1.0: 1}\n    ciclos: 10\n    esperar: {MW30: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q12",
+      "titulo": "Orden de los segmentos",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      U     M 0.0\n      =     A 4.0\n      U     E 0.0\n      =     M 0.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1
+            },
+            "ciclos": 1,
+            "esperar": {
+              "A4.0": 0,
+              "M0.0": 1
+            }
+          },
+          {
+            "ciclos": 1,
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Se pone E0.0 = 1. ¿Cuánto vale A4.0 al terminar el primer ciclo? ¿Y al terminar el segundo?\n\n```awl\n      U     M 0.0\n      =     A 4.0\n      U     E 0.0\n      =     M 0.0\n```\n\n<details><summary>Solución</summary>\n\n- **Ciclo 1: A4.0 = 0.** M0.0 se calcula después de usarse.\n- **Ciclo 2: A4.0 = 1.**\n\n```yaml\npasos:\n  - poner: {E0.0: 1}\n    ciclos: 1\n    esperar: {A4.0: 0, M0.0: 1}\n  - ciclos: 1\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q13",
+      "titulo": "Cadena de O-exclusivas",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      X     E 0.0\n      X     E 0.1\n      X     E 0.2\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "¿Cuánto vale A4.0 con (1, 1, 1)? ¿Y con (1, 1, 0) y con (1, 0, 0)?\n\n```awl\n      X     E 0.0\n      X     E 0.1\n      X     E 0.2\n      =     A 4.0\n```\n\n<details><summary>Solución</summary>\n\nEs la **paridad**: A4.0 = 1 si hay un número impar de unos.\n- (1, 1, 1) → **1**\n- (1, 1, 0) → **0**\n- (1, 0, 0) → **1**\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 1}\n    esperar: {A4.0: 1}\n  - poner: {E0.2: 0}\n    esperar: {A4.0: 0}\n  - poner: {E0.1: 0}\n    esperar: {A4.0: 1}\n```\n</details>"
+    },
+    {
+      "id": "Q14",
+      "titulo": "Resultado completo de /I",
+      "categoria": "J. Preguntas tipo examen: \"¿qué vale…?\"",
+      "tipo": "predice",
+      "awl": "      L     17\n      L     5\n      /I\n      T     MW 30\n      T     MD 32\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "ciclos": 1,
+            "esperar": {
+              "MW30": 3,
+              "MD32": 131075
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "¿Cuánto valen MW30 y MD32?\n\n```awl\n      L     17\n      L     5\n      /I\n      T     MW 30\n      T     MD 32\n```\n\n<details><summary>Solución</summary>\n\n- **MW30 = 3** (el cociente).\n- **MD32 = 131075** = DW#16#00020003: el resto (2) está en la palabra alta y el cociente (3) en la baja.\n\n```yaml\npasos:\n  - ciclos: 1\n    esperar: {MW30: 3, MD32: 131075}\n```\n</details>"
+    },
+    {
+      "id": "C01",
+      "titulo": "Pasar a AWL",
+      "categoria": "K. Conversión KOP ↔ AWL",
+      "tipo": "traduce",
+      "awl": "      O     E 0.0\n      O     E 0.1\n      UN    E 0.2\n      =     A 4.0\n",
+      "kop_ascii": "     E0.0              E0.2        A4.0\n |---| |-----+---------|/|---------( )\n |   E0.1    |\n |---| |-----+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 0,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0,
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```text\n     E0.0              E0.2        A4.0\n |---| |-----+---------|/|---------( )\n |   E0.1    |\n |---| |-----+\n```\n\n<details><summary>Solución</summary>\n\nDos soluciones válidas: `U( / O E0.0 / O E0.1 / ) / UN E0.2 / = A4.0` y, aprovechando la evaluación secuencial, la que sigue.\n</details>\n\n```awl\n      O     E 0.0\n      O     E 0.1\n      UN    E 0.2\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 0, E0.2: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 1, E0.2: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.0: 0, E0.1: 0, E0.2: 0}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "C02",
+      "titulo": "Pasar a AWL (dos ramas con Set y Reset)",
+      "categoria": "K. Conversión KOP ↔ AWL",
+      "tipo": "traduce",
+      "awl": "      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      UN    E 0.3\n      S     A 4.0\n      U     E 0.4\n      R     A 4.0\n",
+      "kop_ascii": "     E0.0     E0.1           A4.0\n |---| |------| |-----+------(S)\n |   E0.2     E0.3    |\n |---| |------|/|-----+\n     E0.4                    A4.0\n |---| |---------------------(R)\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 0,
+              "E0.3": 0,
+              "E0.4": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.4": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.4": 0,
+              "E0.2": 1,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0,
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.4": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```text\n     E0.0     E0.1           A4.0\n |---| |------| |-----+------(S)\n |   E0.2     E0.3    |\n |---| |------|/|-----+\n     E0.4                    A4.0\n |---| |---------------------(R)\n```\n\n```awl\n      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      UN    E 0.3\n      S     A 4.0\n      U     E 0.4\n      R     A 4.0\n```\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 0, E0.3: 0, E0.4: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.0: 0, E0.1: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.4: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.4: 0, E0.2: 1, E0.3: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.3: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.2: 0, E0.0: 1, E0.1: 1, E0.4: 1}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "C03",
+      "titulo": "Pasar a KOP",
+      "categoria": "K. Conversión KOP ↔ AWL",
+      "tipo": "traduce",
+      "awl": "      U     E 0.0\n      U(\n      O     E 0.1\n      O(\n      U     E 0.2\n      U     E 0.3\n      )\n      )\n      =     A 4.0\n      =     A 4.1\n",
+      "kop_ascii": "     E0.0     E0.1                    A4.0\n |---| |---+--| |-------------+---+---( )\n |         |  E0.2     E0.3   |   |   A4.1\n |         +--| |------| |----+   +---( )\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E0.0": 1,
+              "E0.1": 1,
+              "E0.2": 0,
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0,
+              "E0.2": 1,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.0": 0,
+              "E0.1": 1,
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "Dibuja el KOP equivalente de este AWL:\n\n```awl\n      U     E 0.0\n      U(\n      O     E 0.1\n      O(\n      U     E 0.2\n      U     E 0.3\n      )\n      )\n      =     A 4.0\n      =     A 4.1\n```\n\n<details><summary>Solución</summary>\n\n```text\n     E0.0     E0.1                    A4.0\n |---| |---+--| |-------------+---+---( )\n |         |  E0.2     E0.3   |   |   A4.1\n |         +--| |------| |----+   +---( )\n```\n</details>\n\n```yaml\npasos:\n  - poner: {E0.0: 1, E0.1: 1, E0.2: 0, E0.3: 0}\n    esperar: {A4.0: 1, A4.1: 1}\n  - poner: {E0.1: 0, E0.2: 1, E0.3: 1}\n    esperar: {A4.0: 1, A4.1: 1}\n  - poner: {E0.3: 0}\n    esperar: {A4.0: 0, A4.1: 0}\n  - poner: {E0.0: 0, E0.1: 1, E0.3: 1}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "C04",
+      "titulo": "Pasar a KOP (comparador y temporizador)",
+      "categoria": "K. Conversión KOP ↔ AWL",
+      "tipo": "traduce",
+      "awl": "      U     E 2.0\n      U(\n      L     MW 30\n      L     100\n      >I\n      )\n      L     S5T#3S\n      SE    T 2\n      U     T 2\n      =     A 4.3\n",
+      "kop_ascii": "     E2.0      CMP >I              T2\n |---| |------+-------+-------+-----------+           A4.3\n |     MW30 --|IN1    |       | S_EVERZ   |\n |     100  --|IN2    |       |S         Q|-----------( )\n |            +-------+       |           |\n |                   S5T#3S --|TW         |\n |                            +-----------+\n",
+      "prueba": {
+        "pasos": [
+          {
+            "poner": {
+              "E2.0": 1,
+              "MW30": 150
+            },
+            "esperar": {
+              "A4.3": 0
+            }
+          },
+          {
+            "tiempo_ms": 2900,
+            "esperar": {
+              "A4.3": 0
+            }
+          },
+          {
+            "tiempo_ms": 200,
+            "esperar": {
+              "A4.3": 1
+            }
+          },
+          {
+            "poner": {
+              "MW30": 50
+            },
+            "esperar": {
+              "A4.3": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      U     E 2.0\n      U(\n      L     MW 30\n      L     100\n      >I\n      )\n      L     S5T#3S\n      SE    T 2\n      U     T 2\n      =     A 4.3\n```\n\n<details><summary>Solución</summary>\n\n```text\n     E2.0      CMP >I              T2\n |---| |------+-------+-------+-----------+           A4.3\n |     MW30 --|IN1    |       | S_EVERZ   |\n |     100  --|IN2    |       |S         Q|-----------( )\n |            +-------+       |           |\n |                   S5T#3S --|TW         |\n |                            +-----------+\n```\n(El comparador sale hacia la patilla S del temporizador.)\n</details>\n\n```yaml\npasos:\n  - poner: {E2.0: 1, MW30: 150}\n    esperar: {A4.3: 0}\n  - tiempo_ms: 2900\n    esperar: {A4.3: 0}\n  - tiempo_ms: 200\n    esperar: {A4.3: 1}\n  - poner: {MW30: 50}\n    esperar: {A4.3: 0}\n```"
+    },
+    {
+      "id": "P01",
+      "titulo": "Llenado de depósito con histéresis",
+      "categoria": "L. Ejercicios propuestos (con solución)",
+      "tipo": "programa",
+      "awl": "      UN    E 0.2\n      S     A 4.0\n      U     E 0.3\n      R     A 4.0\n      UN    E 0.1\n      R     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "inicial": {
+          "E0.1": 1
+        },
+        "pasos": [
+          {
+            "poner": {
+              "E0.2": 0,
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 1
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 1
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.3": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "poner": {
+              "E0.2": 0
+            },
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**:\n- E0.2 = sonda de mínimo (1 = hay agua por encima del mínimo).\n- E0.3 = sonda de máximo (1 = el agua llega al máximo).\n- E0.1 = paro (NC).\n\nLa bomba A4.0 arranca cuando el nivel baja del mínimo y para al llegar al máximo. Entre las dos sondas mantiene su estado. El paro la detiene.\n\n<details><summary>Solución</summary>\n\nSet por debajo del mínimo; Reset en el máximo o con el paro (los Reset van después: prioridad a parar).\n</details>\n\n```awl\n      UN    E 0.2\n      S     A 4.0\n      U     E 0.3\n      R     A 4.0\n      UN    E 0.1\n      R     A 4.0\n```\n\n```yaml\ninicial: {E0.1: 1}\npasos:\n  - poner: {E0.2: 0, E0.3: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.2: 1}\n    esperar: {A4.0: 1}          # entre sondas: sigue llenando\n  - poner: {E0.3: 1}\n    esperar: {A4.0: 0}\n  - poner: {E0.3: 0}\n    esperar: {A4.0: 0}          # entre sondas vaciándose: sigue parada\n  - poner: {E0.2: 0}\n    esperar: {A4.0: 1}\n  - poner: {E0.1: 0}\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "P02",
+      "titulo": "Minutero de escalera",
+      "categoria": "L. Ejercicios propuestos (con solución)",
+      "tipo": "programa",
+      "awl": "      U     E 0.0\n      L     S5T#30S\n      SV    T 1\n      U     T 1\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 29000,
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 2000,
+            "esperar": {
+              "A4.0": 0
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 20000,
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 25000,
+            "esperar": {
+              "A4.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 6000,
+            "esperar": {
+              "A4.0": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: un pulso en E0.0 enciende la luz A4.0 durante 30 s. Si se vuelve a pulsar mientras está encendida, los 30 s vuelven a empezar.\n\n<details><summary>Solución</summary>\n\nImpulso prolongado (SV): se redispara con cada flanco.\n</details>\n\n```awl\n      U     E 0.0\n      L     S5T#30S\n      SV    T 1\n      U     T 1\n      =     A 4.0\n```\n\n```yaml\npasos:\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n  - tiempo_ms: 29000\n    esperar: {A4.0: 1}\n  - tiempo_ms: 2000\n    esperar: {A4.0: 0}\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n  - tiempo_ms: 20000\n    esperar: {A4.0: 1}\n  - pulso: E0.0\n    esperar: {A4.0: 1}\n  - tiempo_ms: 25000\n    esperar: {A4.0: 1}\n  - tiempo_ms: 6000\n    esperar: {A4.0: 0}\n```"
+    },
+    {
+      "id": "P03",
+      "titulo": "Encajado: aviso cada 5 piezas",
+      "categoria": "L. Ejercicios propuestos (con solución)",
+      "tipo": "programa",
+      "awl": "      U     E 1.0\n      ZV    Z 1\n      L     Z 1\n      L     5\n      >=I\n      L     S5T#2S\n      SV    T 1\n      U     T 1\n      =     A 5.0\n      L     Z 1\n      L     5\n      >=I\n      R     Z 1\n",
+      "kop_ascii": null,
+      "prueba": {
+        "pasos": [
+          {
+            "pulso": "E1.0",
+            "veces": 4,
+            "esperar": {
+              "A5.0": 0,
+              "Z1:VALOR": 4
+            }
+          },
+          {
+            "pulso": "E1.0",
+            "esperar": {
+              "A5.0": 1,
+              "Z1:VALOR": 0
+            }
+          },
+          {
+            "tiempo_ms": 1800,
+            "esperar": {
+              "A5.0": 1
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A5.0": 0
+            }
+          },
+          {
+            "pulso": "E1.0",
+            "veces": 5,
+            "esperar": {
+              "A5.0": 1
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**: E1.0 = sensor de pieza. Al llegar a 5 piezas, el aviso A5.0 se enciende durante 2 s y el contador vuelve a 0 automáticamente.\n\n<details><summary>Solución</summary>\n\nContador ascendente + comparación ≥ 5 que dispara un SV de 2 s y hace reset del contador.\n</details>\n\n```awl\n      U     E 1.0\n      ZV    Z 1\n      L     Z 1\n      L     5\n      >=I\n      L     S5T#2S\n      SV    T 1\n      U     T 1\n      =     A 5.0\n      L     Z 1\n      L     5\n      >=I\n      R     Z 1\n```\n\n```yaml\npasos:\n  - pulso: E1.0\n    veces: 4\n    esperar: {A5.0: 0, \"Z1:VALOR\": 4}\n  - pulso: E1.0\n    esperar: {A5.0: 1, \"Z1:VALOR\": 0}\n  - tiempo_ms: 1800\n    esperar: {A5.0: 1}\n  - tiempo_ms: 300\n    esperar: {A5.0: 0}\n  - pulso: E1.0\n    veces: 5\n    esperar: {A5.0: 1}\n```"
+    },
+    {
+      "id": "P04",
+      "titulo": "Arranque estrella-triángulo",
+      "categoria": "L. Ejercicios propuestos (con solución)",
+      "tipo": "programa",
+      "awl": "// Línea (enclavamiento)\n      U(\n      O     E 0.0\n      O     A 4.0\n      )\n      U     E 0.1\n      =     A 4.0\n// Tiempo de estrella\n      U     A 4.0\n      L     S5T#5S\n      SE    T 1\n// Estrella\n      U     A 4.0\n      UN    T 1\n      UN    A 4.2\n      =     A 4.1\n// Triángulo\n      U     A 4.0\n      U     T 1\n      UN    A 4.1\n      =     A 4.2\n",
+      "kop_ascii": null,
+      "prueba": {
+        "inicial": {
+          "E0.1": 1
+        },
+        "pasos": [
+          {
+            "pulso": "E0.0",
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 1,
+              "A4.2": 0
+            }
+          },
+          {
+            "tiempo_ms": 4800,
+            "esperar": {
+              "A4.1": 1,
+              "A4.2": 0
+            }
+          },
+          {
+            "tiempo_ms": 300,
+            "esperar": {
+              "A4.0": 1,
+              "A4.1": 0,
+              "A4.2": 1
+            }
+          },
+          {
+            "poner": {
+              "E0.1": 0
+            },
+            "esperar": {
+              "A4.0": 0,
+              "A4.1": 0,
+              "A4.2": 0
+            }
+          }
+        ]
+      },
+      "traza": null,
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "**Enunciado**:\n- E0.0 = marcha; E0.1 = paro (NC).\n- A4.0 = contactor de línea (KM1), A4.1 = estrella (KM2), A4.2 = triángulo (KM3).\n\nAl dar marcha entran línea y estrella. A los 5 s se desconecta la estrella y entra el triángulo. Estrella y triángulo **nunca** pueden estar a la vez (enclavamiento mutuo).\n\n<details><summary>Solución</summary>\n\nLínea con enclavamiento; SE de 5 s; estrella = línea ∧ ¬T1 ∧ ¬triángulo; triángulo = línea ∧ T1 ∧ ¬estrella.\n</details>\n\n```awl\n// Línea (enclavamiento)\n      U(\n      O     E 0.0\n      O     A 4.0\n      )\n      U     E 0.1\n      =     A 4.0\n// Tiempo de estrella\n      U     A 4.0\n      L     S5T#5S\n      SE    T 1\n// Estrella\n      U     A 4.0\n      UN    T 1\n      UN    A 4.2\n      =     A 4.1\n// Triángulo\n      U     A 4.0\n      U     T 1\n      UN    A 4.1\n      =     A 4.2\n```\n\n```yaml\ninicial: {E0.1: 1}\npasos:\n  - pulso: E0.0\n    esperar: {A4.0: 1, A4.1: 1, A4.2: 0}\n  - tiempo_ms: 4800\n    esperar: {A4.1: 1, A4.2: 0}\n  - tiempo_ms: 300\n    esperar: {A4.0: 1, A4.1: 0, A4.2: 1}\n  - poner: {E0.1: 0}\n    esperar: {A4.0: 0, A4.1: 0, A4.2: 0}\n```"
+    },
+    {
+      "id": "M01",
+      "titulo": "Banco de preguntas de teoría",
+      "categoria": "M. Preguntas de teoría (test)",
+      "tipo": "teoria",
+      "awl": null,
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": null,
+      "cronograma": null,
+      "preguntas": [
+        {
+          "id": "M01",
+          "pregunta": "¿Qué bytes forman la palabra de marcas MW 10?",
+          "opciones": [
+            "MB10 y MB11",
+            "MB9 y MB10",
+            "MB10, MB11, MB12 y MB13",
+            "MB10 y MB12"
+          ],
+          "correcta": 0,
+          "explicacion": "Una palabra son 2 bytes empezando en la dirección indicada. MB10 es el byte alto y MB11 el bajo."
+        },
+        {
+          "id": "M02",
+          "pregunta": "Si solo E1.0 = 1, ¿cuánto vale EW 0?",
+          "opciones": [
+            "1",
+            "256",
+            "128",
+            "2"
+          ],
+          "correcta": 0,
+          "explicacion": "EB1 es el byte bajo de EW0, y E1.0 es su bit 0. Si solo E0.0 = 1, EW0 valdría 256."
+        },
+        {
+          "id": "M03",
+          "pregunta": "¿Cómo se guarda S5T#5S en el acumulador?",
+          "opciones": [
+            "W#16#0500",
+            "W#16#1050",
+            "W#16#01F4",
+            "W#16#0005"
+          ],
+          "correcta": 0,
+          "explicacion": "Base 10 ms (bits 13-12 = 00) y valor 500 en BCD: 16#0500."
+        },
+        {
+          "id": "M04",
+          "pregunta": "¿Qué temporizador mantiene Q = 1 durante todo el tiempo programado aunque la entrada S caiga antes?",
+          "opciones": [
+            "SV (S_VIMP, impulso prolongado)",
+            "SI (S_IMPULS, impulso)",
+            "SE (S_EVERZ, retardo a la conexión)",
+            "SA (S_AVERZ, retardo a la desconexión)"
+          ],
+          "correcta": 0,
+          "explicacion": "El impulso prolongado no depende de que S siga a 1. El impulso SI se corta si S cae."
+        },
+        {
+          "id": "M05",
+          "pregunta": "¿Qué temporizador pone Q = 1 en cuanto S = 1 y la mantiene un tiempo después de que S caiga?",
+          "opciones": [
+            "SA (S_AVERZ)",
+            "SE (S_EVERZ)",
+            "SS (S_SEVERZ)",
+            "SI (S_IMPULS)"
+          ],
+          "correcta": 0,
+          "explicacion": "Es el retardo a la desconexión: el tiempo empieza a contar en el flanco negativo de S."
+        },
+        {
+          "id": "M06",
+          "pregunta": "El pulsador de paro está cableado como contacto NC. ¿Qué contacto se programa para que el motor pueda funcionar?",
+          "opciones": [
+            "Un contacto NA (U E0.1)",
+            "Un contacto NC (UN E0.1)",
+            "Un flanco positivo",
+            "Da igual"
+          ],
+          "correcta": 0,
+          "explicacion": "En reposo la entrada vale 1. El contacto del programa solo pregunta: «¿vale 1?». Si se rompe el cable, la máquina se para."
+        },
+        {
+          "id": "M07",
+          "pregunta": "¿Cuál es el rango de valores de un contador (Z)?",
+          "opciones": [
+            "0 a 999",
+            "0 a 255",
+            "−32768 a 32767",
+            "0 a 9999"
+          ],
+          "correcta": 0,
+          "explicacion": "El valor se guarda en 3 cifras BCD. No baja de 0 ni sube de 999."
+        },
+        {
+          "id": "M08",
+          "pregunta": "¿Qué hace «T MW 10» si el RLO vale 0?",
+          "opciones": [
+            "Transfiere igualmente ACU1 a MW10",
+            "No hace nada",
+            "Escribe 0 en MW10",
+            "Provoca un error"
+          ],
+          "correcta": 0,
+          "explicacion": "L y T son incondicionales: no dependen del RLO. Para condicionarlos hay que saltar por encima."
+        },
+        {
+          "id": "M09",
+          "pregunta": "¿Qué bit de la palabra de estado indica si la siguiente instrucción lógica es una primera consulta?",
+          "opciones": [
+            "/ER",
+            "STA",
+            "OR",
+            "RB (BIE)"
+          ],
+          "correcta": 0,
+          "explicacion": "Con /ER = 0 la siguiente U/O/X copia el operando en el RLO en lugar de combinarlo."
+        },
+        {
+          "id": "M10",
+          "pregunta": "¿Qué resultado deja «L 30000 / L 10000 / +I» en la parte baja de ACU1?",
+          "opciones": [
+            "−25536, con OV = 1",
+            "40000",
+            "32767 (satura)",
+            "La CPU pasa a STOP"
+          ],
+          "correcta": 0,
+          "explicacion": "40000 no cabe en un INT: el resultado da la vuelta (40000 − 65536) y se activan OV y OS."
+        },
+        {
+          "id": "M11",
+          "pregunta": "¿Qué OB se ejecuta cíclicamente con el programa principal?",
+          "opciones": [
+            "OB1",
+            "OB100",
+            "OB35",
+            "OB80"
+          ],
+          "correcta": 0,
+          "explicacion": "OB100 es el arranque, OB35 la alarma cíclica y OB80 el error de tiempo."
+        },
+        {
+          "id": "M12",
+          "pregunta": "¿Qué OB se ejecuta una sola vez al pasar de STOP a RUN (rearranque completo)?",
+          "opciones": [
+            "OB100",
+            "OB1",
+            "OB121",
+            "OB10"
+          ],
+          "correcta": 0,
+          "explicacion": "OB100 sirve para inicializar. Después empieza el ciclo de OB1."
+        },
+        {
+          "id": "M13",
+          "pregunta": "Si el programa tiene «= A 4.0» en dos segmentos distintos, ¿qué valor llega a la salida?",
+          "opciones": [
+            "El de la última asignación ejecutada",
+            "El O de las dos",
+            "El Y de las dos",
+            "La CPU da error"
+          ],
+          "correcta": 0,
+          "explicacion": "La PAA se escribe al final del ciclo, así que la última asignación sobrescribe a las anteriores."
+        },
+        {
+          "id": "M14",
+          "pregunta": "¿Qué diferencia a un FB de un FC?",
+          "opciones": [
+            "El FB tiene memoria propia (DB de instancia)",
+            "El FC solo se puede llamar desde OB1",
+            "El FB no admite parámetros",
+            "No hay diferencia"
+          ],
+          "correcta": 0,
+          "explicacion": "Las variables estáticas (STAT) del FB se guardan en su DB de instancia y conservan el valor entre llamadas."
+        },
+        {
+          "id": "M15",
+          "pregunta": "¿Qué valor da una entrada analógica al final de su rango nominal (por ejemplo, 10 V o 20 mA)?",
+          "opciones": [
+            "27648",
+            "32767",
+            "4095",
+            "65535"
+          ],
+          "correcta": 0,
+          "explicacion": "El rango nominal va de 0 a 27648. Por encima está el rango de rebase, y 32767 indica desbordamiento o rotura de hilo."
+        },
+        {
+          "id": "M16",
+          "pregunta": "¿Cuántos niveles de paréntesis anidados admite AWL?",
+          "opciones": [
+            "7",
+            "8",
+            "16",
+            "Ilimitados"
+          ],
+          "correcta": 0,
+          "explicacion": "La pila de anidamiento tiene 7 niveles. Si se superan, hay un error y la CPU pasa a STOP."
+        },
+        {
+          "id": "M17",
+          "pregunta": "Con MW10 = −1, ¿qué contiene ACU1 después de «L MW 10»?",
+          "opciones": [
+            "DW#16#0000FFFF",
+            "DW#16#FFFFFFFF",
+            "DW#16#FFFF0000",
+            "0"
+          ],
+          "correcta": 0,
+          "explicacion": "L rellena con ceros la parte alta, sin extender el signo. Para pasarlo a DINT hay que usar ITD."
+        },
+        {
+          "id": "M18",
+          "pregunta": "¿Qué instrucción AWL equivale a la bobina «(S)» de KOP?",
+          "opciones": [
+            "S",
+            "=",
+            "SET",
+            "SE"
+          ],
+          "correcta": 0,
+          "explicacion": "SET pone el RLO a 1, SE arranca un temporizador y = asigna el RLO."
+        },
+        {
+          "id": "M19",
+          "pregunta": "¿Qué hace la instrucción SET en AWL?",
+          "opciones": [
+            "Pone el RLO a 1",
+            "Pone a 1 el bit indicado",
+            "Arranca un temporizador",
+            "Pone OS a 1"
+          ],
+          "correcta": 0,
+          "explicacion": "SET y CLR actúan sobre el RLO y cierran la cadena lógica (/ER = 0)."
+        },
+        {
+          "id": "M20",
+          "pregunta": "¿Qué contiene ACU1 tras «L 17 / L 5 / /I»?",
+          "opciones": [
+            "El cociente 3 en la parte baja y el resto 2 en la parte alta",
+            "3,4 en REAL",
+            "Solo el cociente 3",
+            "Solo el resto 2"
+          ],
+          "correcta": 0,
+          "explicacion": "/I deja el cociente en ACU1-L y el resto en ACU1-H. ACU1 = DW#16#00020003."
+        },
+        {
+          "id": "M21",
+          "pregunta": "En nemotécnica inglesa, ¿cómo se escribe «SE T 1» (retardo a la conexión)?",
+          "opciones": [
+            "SD T 1",
+            "SE T 1",
+            "SO T 1",
+            "TON T 1"
+          ],
+          "correcta": 0,
+          "explicacion": "En inglés, SE es el impulso prolongado (en alemán SV). El retardo a la conexión es SD."
+        },
+        {
+          "id": "M22",
+          "pregunta": "Con MB100 configurado como marca de ciclo, ¿qué bit oscila a 1 Hz?",
+          "opciones": [
+            "M100.5",
+            "M100.0",
+            "M100.7",
+            "M100.3"
+          ],
+          "correcta": 0,
+          "explicacion": "Periodos de los bits 0 a 7: 0,1 / 0,2 / 0,4 / 0,5 / 0,8 / 1 / 1,6 / 2 s. El bit 5 tiene un periodo de 1 s."
+        },
+        {
+          "id": "M23",
+          "pregunta": "¿Cómo quedan RLO y /ER cuando un SPB no salta?",
+          "opciones": [
+            "RLO = 1 y /ER = 0",
+            "Sin cambios",
+            "RLO = 0 y /ER = 0",
+            "RLO = 0 y /ER = 1"
+          ],
+          "correcta": 0,
+          "explicacion": "SPB y SPBN siempre dejan RLO = 1 y cierran la cadena, tanto si saltan como si no."
+        },
+        {
+          "id": "M24",
+          "pregunta": "En KOP, dos contactos en serie equivalen a…",
+          "opciones": [
+            "Una función Y (AND)",
+            "Una función O (OR)",
+            "Una O-exclusiva",
+            "Un flanco"
+          ],
+          "correcta": 0,
+          "explicacion": "La corriente solo pasa si conducen los dos. En paralelo es una O."
+        }
+      ],
+      "markdown": "```yaml\npreguntas:\n  - id: M01\n    pregunta: \"¿Qué bytes forman la palabra de marcas MW 10?\"\n    opciones: [\"MB10 y MB11\", \"MB9 y MB10\", \"MB10, MB11, MB12 y MB13\", \"MB10 y MB12\"]\n    correcta: 0\n    explicacion: \"Una palabra son 2 bytes empezando en la dirección indicada. MB10 es el byte alto y MB11 el bajo.\"\n  - id: M02\n    pregunta: \"Si solo E1.0 = 1, ¿cuánto vale EW 0?\"\n    opciones: [\"1\", \"256\", \"128\", \"2\"]\n    correcta: 0\n    explicacion: \"EB1 es el byte bajo de EW0, y E1.0 es su bit 0. Si solo E0.0 = 1, EW0 valdría 256.\"\n  - id: M03\n    pregunta: \"¿Cómo se guarda S5T#5S en el acumulador?\"\n    opciones: [\"W#16#0500\", \"W#16#1050\", \"W#16#01F4\", \"W#16#0005\"]\n    correcta: 0\n    explicacion: \"Base 10 ms (bits 13-12 = 00) y valor 500 en BCD: 16#0500.\"\n  - id: M04\n    pregunta: \"¿Qué temporizador mantiene Q = 1 durante todo el tiempo programado aunque la entrada S caiga antes?\"\n    opciones: [\"SV (S_VIMP, impulso prolongado)\", \"SI (S_IMPULS, impulso)\", \"SE (S_EVERZ, retardo a la conexión)\", \"SA (S_AVERZ, retardo a la desconexión)\"]\n    correcta: 0\n    explicacion: \"El impulso prolongado no depende de que S siga a 1. El impulso SI se corta si S cae.\"\n  - id: M05\n    pregunta: \"¿Qué temporizador pone Q = 1 en cuanto S = 1 y la mantiene un tiempo después de que S caiga?\"\n    opciones: [\"SA (S_AVERZ)\", \"SE (S_EVERZ)\", \"SS (S_SEVERZ)\", \"SI (S_IMPULS)\"]\n    correcta: 0\n    explicacion: \"Es el retardo a la desconexión: el tiempo empieza a contar en el flanco negativo de S.\"\n  - id: M06\n    pregunta: \"El pulsador de paro está cableado como contacto NC. ¿Qué contacto se programa para que el motor pueda funcionar?\"\n    opciones: [\"Un contacto NA (U E0.1)\", \"Un contacto NC (UN E0.1)\", \"Un flanco positivo\", \"Da igual\"]\n    correcta: 0\n    explicacion: \"En reposo la entrada vale 1. El contacto del programa solo pregunta: «¿vale 1?». Si se rompe el cable, la máquina se para.\"\n  - id: M07\n    pregunta: \"¿Cuál es el rango de valores de un contador (Z)?\"\n    opciones: [\"0 a 999\", \"0 a 255\", \"−32768 a 32767\", \"0 a 9999\"]\n    correcta: 0\n    explicacion: \"El valor se guarda en 3 cifras BCD. No baja de 0 ni sube de 999.\"\n  - id: M08\n    pregunta: \"¿Qué hace «T MW 10» si el RLO vale 0?\"\n    opciones: [\"Transfiere igualmente ACU1 a MW10\", \"No hace nada\", \"Escribe 0 en MW10\", \"Provoca un error\"]\n    correcta: 0\n    explicacion: \"L y T son incondicionales: no dependen del RLO. Para condicionarlos hay que saltar por encima.\"\n  - id: M09\n    pregunta: \"¿Qué bit de la palabra de estado indica si la siguiente instrucción lógica es una primera consulta?\"\n    opciones: [\"/ER\", \"STA\", \"OR\", \"RB (BIE)\"]\n    correcta: 0\n    explicacion: \"Con /ER = 0 la siguiente U/O/X copia el operando en el RLO en lugar de combinarlo.\"\n  - id: M10\n    pregunta: \"¿Qué resultado deja «L 30000 / L 10000 / +I» en la parte baja de ACU1?\"\n    opciones: [\"−25536, con OV = 1\", \"40000\", \"32767 (satura)\", \"La CPU pasa a STOP\"]\n    correcta: 0\n    explicacion: \"40000 no cabe en un INT: el resultado da la vuelta (40000 − 65536) y se activan OV y OS.\"\n  - id: M11\n    pregunta: \"¿Qué OB se ejecuta cíclicamente con el programa principal?\"\n    opciones: [\"OB1\", \"OB100\", \"OB35\", \"OB80\"]\n    correcta: 0\n    explicacion: \"OB100 es el arranque, OB35 la alarma cíclica y OB80 el error de tiempo.\"\n  - id: M12\n    pregunta: \"¿Qué OB se ejecuta una sola vez al pasar de STOP a RUN (rearranque completo)?\"\n    opciones: [\"OB100\", \"OB1\", \"OB121\", \"OB10\"]\n    correcta: 0\n    explicacion: \"OB100 sirve para inicializar. Después empieza el ciclo de OB1.\"\n  - id: M13\n    pregunta: \"Si el programa tiene «= A 4.0» en dos segmentos distintos, ¿qué valor llega a la salida?\"\n    opciones: [\"El de la última asignación ejecutada\", \"El O de las dos\", \"El Y de las dos\", \"La CPU da error\"]\n    correcta: 0\n    explicacion: \"La PAA se escribe al final del ciclo, así que la última asignación sobrescribe a las anteriores.\"\n  - id: M14\n    pregunta: \"¿Qué diferencia a un FB de un FC?\"\n    opciones: [\"El FB tiene memoria propia (DB de instancia)\", \"El FC solo se puede llamar desde OB1\", \"El FB no admite parámetros\", \"No hay diferencia\"]\n    correcta: 0\n    explicacion: \"Las variables estáticas (STAT) del FB se guardan en su DB de instancia y conservan el valor entre llamadas.\"\n  - id: M15\n    pregunta: \"¿Qué valor da una entrada analógica al final de su rango nominal (por ejemplo, 10 V o 20 mA)?\"\n    opciones: [\"27648\", \"32767\", \"4095\", \"65535\"]\n    correcta: 0\n    explicacion: \"El rango nominal va de 0 a 27648. Por encima está el rango de rebase, y 32767 indica desbordamiento o rotura de hilo.\"\n  - id: M16\n    pregunta: \"¿Cuántos niveles de paréntesis anidados admite AWL?\"\n    opciones: [\"7\", \"8\", \"16\", \"Ilimitados\"]\n    correcta: 0\n    explicacion: \"La pila de anidamiento tiene 7 niveles. Si se superan, hay un error y la CPU pasa a STOP.\"\n  - id: M17\n    pregunta: \"Con MW10 = −1, ¿qué contiene ACU1 después de «L MW 10»?\"\n    opciones: [\"DW#16#0000FFFF\", \"DW#16#FFFFFFFF\", \"DW#16#FFFF0000\", \"0\"]\n    correcta: 0\n    explicacion: \"L rellena con ceros la parte alta, sin extender el signo. Para pasarlo a DINT hay que usar ITD.\"\n  - id: M18\n    pregunta: \"¿Qué instrucción AWL equivale a la bobina «(S)» de KOP?\"\n    opciones: [\"S\", \"=\", \"SET\", \"SE\"]\n    correcta: 0\n    explicacion: \"SET pone el RLO a 1, SE arranca un temporizador y = asigna el RLO.\"\n  - id: M19\n    pregunta: \"¿Qué hace la instrucción SET en AWL?\"\n    opciones: [\"Pone el RLO a 1\", \"Pone a 1 el bit indicado\", \"Arranca un temporizador\", \"Pone OS a 1\"]\n    correcta: 0\n    explicacion: \"SET y CLR actúan sobre el RLO y cierran la cadena lógica (/ER = 0).\"\n  - id: M20\n    pregunta: \"¿Qué contiene ACU1 tras «L 17 / L 5 / /I»?\"\n    opciones: [\"El cociente 3 en la parte baja y el resto 2 en la parte alta\", \"3,4 en REAL\", \"Solo el cociente 3\", \"Solo el resto 2\"]\n    correcta: 0\n    explicacion: \"/I deja el cociente en ACU1-L y el resto en ACU1-H. ACU1 = DW#16#00020003.\"\n  - id: M21\n    pregunta: \"En nemotécnica inglesa, ¿cómo se escribe «SE T 1» (retardo a la conexión)?\"\n    opciones: [\"SD T 1\", \"SE T 1\", \"SO T 1\", \"TON T 1\"]\n    correcta: 0\n    explicacion: \"En inglés, SE es el impulso prolongado (en alemán SV). El retardo a la conexión es SD.\"\n  - id: M22\n    pregunta: \"Con MB100 configurado como marca de ciclo, ¿qué bit oscila a 1 Hz?\"\n    opciones: [\"M100.5\", \"M100.0\", \"M100.7\", \"M100.3\"]\n    correcta: 0\n    explicacion: \"Periodos de los bits 0 a 7: 0,1 / 0,2 / 0,4 / 0,5 / 0,8 / 1 / 1,6 / 2 s. El bit 5 tiene un periodo de 1 s.\"\n  - id: M23\n    pregunta: \"¿Cómo quedan RLO y /ER cuando un SPB no salta?\"\n    opciones: [\"RLO = 1 y /ER = 0\", \"Sin cambios\", \"RLO = 0 y /ER = 0\", \"RLO = 0 y /ER = 1\"]\n    correcta: 0\n    explicacion: \"SPB y SPBN siempre dejan RLO = 1 y cierran la cadena, tanto si saltan como si no.\"\n  - id: M24\n    pregunta: \"En KOP, dos contactos en serie equivalen a…\"\n    opciones: [\"Una función Y (AND)\", \"Una función O (OR)\", \"Una O-exclusiva\", \"Un flanco\"]\n    correcta: 0\n    explicacion: \"La corriente solo pasa si conducen los dos. En paralelo es una O.\"\n```"
+    },
+    {
+      "id": "T01",
+      "titulo": "Grupos Y con `O` (caso de la referencia §7.21)",
+      "categoria": "N. Trazas (palabra de estado instrucción a instrucción)",
+      "tipo": "traza",
+      "awl": "      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": {
+        "inicial": {
+          "E0.0": 1,
+          "E0.1": 0,
+          "E0.2": 1,
+          "E0.3": 1
+        },
+        "filas": [
+          {
+            "i": "U E 0.0",
+            "er_antes": 0,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "U E 0.1",
+            "er_antes": 1,
+            "sta": 0,
+            "rlo": 0,
+            "or": 0
+          },
+          {
+            "i": "O",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 0,
+            "or": 0
+          },
+          {
+            "i": "U E 0.2",
+            "er_antes": 0,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "U E 0.3",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "= A 4.0",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          }
+        ]
+      },
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n```\n\n```yaml\ntraza:\n  inicial: {E0.0: 1, E0.1: 0, E0.2: 1, E0.3: 1}\n  filas:\n    - {i: \"U E 0.0\", er_antes: 0, sta: 1, rlo: 1, or: 0}\n    - {i: \"U E 0.1\", er_antes: 1, sta: 0, rlo: 0, or: 0}\n    - {i: \"O\",       er_antes: 1, sta: 1, rlo: 0, or: 0}\n    - {i: \"U E 0.2\", er_antes: 0, sta: 1, rlo: 1, or: 0}\n    - {i: \"U E 0.3\", er_antes: 1, sta: 1, rlo: 1, or: 0}\n    - {i: \"= A 4.0\", er_antes: 1, sta: 1, rlo: 1, or: 0}\n```"
+    },
+    {
+      "id": "T02",
+      "titulo": "Paréntesis negado `UN(`",
+      "categoria": "N. Trazas (palabra de estado instrucción a instrucción)",
+      "tipo": "traza",
+      "awl": "      U     E 0.0\n      UN(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": {
+        "inicial": {
+          "E0.0": 1,
+          "E0.1": 0,
+          "E0.2": 1
+        },
+        "filas": [
+          {
+            "i": "U E 0.0",
+            "er_antes": 0,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "UN(",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "O E 0.1",
+            "er_antes": 0,
+            "sta": 0,
+            "rlo": 0,
+            "or": 0
+          },
+          {
+            "i": "O E 0.2",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": ")",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 0,
+            "or": 0
+          },
+          {
+            "i": "= A 4.0",
+            "er_antes": 1,
+            "sta": 0,
+            "rlo": 0,
+            "or": 0
+          }
+        ]
+      },
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      U     E 0.0\n      UN(\n      O     E 0.1\n      O     E 0.2\n      )\n      =     A 4.0\n```\n\n```yaml\ntraza:\n  inicial: {E0.0: 1, E0.1: 0, E0.2: 1}\n  filas:\n    - {i: \"U E 0.0\", er_antes: 0, sta: 1, rlo: 1, or: 0}\n    - {i: \"UN(\",     er_antes: 1, sta: 1, rlo: 1, or: 0}\n    - {i: \"O E 0.1\", er_antes: 0, sta: 0, rlo: 0, or: 0}\n    - {i: \"O E 0.2\", er_antes: 1, sta: 1, rlo: 1, or: 0}\n    - {i: \")\",       er_antes: 1, sta: 1, rlo: 0, or: 0}\n    - {i: \"= A 4.0\", er_antes: 1, sta: 0, rlo: 0, or: 0}\n```"
+    },
+    {
+      "id": "T03",
+      "titulo": "Bit OR a 1: el resultado ya está decidido",
+      "categoria": "N. Trazas (palabra de estado instrucción a instrucción)",
+      "tipo": "traza",
+      "awl": "      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": {
+        "inicial": {
+          "E0.0": 1,
+          "E0.1": 1,
+          "E0.2": 0,
+          "E0.3": 0
+        },
+        "filas": [
+          {
+            "i": "U E 0.0",
+            "er_antes": 0,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "U E 0.1",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          },
+          {
+            "i": "O",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 1
+          },
+          {
+            "i": "U E 0.2",
+            "er_antes": 0,
+            "sta": 0,
+            "rlo": 1,
+            "or": 1
+          },
+          {
+            "i": "U E 0.3",
+            "er_antes": 1,
+            "sta": 0,
+            "rlo": 1,
+            "or": 1
+          },
+          {
+            "i": "= A 4.0",
+            "er_antes": 1,
+            "sta": 1,
+            "rlo": 1,
+            "or": 0
+          }
+        ]
+      },
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      U     E 0.0\n      U     E 0.1\n      O\n      U     E 0.2\n      U     E 0.3\n      =     A 4.0\n```\n\n```yaml\ntraza:\n  inicial: {E0.0: 1, E0.1: 1, E0.2: 0, E0.3: 0}\n  filas:\n    - {i: \"U E 0.0\", er_antes: 0, sta: 1, rlo: 1, or: 0}\n    - {i: \"U E 0.1\", er_antes: 1, sta: 1, rlo: 1, or: 0}\n    - {i: \"O\",       er_antes: 1, sta: 1, rlo: 1, or: 1}\n    - {i: \"U E 0.2\", er_antes: 0, sta: 0, rlo: 1, or: 1}\n    - {i: \"U E 0.3\", er_antes: 1, sta: 0, rlo: 1, or: 1}\n    - {i: \"= A 4.0\", er_antes: 1, sta: 1, rlo: 1, or: 0}\n```"
+    },
+    {
+      "id": "T04",
+      "titulo": "Acumuladores y comparación",
+      "categoria": "N. Trazas (palabra de estado instrucción a instrucción)",
+      "tipo": "traza",
+      "awl": "      L     MW 30\n      L     MW 32\n      >I\n      =     A 4.0\n",
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": {
+        "inicial": {
+          "MW30": 10,
+          "MW32": 5
+        },
+        "filas": [
+          {
+            "i": "L MW 30",
+            "acu1": 10,
+            "acu2": 0
+          },
+          {
+            "i": "L MW 32",
+            "acu1": 5,
+            "acu2": 10
+          },
+          {
+            "i": ">I",
+            "acu1": 5,
+            "acu2": 10,
+            "rlo": 1,
+            "cc1": 1,
+            "cc0": 0,
+            "er_antes": 0
+          },
+          {
+            "i": "= A 4.0",
+            "rlo": 1,
+            "er_antes": 1
+          }
+        ]
+      },
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      L     MW 30\n      L     MW 32\n      >I\n      =     A 4.0\n```\n\n```yaml\ntraza:\n  inicial: {MW30: 10, MW32: 5}\n  filas:\n    - {i: \"L MW 30\", acu1: 10, acu2: 0}\n    - {i: \"L MW 32\", acu1: 5, acu2: 10}\n    - {i: \">I\",      acu1: 5, acu2: 10, rlo: 1, cc1: 1, cc0: 0, er_antes: 0}\n    - {i: \"= A 4.0\", rlo: 1, er_antes: 1}\n```"
+    },
+    {
+      "id": "T05",
+      "titulo": "Desbordamiento en +I",
+      "categoria": "N. Trazas (palabra de estado instrucción a instrucción)",
+      "tipo": "traza",
+      "awl": "      L     30000\n      L     10000\n      +I\n      T     MW 44\n",
+      "kop_ascii": null,
+      "prueba": null,
+      "traza": {
+        "inicial": {},
+        "filas": [
+          {
+            "i": "L 30000",
+            "acu1_int": 30000,
+            "acu2_int": 0
+          },
+          {
+            "i": "L 10000",
+            "acu1_int": 10000,
+            "acu2_int": 30000
+          },
+          {
+            "i": "+I",
+            "acu1_int": -25536,
+            "acu2_int": 30000,
+            "ov": 1,
+            "os": 1,
+            "cc1": 0,
+            "cc0": 1
+          },
+          {
+            "i": "T MW 44",
+            "acu1_int": -25536,
+            "ov": 1,
+            "os": 1
+          }
+        ]
+      },
+      "cronograma": null,
+      "preguntas": null,
+      "markdown": "```awl\n      L     30000\n      L     10000\n      +I\n      T     MW 44\n```\n\n```yaml\ntraza:\n  inicial: {}\n  filas:\n    - {i: \"L 30000\", acu1_int: 30000, acu2_int: 0}\n    - {i: \"L 10000\", acu1_int: 10000, acu2_int: 30000}\n    - {i: \"+I\",      acu1_int: -25536, acu2_int: 30000, ov: 1, os: 1, cc1: 0, cc0: 1}\n    - {i: \"T MW 44\", acu1_int: -25536, ov: 1, os: 1}\n```"
+    },
+    {
+      "id": "R01",
+      "titulo": "Retardo a la conexión (SE) de 1 s",
+      "categoria": "O. Cronogramas de temporizadores",
+      "tipo": "cronograma",
+      "awl": "      U     E 0.0\n      L     S5T#1S\n      SE    T 1\n      U     T 1\n      =     A 4.0\n",
+      "kop_ascii": " t (×0,5 s)  0123456789012345\n E0.0        _‾‾‾‾‾‾__‾‾‾____\n A4.0        ___‾‾‾‾____‾____\n",
+      "prueba": null,
+      "traza": null,
+      "cronograma": {
+        "paso_ms": 500,
+        "entradas": {
+          "E0.0": "0111111001110000"
+        },
+        "salidas": {
+          "A4.0": "0001111000010000"
+        }
+      },
+      "preguntas": null,
+      "markdown": "```text\n t (×0,5 s)  0123456789012345\n E0.0        _‾‾‾‾‾‾__‾‾‾____\n A4.0        ___‾‾‾‾____‾____\n```\n\n```awl\n      U     E 0.0\n      L     S5T#1S\n      SE    T 1\n      U     T 1\n      =     A 4.0\n```\n\n```yaml\ncronograma:\n  paso_ms: 500\n  entradas: {E0.0: \"0111111001110000\"}\n  salidas:  {A4.0: \"0001111000010000\"}\n```"
+    },
+    {
+      "id": "R02",
+      "titulo": "Retardo a la desconexión (SA) de 1 s",
+      "categoria": "O. Cronogramas de temporizadores",
+      "tipo": "cronograma",
+      "awl": "      U     E 0.0\n      L     S5T#1S\n      SA    T 1\n      U     T 1\n      =     A 4.0\n",
+      "kop_ascii": " t (×0,5 s)  0123456789012345\n E0.0        _‾‾____‾‾‾___‾__\n A4.0        _‾‾‾‾__‾‾‾‾‾_‾‾‾\n",
+      "prueba": null,
+      "traza": null,
+      "cronograma": {
+        "paso_ms": 500,
+        "entradas": {
+          "E0.0": "0110000111000100"
+        },
+        "salidas": {
+          "A4.0": "0111100111110111"
+        }
+      },
+      "preguntas": null,
+      "markdown": "```text\n t (×0,5 s)  0123456789012345\n E0.0        _‾‾____‾‾‾___‾__\n A4.0        _‾‾‾‾__‾‾‾‾‾_‾‾‾\n```\n\n```awl\n      U     E 0.0\n      L     S5T#1S\n      SA    T 1\n      U     T 1\n      =     A 4.0\n```\n\n```yaml\ncronograma:\n  paso_ms: 500\n  entradas: {E0.0: \"0110000111000100\"}\n  salidas:  {A4.0: \"0111100111110111\"}\n```"
+    },
+    {
+      "id": "R03",
+      "titulo": "Impulso (SI) frente a impulso prolongado (SV) de 1 s",
+      "categoria": "O. Cronogramas de temporizadores",
+      "tipo": "cronograma",
+      "awl": "      U     E 0.0\n      L     S5T#1S\n      SI    T 1\n      U     T 1\n      =     A 4.0\n      U     E 0.0\n      L     S5T#1S\n      SV    T 2\n      U     T 2\n      =     A 4.1\n",
+      "kop_ascii": " t (×0,5 s)  0123456789012345\n E0.0        _‾‾‾‾__‾___‾‾___\n A4.0 (SI)   _‾‾____‾___‾‾___\n A4.1 (SV)   _‾‾____‾‾__‾‾___\n",
+      "prueba": null,
+      "traza": null,
+      "cronograma": {
+        "paso_ms": 500,
+        "entradas": {
+          "E0.0": "0111100100011000"
+        },
+        "salidas": {
+          "A4.0": "0110000100011000",
+          "A4.1": "0110000110011000"
+        }
+      },
+      "preguntas": null,
+      "markdown": "```text\n t (×0,5 s)  0123456789012345\n E0.0        _‾‾‾‾__‾___‾‾___\n A4.0 (SI)   _‾‾____‾___‾‾___\n A4.1 (SV)   _‾‾____‾‾__‾‾___\n```\n\n```awl\n      U     E 0.0\n      L     S5T#1S\n      SI    T 1\n      U     T 1\n      =     A 4.0\n      U     E 0.0\n      L     S5T#1S\n      SV    T 2\n      U     T 2\n      =     A 4.1\n```\n\n```yaml\ncronograma:\n  paso_ms: 500\n  entradas: {E0.0: \"0111100100011000\"}\n  salidas:  {A4.0: \"0110000100011000\", A4.1: \"0110000110011000\"}\n```"
+    }
+  ]
+}

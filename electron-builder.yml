@@ -1,0 +1,32 @@
+appId: es.automatizacion.simulador
+productName: Automatizacion
+copyright: "© 2026 Arzath — Práctica de autómatas en KOP y AWL"
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**
+  - electron/**
+  - package.json
+asar: true
+npmRebuild: false
+electronLanguages: [es, en]
+afterPack: scripts/adhoc-sign.cjs
+mac:
+  artifactName: Automatizacion-${version}-arm64-mac.${ext}
+  target:
+    - target: dmg
+      arch: [arm64]
+    - target: zip
+      arch: [arm64]
+  category: public.app-category.education
+  icon: build/icon.icns
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  darkModeSupport: true
+  extendInfo:
+    CFBundleDevelopmentRegion: es
+dmg:
+  title: Automatizacion ${version}
+  artifactName: Automatizacion-${version}-arm64.${ext}
