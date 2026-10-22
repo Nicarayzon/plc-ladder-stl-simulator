@@ -38,9 +38,42 @@ test('arranca en el simulador libre sin los modos de práctica', async () => {
 test('inicio y versión', async () => {
   await goto('inicio');
   const { version } = JSON.parse(fs.readFileSync(path.resolve(HERE, '../../package.json'), 'utf-8'));
-  expect(version).toBe('0.18.0');
+  expect(version).toBe('0.22.0');
   await expect(win.locator('.brand')).toContainText(`v${version}`);
   await expect(win.locator('h1')).toHaveText('Automatizacion');
+});
+
+test('ajustes: el tema se elige con el desplegable propio', async () => {
+  await goto('ajustes');
+  // ningún <select> nativo: con Wine su lista no sale
+  await expect(win.locator('.main select')).toHaveCount(0);
+  const tema = win.locator('button[aria-label="Tema"]');
+  await expect(tema).toHaveText('Como el sistema', { useInnerText: true });
+  const elegir = async (t: string) => { await tema.click(); await win.locator('.menu button', { hasText: t }).click(); await expect(win.locator('.menu')).toHaveCount(0); };
+  await elegir('Claro');
+  expect(await win.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
+  await elegir('Oscuro');
+  expect(await win.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('dark');
+  await elegir('Como el sistema');
+  expect(await win.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBeNull();
+  await expect(tema).toHaveText('Como el sistema', { useInnerText: true });
+});
+
+test('la barra de la izquierda se pliega a iconos y se recuerda', async () => {
+  await goto('simulador');
+  const ancho = async () => (await win.locator('.sidebar').boundingBox())!.width;
+  expect(await ancho()).toBeGreaterThan(150);
+  await win.locator('.sidebar button[aria-label="Ocultar la barra"]').click();
+  expect(await ancho()).toBeLessThan(60);
+  await expect(win.locator('.sidebar .nav-item', { hasText: 'Ajustes' })).toHaveCount(0);
+  await win.locator('.sidebar .nav-item[aria-label="Ajustes"]').click();
+  await expect(win.locator('h1')).toHaveText('Ajustes');
+  await win.reload();
+  await win.waitForTimeout(800);
+  expect(await ancho()).toBeLessThan(60);
+  await win.locator('.sidebar button[aria-label="Mostrar la barra"]').click();
+  expect(await ancho()).toBeGreaterThan(150);
+  await expect(win.locator('.sidebar .nav-item', { hasText: 'Ajustes' })).toHaveCount(1);
 });
 
 test('E12: el ejemplo pasa sus pruebas', async () => {

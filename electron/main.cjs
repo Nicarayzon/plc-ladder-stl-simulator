@@ -1,7 +1,8 @@
 // Proceso principal de Electron: una ventana que carga la app web compilada (dist/).
 // Sin integración de Node en el renderizador; todo el simulador corre en la página.
-const { app, BrowserWindow, shell, Menu } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, net } = require('electron');
 const path = require('node:path');
+const { buscarActualizaciones } = require('./actualizaciones.cjs');
 
 app.setName('Automatizacion');
 // pruebas automáticas: carpeta de datos aparte para no tocar los datos del usuario
@@ -15,11 +16,14 @@ function sendToRenderer(win, script) {
 }
 
 function buildMenu() {
+  // solo se conecta a GitHub al pulsarlo
+  const actualizaciones = { label: 'Buscar actualizaciones…', click: (_m, w) => { buscarActualizaciones({ app, dialog, shell, net }, w || BrowserWindow.getAllWindows()[0]); } };
   const template = [
     ...(isMac ? [{
       label: 'Automatizacion',
       submenu: [
         { role: 'about', label: 'Acerca de Automatizacion' },
+        actualizaciones,
         { type: 'separator' },
         { role: 'hide', label: 'Ocultar Automatizacion' },
         { role: 'hideOthers', label: 'Ocultar otros' },
@@ -59,6 +63,8 @@ function buildMenu() {
         ...(isMac ? [{ type: 'separator' }, { role: 'front', label: 'Traer todo al frente' }] : [{ role: 'close', label: 'Cerrar' }]),
       ],
     },
+    // en Windows no hay menú con el nombre de la app: va en Ayuda
+    ...(isMac ? [] : [{ label: 'Ayuda', submenu: [actualizaciones] }]),
   ];
   return Menu.buildFromTemplate(template);
 }

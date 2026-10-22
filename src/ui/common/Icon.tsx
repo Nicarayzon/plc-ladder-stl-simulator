@@ -46,6 +46,24 @@ const P: Record<string, string> = {
   ladder: 'M4 3v18M20 3v18M4 8h4M10 5v6M14 5v6M14 8h6M4 16h4M10 13v6M14 13v6M10 13l4 6M14 16h6',
   bolt: 'M13 2 3 14h9l-1 8 10-12h-9z',
   graduation: 'M22 10 12 5 2 10l10 5zM6 12v5c3 2 9 2 12 0v-5',
+  // tabla de variables (ventana «Var - VAT_n»)
+  enchufe: 'M2 12h5M7 8h5a4 4 0 0 1 0 8H7zM16 10h6M16 14h6',
+  nuevo: 'M14 3H5v18h14V8zM14 3v5h5',
+  abrir: 'M3 19V5h6l2 2h8v3M3 19l3-9h15l-3 9z',
+  imprimir: 'M6 9V3h12v6M6 17H4v-8h16v8h-2M6 13h12v8H6z',
+  cortar: 'M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12',
+  pegar: 'M9 3h6v4H9zM9 5H5v16h14V5h-4',
+  deshacer: 'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-4',
+  rehacer: 'M15 14l5-5-5-5M20 9H9a5 5 0 0 0 0 10h4',
+  enlace: 'M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',
+  desenlace: 'M18.8 13.2 20 12a5 5 0 0 0-7-7l-1.2 1.2M5.2 10.8 4 12a5 5 0 0 0 7 7l1.2-1.2M8 2v3M2 8h3M16 22v-3M22 16h-3',
+  ayudaCtx: 'M3 3l5 14 2-5 5-2zM15 4a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.5M17.5 12h.01',
+  disparo: 'M11 19C6 19 2 16 2 12s4-7 10-7 10 3 10 7M14 22l1-3 5-5 2 2-5 5z',
+  gafas: 'M6 18a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM18 18a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM10 13.5a2 2 0 0 1 4 0M2.5 13 4 6h2M21.5 13 20 6h-2',
+  gafas1: 'M5 14a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM13 14a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 11a1 1 0 0 1 2 0M19 16l2-1.5V22',
+  rayo: 'M3 19l5-7 4 3 6-9M14 6h4v4',
+  rayo1: 'M2 16l4-5 3 2 5-7M11 6h3v3M19 16l2-1.5V22',
+  forzado: 'M5 20 11 4M10 20l6-16M15 20l6-16',
 };
 
 export function Icon({ name, size = 16, stroke = 1.8, className, title }: { name: keyof typeof P | string; size?: number; stroke?: number; className?: string; title?: string }) {

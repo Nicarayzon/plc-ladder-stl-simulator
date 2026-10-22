@@ -109,7 +109,8 @@ export function useTeclasEntradas(sim: SimController, activo: boolean) {
       return m ? +m[1] - 1 : -1;
     };
     const kd = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || isEditingTarget(e.target)) return;
+      // defaultPrevented: la tecla ya la ha usado otro (por ejemplo, empezar a escribir en una celda de la tabla de variables)
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isEditingTarget(e.target)) return;
       const n = num(e);
       if (n < 0) return;
       e.preventDefault();

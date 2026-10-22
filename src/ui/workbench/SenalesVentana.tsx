@@ -3,81 +3,24 @@
 // mismo simulador, así que no hay que copiar datos entre ventanas.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { LOOP_HZ, type SimController } from '../../sim/SimController';
+import type { SimController } from '../../sim/SimController';
 import type { SignalView } from '../../sim/analyzer';
 import { AnalyzerPanel } from './AnalyzerPanel';
 import { CycleStatus } from './Toolbar';
 import { useSimTick } from './useSim';
 import { Icon } from '../common/Icon';
 import { toast } from '../common/ui';
+import { guardarGeom, leerGeom, prepararDocumento, useBombeo } from './ventanaAparte';
 
 const GEOM_KEY = 'automatizacion-senales-ventana';
 const NOMBRE = 'senales';
+const TITULO = 'Señales E/S — Automatizacion';
 
 export interface SenalesVentana {
   /** Ventana aparte abierta (null = las señales van abajo, en la ventana principal) */
   win: Window | null;
   abrir: () => void;
   cerrar: () => void;
-}
-
-interface Geom { x: number; y: number; w: number; h: number }
-
-function leerGeom(): Geom | null {
-  try {
-    const g = JSON.parse(localStorage.getItem(GEOM_KEY) ?? 'null') as Geom | null;
-    return g && [g.x, g.y, g.w, g.h].every(Number.isFinite) ? g : null;
-  } catch {
-    return null;
-  }
-}
-
-function guardarGeom(w: Window) {
-  try {
-    if (w.closed) return;
-    localStorage.setItem(GEOM_KEY, JSON.stringify({ x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight }));
-  } catch { /* sin almacenamiento */ }
-}
-
-/** Estilos, tema y teclado de la ventana principal en la nueva. */
-function prepararDocumento(w: Window): () => void {
-  const doc = w.document;
-  doc.title = 'Señales E/S — Automatizacion';
-  doc.documentElement.lang = 'es';
-  for (const n of document.head.querySelectorAll('style, link[rel="stylesheet"]')) {
-    if (n instanceof HTMLLinkElement) {
-      const l = doc.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = n.href; // dirección completa: la ventana nueva es about:blank
-      doc.head.appendChild(l);
-    } else {
-      const st = doc.createElement('style');
-      st.textContent = n.textContent;
-      doc.head.appendChild(st);
-    }
-  }
-  const root = doc.createElement('div');
-  root.id = 'senales-root';
-  doc.body.appendChild(root);
-  // tema claro/oscuro: el mismo atributo que la principal, también si cambia después
-  const copiarTema = () => {
-    const t = document.documentElement.getAttribute('data-theme');
-    if (t) doc.documentElement.setAttribute('data-theme', t);
-    else doc.documentElement.removeAttribute('data-theme');
-  };
-  copiarTema();
-  const mo = new MutationObserver(copiarTema);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  // teclas 1–8 (y Mayús) con la ventana de señales delante: las atiende la principal
-  const reenviar = (e: KeyboardEvent) => {
-    const t = e.target as HTMLElement | null;
-    if (t && (['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || t.isContentEditable)) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    window.dispatchEvent(new KeyboardEvent(e.type, { key: e.key, code: e.code, shiftKey: e.shiftKey, repeat: e.repeat }));
-  };
-  w.addEventListener('keydown', reenviar);
-  w.addEventListener('keyup', reenviar);
-  return () => mo.disconnect();
 }
 
 /** Abre y cierra la ventana de señales. Vive en la pantalla del simulador: sobrevive al cambiar de proyecto. */
@@ -88,7 +31,7 @@ export function useSenalesVentana(): SenalesVentana {
   const cerrar = useCallback(() => {
     setWin((w) => {
       if (w && !w.closed) {
-        guardarGeom(w);
+        guardarGeom(GEOM_KEY, w);
         w.close();
       }
       return null;
@@ -96,7 +39,7 @@ export function useSenalesVentana(): SenalesVentana {
   }, []);
 
   const abrir = useCallback(() => {
-    const g = leerGeom();
+    const g = leerGeom(GEOM_KEY);
     const feats = g ? `left=${g.x},top=${g.y},width=${g.w},height=${g.h}` : 'width=1100,height=460';
     const w = window.open('', NOMBRE, feats);
     if (!w) {
@@ -105,7 +48,7 @@ export function useSenalesVentana(): SenalesVentana {
     }
     if (!w.document.getElementById('senales-root')) {
       limpiar.current?.();
-      limpiar.current = prepararDocumento(w);
+      limpiar.current = prepararDocumento(w, TITULO, 'senales-root');
     }
     w.focus();
     setWin(w);
@@ -114,14 +57,14 @@ export function useSenalesVentana(): SenalesVentana {
   // la ventana se cierra con su botón rojo: las señales vuelven a la principal
   useEffect(() => {
     if (!win) return;
-    const onHide = () => guardarGeom(win);
+    const onHide = () => guardarGeom(GEOM_KEY, win);
     win.addEventListener('pagehide', onHide);
     const iv = window.setInterval(() => {
       if (win.closed) {
         limpiar.current?.();
         limpiar.current = null;
         setWin(null);
-      } else guardarGeom(win);
+      } else guardarGeom(GEOM_KEY, win);
     }, 500);
     return () => {
       clearInterval(iv);
@@ -133,7 +76,7 @@ export function useSenalesVentana(): SenalesVentana {
   const winRef = useRef(win);
   winRef.current = win;
   useEffect(() => {
-    const bye = () => { const w = winRef.current; if (w && !w.closed) { guardarGeom(w); w.close(); } };
+    const bye = () => { const w = winRef.current; if (w && !w.closed) { guardarGeom(GEOM_KEY, w); w.close(); } };
     window.addEventListener('beforeunload', bye);
     return () => {
       window.removeEventListener('beforeunload', bye);
@@ -169,22 +112,10 @@ export function SenalesFuera({ sim, win, nombre, onSignalsChange, onTraer }: {
   const root = win.document.getElementById('senales-root');
 
   useEffect(() => {
-    win.document.title = nombre ? `Señales E/S — ${nombre}` : 'Señales E/S — Automatizacion';
+    win.document.title = nombre ? `Señales E/S — ${nombre}` : TITULO;
   }, [win, nombre]);
 
-  // si la ventana principal está minimizada u oculta su bucle se para: entonces es esta ventana
-  // (con sus propios temporizadores) la que hace avanzar la simulación
-  useEffect(() => {
-    let t: number | undefined;
-    const f = () => {
-      sim.pump();
-      t = win.setTimeout(f, sim.playing ? 1000 / LOOP_HZ : 200);
-    };
-    t = win.setTimeout(f, 200);
-    return () => {
-      if (!win.closed && t !== undefined) win.clearTimeout(t);
-    };
-  }, [sim, win]);
+  useBombeo(sim, win);
 
   if (!root) return null;
   return createPortal(

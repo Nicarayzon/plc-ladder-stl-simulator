@@ -25,10 +25,11 @@ import { useSettings } from '../../store/settings';
 import { lintProgram, marcasNuncaEscritas } from '../../core/lint';
 import { translateAwl } from '../../core/translate';
 import { SenalesFuera, type SenalesVentana } from './SenalesVentana';
+import { VatFlotante, VatVista, useTablasVat } from './VatVentana';
 import type { SignalView } from '../../sim/analyzer';
 
 type RightTab = 'io' | 'vat' | 'tz' | 'cpu' | 'sym';
-/** `vat:VAT_1`: una pestaña por cada tabla de variables del proyecto */
+/** `vat:VAT_1`: tabla de variables acoplada abajo */
 type BottomTab = 'an' | 'msg' | 'awl' | 'trace' | `vat:${string}`;
 
 export interface WorkbenchProps {
@@ -56,8 +57,10 @@ export interface WorkbenchProps {
   hardware?: boolean;
   /** Botón «Señales E/S»: el panel de abajo se abre a mano y las señales pueden ir a otra ventana */
   senales?: SenalesVentana & { nombre?: string };
-  /** Tablas de variables del proyecto (`wbState.vats`) en el panel de abajo, en lugar de las pestañas «Variables» y «T / Z» */
-  vatAbajo?: boolean;
+  /** Tablas de variables del proyecto (`wbState.vats`) en una ventana flotante dentro de la app o abajo, en lugar de las pestañas «Variables» y «T / Z» */
+  vatVentanas?: boolean;
+  /** Nombre del proyecto, para el título de las tablas de variables */
+  proyecto?: string;
   /** Abrir una tabla de variables desde el explorador (`n` cambia en cada petición) */
   vatPedida?: { nombre: string; n: number } | null;
   onVatAtendida?: () => void;
@@ -75,14 +78,11 @@ export function Workbench(props: WorkbenchProps) {
   const [blockLocal, setBlockLocal] = useState('OB1');
   const block = props.block ?? blockLocal;
   const setBlock = (b: string) => { setBlockLocal(b); props.onBlock?.(b); };
-  const vatAbajo = !!props.vatAbajo;
+  const vatEnVentana = !!props.vatVentanas;
   const [rightSel, setRight] = useState<RightTab>(props.initialRight ?? 'io');
-  const right: RightTab = vatAbajo && (rightSel === 'vat' || rightSel === 'tz') ? 'io' : rightSel;
+  const right: RightTab = vatEnVentana && (rightSel === 'vat' || rightSel === 'tz') ? 'io' : rightSel;
   const [bottomSel, setBottom] = useState<BottomTab>(props.initialBottom ?? 'an');
-  const vats = vatAbajo ? wbState.vats ?? [] : [];
-  const vatSel = bottomSel.startsWith('vat:') ? vats.find((v) => `vat:${v.nombre}` === bottomSel) : undefined;
-  // si se borra o se renombra la tabla abierta, vuelve a las señales
-  const bottom: BottomTab = bottomSel.startsWith('vat:') && !vatSel ? 'an' : bottomSel;
+  const vats = vatEnVentana ? wbState.vats ?? [] : [];
   const setFilas = (nombre: string, filas: VatFila[]) => onWbState({ ...wbState, vats: vats.map((v) => (v.nombre === nombre ? { ...v, filas } : v)) });
   // con «Señales E/S» el panel de abajo empieza cerrado (solo las pestañas) y se recuerda
   const senales = props.senales;
@@ -90,10 +90,14 @@ export function Workbench(props: WorkbenchProps) {
   const [bottomOpen, setBottomOpenState] = useState(() => (senales ? leerBool(openKey, false) : true));
   const setBottomOpen = (v: boolean) => { setBottomOpenState(v); if (senales) guardarBool(openKey, v); };
   const showBottom = (t: BottomTab) => { setBottom(t); setBottomOpen(true); };
+  const tablas = useTablasVat(sim, vats.map((v) => v.nombre), (nombre) => showBottom(`vat:${nombre}`));
+  const vatsAbajo = tablas.abiertas.filter((a) => a.modo === 'abajo');
+  // una tabla que ya no está abajo (cerrada o pasada a ventana): vuelven las señales
+  const bottom: BottomTab = bottomSel.startsWith('vat:') && !vatsAbajo.some((a) => `vat:${a.nombre}` === bottomSel) ? 'an' : bottomSel;
   const pedida = props.vatPedida;
   useEffect(() => {
     if (!pedida) return;
-    showBottom(`vat:${pedida.nombre}`);
+    tablas.abrir(pedida.nombre);
     props.onVatAtendida?.();
   }, [pedida?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   useTeclasEntradas(sim, props.ioVariant === 'switches');
@@ -322,7 +326,7 @@ export function Workbench(props: WorkbenchProps) {
         <aside className="wb-right" style={{ width: rightW }}>
           <Tabs<RightTab> value={right} onChange={setRight} tabs={[
             { id: 'io', label: 'E/S' },
-            ...(vatAbajo ? [] : [{ id: 'vat' as const, label: 'Variables' }, { id: 'tz' as const, label: 'T / Z' }]),
+            ...(vatEnVentana ? [] : [{ id: 'vat' as const, label: 'Variables' }, { id: 'tz' as const, label: 'T / Z' }]),
             { id: 'cpu', label: 'CPU' }, { id: 'sym', label: 'Símbolos' },
           ]} />
           <div className="wb-right-body">
@@ -340,7 +344,7 @@ export function Workbench(props: WorkbenchProps) {
       <div className={`wb-bottom ${bottomOpen ? '' : 'collapsed'}`} style={bottomOpen ? { height: bottomH } : undefined}>
         <Tabs<BottomTab> value={bottom} onChange={(t) => { if (t === 'an' && senales && !senalesFuera) senalesPorDefecto(); showBottom(t); }} tabs={[
           { id: 'an', label: senales ? <><Icon name="wave" size={13} />Señales E/S{senalesFuera ? <span className="faint"> (en otra ventana)</span> : null}</> : 'Analizador lógico' },
-          ...vats.map((v) => ({ id: `vat:${v.nombre}` as const, label: <><Icon name="table" size={13} />{v.nombre}</> })),
+          ...vatsAbajo.map((a) => ({ id: `vat:${a.nombre}` as const, label: <><Icon name="table" size={13} />{a.nombre}</> })),
           { id: 'msg', label: <>Mensajes {sim.compiled.errors.length > 0 ? <span className="badge err">{sim.compiled.errors.length}</span> : warnings.length > 0 ? <span className="badge warn">{warnings.length}</span> : null}</> },
           { id: 'awl', label: 'AWL generado' },
           { id: 'trace', label: 'Traza del ciclo' },
@@ -364,15 +368,28 @@ export function Workbench(props: WorkbenchProps) {
             {bottom === 'msg' && <MessagesPanel sim={sim} warnings={warnings} onGoto={gotoSeg} />}
             {bottom === 'awl' && <GeneratedAwl sim={sim} programa={programa} block={block} />}
             {bottom === 'trace' && <TracePanel sim={sim} />}
-            {vatSel && bottom === `vat:${vatSel.nombre}` && (
-              <div className="vat-abajo">
-                <VatPanel key={vatSel.nombre} sim={sim} rows={vatSel.filas} onRows={(f) => setFilas(vatSel.nombre, f)} symbols={sim.compiled.symbols} symByAddr={symByAddr} valorTZ />
-              </div>
-            )}
+            {vatsAbajo.map((a) => {
+              const t = vats.find((v) => v.nombre === a.nombre);
+              return t && bottom === `vat:${a.nombre}` && (
+                <VatVista key={a.nombre} sim={sim} ses={tablas.sesion(a.nombre)} modo="abajo" nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
+                  symbols={sim.compiled.symbols} symByAddr={symByAddr} onCerrar={() => tablas.cerrar(a.nombre)} onFlotante={() => tablas.cambiarModo(a.nombre, 'flotante')} />
+              );
+            })}
           </div>
         )}
       </div>
       {senalesFuera && senales && <SenalesFuera sim={sim} win={senalesFuera} nombre={senales.nombre} onSignalsChange={onSignals} onTraer={sacarSenales} />}
+      {tablas.abiertas.filter((a) => a.modo === 'flotante').map((a) => {
+        const t = vats.find((v) => v.nombre === a.nombre);
+        const ses = tablas.sesion(a.nombre);
+        return t && (
+          <VatFlotante key={a.nombre} nombre={a.nombre} ses={ses} z={30 + Math.max(0, tablas.orden.indexOf(a.nombre))}
+            onFrente={() => tablas.frente(a.nombre)} onAcoplar={() => tablas.cambiarModo(a.nombre, 'abajo')} onCerrar={() => tablas.cerrar(a.nombre)}>
+            <VatVista sim={sim} ses={ses} modo="flotante" nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
+              symbols={sim.compiled.symbols} symByAddr={symByAddr} onCerrar={() => tablas.cerrar(a.nombre)} />
+          </VatFlotante>
+        );
+      })}
       {hwOpen && <HardwareDialog sim={sim} programa={programa} onChange={(p) => change(p)} onClose={() => setHwOpen(false)} />}
       {blockMenu && <ContextMenu x={blockMenu.x} y={blockMenu.y} items={blockItems(blockMenu.name)} onClose={() => setBlockMenu(null)} />}
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useHashRoute, go } from './ui/router';
 import { Icon } from './ui/common/Icon';
 import { useSettings } from './store/settings';
@@ -37,6 +37,18 @@ const NAV: NavDef[] = [
   { id: 'ajustes', label: 'Ajustes', icon: 'settings', group: 'Aplicación' },
   { id: 'ayuda', label: 'Ayuda', icon: 'info', group: 'Aplicación' },
 ];
+
+const MINI_KEY = 'automatizacion-barra-mini';
+
+/** Barra de la izquierda plegada (solo iconos), como el explorador de proyectos: se recuerda */
+function useBarraMini(): [boolean, (v: boolean) => void] {
+  const [mini, setMini] = useState(() => { try { return localStorage.getItem(MINI_KEY) === '1'; } catch { return false; } });
+  const poner = (v: boolean) => {
+    setMini(v);
+    try { localStorage.setItem(MINI_KEY, v ? '1' : '0'); } catch { /* sin almacenamiento */ }
+  };
+  return [mini, poner];
+}
 
 function useTheme() {
   const theme = useSettings((s) => s.theme);
@@ -89,21 +101,25 @@ export function App() {
   let lastGroup: string | undefined;
   const bloqueada = !PRACTICA_ACTIVA && (RUTAS_PRACTICA.has(top) || (top === 'ejercicio' && !!route[1] && !route[1].startsWith('E')));
   const render = bloqueada ? () => <Desactivado /> : screens[top];
+  const [mini, setMini] = useBarraMini();
   return (
-    <div className="shell">
+    <div className={`shell${mini ? ' mini' : ''}`}>
       <nav className="sidebar" aria-label="Navegación principal">
-        <div className="brand">
+        <div className="brand" title={mini ? `Automatizacion v${APP_VERSION}` : undefined}>
           <img src={iconUrl} alt="" />
-          <div><b>Automatizacion</b><span>PLC · KOP y AWL · v{APP_VERSION}</span></div>
+          {!mini && <div className="grow"><b>Automatizacion</b><span>PLC · KOP y AWL · v{APP_VERSION}</span></div>}
+          {!mini && <button className="btn small ghost icon" onClick={() => setMini(true)} title="Ocultar la barra (solo iconos)" aria-label="Ocultar la barra"><Icon name="left" size={14} /></button>}
         </div>
+        {mini && <button className="btn small ghost icon barra-mostrar" onClick={() => setMini(false)} title="Mostrar la barra" aria-label="Mostrar la barra"><Icon name="right" size={14} /></button>}
         {NAV_VISIBLE.map((n) => {
           const head = n.group && n.group !== lastGroup ? <div className="nav-group" key={`g${n.group}`}>{n.group}</div> : null;
           lastGroup = n.group;
           return (
             <div key={n.id}>
               {head}
-              <button className={`nav-item ${active === n.id ? 'active' : ''}`} onClick={() => go(n.id)} aria-current={active === n.id ? 'page' : undefined}>
-                <Icon name={n.icon} />{n.label}
+              <button className={`nav-item ${active === n.id ? 'active' : ''}`} onClick={() => go(n.id)} aria-current={active === n.id ? 'page' : undefined}
+                title={mini ? n.label : undefined} aria-label={mini ? n.label : undefined}>
+                <Icon name={n.icon} />{!mini && n.label}
                 {n.id === 'progreso' && pend > 0 && <span className="badge err" title="Ejercicios para repasar hoy">{pend}</span>}
               </button>
             </div>

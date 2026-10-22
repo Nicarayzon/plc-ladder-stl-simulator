@@ -58,6 +58,20 @@ test('señales E/S: botón, ventana aparte, teclas y simulación con la principa
   await hija.locator('input[aria-label="Señal nueva"]').fill('M 0.5');
   await hija.locator('button', { hasText: 'Señal' }).click();
   await expect(hija.locator('.an-sig .nm')).toHaveText(['E 124.0', 'A 124.0', 'A 124.7', 'M 0.5']);
+  // el desplegable «Disparo» abre su menú en esta ventana y se cierra con un clic fuera de él
+  const disparo = hija.locator('button[aria-label="Disparo"]');
+  await expect(hija.locator('select')).toHaveCount(0);
+  await disparo.click();
+  await expect(hija.locator('.menu')).toHaveCount(1);
+  await expect(win.locator('.menu')).toHaveCount(0);
+  await hija.locator('.senales-head').click({ position: { x: 4, y: 4 } });
+  await expect(hija.locator('.menu')).toHaveCount(0);
+  await disparo.click();
+  await hija.locator('.menu button', { hasText: 'Pausar si E 124.0 ↑' }).click();
+  await expect(disparo).toHaveText('Pausar si E 124.0 ↑', { useInnerText: true });
+  await disparo.click();
+  await hija.locator('.menu button', { hasText: 'Sin disparo' }).click();
+  await expect(disparo).toHaveText('Sin disparo', { useInnerText: true });
   // teclas 1–8 con la ventana de señales delante → entradas de la principal
   const on0 = await win.locator('.sw.on', { hasText: '124.0' }).count();
   await hija.locator('canvas').click();

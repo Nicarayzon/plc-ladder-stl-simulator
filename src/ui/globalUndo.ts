@@ -18,6 +18,12 @@ export function installGlobalUndo() {
       document.execCommand(isRedo ? 'redo' : 'undo');
       return;
     }
+    // tabla de variables con el foco: deshace en la tabla, no en el programa
+    const vat = ae?.closest('.vatw');
+    if (vat) {
+      vat.dispatchEvent(new Event(isRedo ? 'vat-rehacer' : 'vat-deshacer'));
+      return;
+    }
     (isRedo ? w.__kopRedo : w.__kopUndo)?.();
   };
   w.__appUndo = () => run(false);

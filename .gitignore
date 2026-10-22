@@ -49,6 +49,10 @@ DESARROLLO.md
 CLAUDE.md
 .claude/
 
+# Referencias locales que no se publican
+docs/ventana_tabla_variables.png
+docs/Especificaci*n recrear la ventana VAT*.md
+
 # Sistema y editores
 .DS_Store
 .vscode/

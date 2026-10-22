@@ -47,13 +47,14 @@ export function fmtValue(raw: number, size: 0 | 1 | 2 | 4, f: Formato): string {
   }
 }
 
-export function fmtReal(x: number): string {
+/** `cifras`: cifras significativas (7 por defecto; la ventana de la tabla de variables usa 6) */
+export function fmtReal(x: number, cifras = 7): string {
   if (Number.isNaN(x)) return 'NaN';
   if (!Number.isFinite(x)) return x > 0 ? '+inf' : '-inf';
   if (x === 0) return '0.0';
   const a = Math.abs(x);
-  if (a >= 1e7 || a < 1e-4) return x.toExponential(6).replace(/e\+?/, 'e+').replace('e+-', 'e-');
-  const s = parseFloat(x.toPrecision(7)).toString();
+  if (a >= 1e7 || a < 1e-4) return x.toExponential(cifras - 1).replace(/e\+?/, 'e+').replace('e+-', 'e-');
+  const s = parseFloat(x.toPrecision(cifras)).toString();
   return s.includes('.') ? s : `${s}.0`;
 }
 

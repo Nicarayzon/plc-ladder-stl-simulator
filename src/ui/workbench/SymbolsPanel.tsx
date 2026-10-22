@@ -1,7 +1,9 @@
 import type { Simbolo } from '../../core/program';
 import { Icon } from '../common/Icon';
+import { Desplegable } from '../common/ui';
 
 const TIPOS = ['BOOL', 'BYTE', 'WORD', 'INT', 'DWORD', 'DINT', 'REAL', 'S5TIME', 'TIMER', 'COUNTER'];
+const OPCIONES_TIPO = TIPOS.map((t) => ({ value: t, label: t }));
 
 function guessTipo(dir: string): string {
   const d = dir.trim().toUpperCase();
@@ -27,9 +29,7 @@ export function SymbolsPanel({ simbolos, onChange, errors, readOnly }: { simbolo
               <td><input className="input mono" style={{ height: 24, width: 86 }} value={s.dir} disabled={readOnly}
                 onChange={(e) => upd(i, { dir: e.target.value, tipo: s.tipo && s.tipo !== guessTipo(s.dir) ? s.tipo : guessTipo(e.target.value) })} aria-label="Dirección" /></td>
               <td>
-                <select className="input" style={{ height: 24, padding: '0 4px' }} value={s.tipo} disabled={readOnly} onChange={(e) => upd(i, { tipo: e.target.value })} aria-label="Tipo">
-                  {TIPOS.map((t) => <option key={t}>{t}</option>)}
-                </select>
+                <Desplegable style={{ height: 24, padding: '0 6px' }} value={s.tipo} options={OPCIONES_TIPO} disabled={readOnly} onChange={(tipo) => upd(i, { tipo })} aria-label="Tipo" />
               </td>
               <td><input className="input" style={{ height: 24, width: '100%' }} value={s.comentario ?? ''} disabled={readOnly} onChange={(e) => upd(i, { comentario: e.target.value })} aria-label="Comentario" /></td>
               <td>{!readOnly && <button className="btn small ghost icon" onClick={() => onChange(simbolos.filter((_, j) => j !== i))} aria-label="Quitar símbolo"><Icon name="x" size={13} /></button>}</td>

@@ -11,7 +11,7 @@ const AYUDA = `# Ayuda
 - **Errores de ejecución** (BCD no válido, acceso fuera de rango, bucle infinito…): la CPU pasa a STOP, se enciende **SF** y el mensaje indica la línea.
 - **Observar**: en AWL se ve RLO, STA, ACU1 y ACU2 tras cada línea ejecutada en el último ciclo (las líneas atenuadas no se ejecutaron, por ejemplo por un salto; «×n» indica que se ejecutó varias veces). En KOP, el cable verde y grueso tiene corriente, el azul discontinuo no, y el gris no se ejecutó.
 - **Puntos de parada**: clic en el margen izquierdo de una línea AWL, o en el punto del encabezado de un segmento KOP. La CPU se para *antes* de esa instrucción.
-- **Tabla de variables**: «Modificar» escribe una vez (las entradas se escriben en la periferia, así que se mantienen); «Forzar» lo reaplica en cada ciclo y enciende **FRCE**.
+- **Tabla de variables** (clic derecho en OB1 → Insertar nuevo objeto → Tabla de variables): se abre en una ventana «Var - VAT_1» dentro de la app, que se queda encima aunque sigas escribiendo código (se mueve arrastrando su título y se minimiza a la barra de título), o abajo, junto a **Señales E/S**: el botón ↓ de su título la acopla abajo y el botón ⧉ de abajo la vuelve a sacar. Las **lentes** (Observar variable, Ctrl+F7) abren la tabla y leen los valores cada medio segundo; otro clic pausa la lectura. En «Valor de forzado» se escribe el valor en el formato de la fila: **Activar valores de forzado** lo escribe una vez (las entradas se escriben en la periferia, así que se mantienen) y **Forzar variable** (Ctrl+F9) lo mantiene en cada ciclo mientras está pulsado y enciende **FRCE**.
 - **Analizador lógico**: añade señales (bits, palabras, \`T 1\`, \`T 1:VALOR\`, \`Z 1:VALOR\`, \`MD 4:REAL\`). Clic = cursor A, Mayús + clic = cursor B (se muestra Δt), rueda = zoom, arrastrar = desplazar. Se puede pausar automáticamente con un disparo y exportar a CSV o PNG.
 
 ## Proyectos (simulador libre)
@@ -95,6 +95,10 @@ Donde la CPU real no está definida o el detalle no aporta nada al examen, el si
 ## Copias de seguridad
 
 Todo se guarda en este ordenador. En **Progreso** puedes exportar una copia completa (progreso, programas y ajustes) e importarla en otro equipo. En el **Simulador libre** puedes exportar cada programa como proyecto (.json) o como fuente AWL (.awl, el formato de texto con \`ORGANIZATION_BLOCK\` y \`FUNCTION\`), e importar fuentes AWL con ese formato.
+
+## Actualizaciones
+
+En el menú **Automatizacion ▸ Buscar actualizaciones…** (en Windows, **Ayuda ▸ Buscar actualizaciones…**) la app compara su versión con la última publicada en GitHub. Solo se conecta cuando lo pides. Si hay una nueva, **Actualizar** abre su página en el navegador: descarga el instalador de tu sistema y ejecútalo para reemplazar la versión anterior (en macOS, sal de la app, abre el .dmg y arrastra Automatizacion a Aplicaciones eligiendo «Reemplazar»). Tus proyectos se conservan.
 
 ## Abrir la aplicación en macOS
 
