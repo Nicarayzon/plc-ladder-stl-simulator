@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador de PLC gratis para aprender KOP (Ladder) y AWL (STL)</title>
+  <meta name="description" content="Simulador de PLC gratuito para aprender a programar autómatas en KOP (Ladder) y AWL (STL), con teoría y 31 ejemplos resueltos. Para Windows, macOS y Linux.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Simulador de PLC gratis para aprender KOP (Ladder) y AWL (STL)">
+  <meta property="og:description" content="Aprende a programar autómatas con un simulador de PLC en tu ordenador: KOP, AWL, ciclo de scan, temporizadores y contadores. Gratis y de código abierto.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta property="og:image:alt" content="El simulador de PLC Automatizacion con un programa AWL en RUN">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Automatizacion",
+    "alternateName": "Simulador de PLC en KOP y AWL",
+    "description": "Simulador de autómatas programables (PLC) para aprender a programar en KOP (esquema de contactos, Ladder) y AWL (lista de instrucciones, STL), con teoría, ejemplos resueltos, temporizadores, contadores y analizador lógico.",
+    "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/",
+    "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
+    "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
+    "applicationCategory": "EducationalApplication",
+    "applicationSubCategory": "Simulador de PLC",
+    "operatingSystem": "Windows 10, Windows 11, macOS (Apple Silicon), Linux (Wine)",
+    "inLanguage": "es",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+    "author": { "@type": "Person", "name": "Arzath" },
+    "keywords": "simulador PLC, simulador de autómatas, programación de autómatas, KOP, AWL, Ladder, STL, esquema de contactos, lista de instrucciones, automatización industrial"
+  }
+  </script>
+  <link rel="stylesheet" href="estilos.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="web.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-portatil" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19h20" /></symbol>
+    <symbol id="i-pantalla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M9 20h6M12 16v4" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-birrete" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Z" /><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6" /></symbol>
+    <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4" /></symbol>
+    <symbol id="i-pizarra" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="m8 20 4-4 4 4M7 9h6m-6 3h10" /></symbol>
+    <symbol id="i-libro" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Zm0 15A2.5 2.5 0 0 0 6.5 23H20v-5" /></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="#inicio" aria-label="Automatizacion, inicio">
+        <img src="favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Secciones">
+        <a href="#funciones">Funciones</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#usos">Usos</a>
+        <a href="#preguntas">Preguntas</a>
+        <a href="#sobre-mi">Sobre mí</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <!-- ───────── Portada: la app y, debajo, las descargas ───────── -->
+    <section class="portada">
+      <div class="contenedor portada-texto">
+        <a class="pildora" href="#descargar">
+          <span class="led-run" aria-hidden="true"></span>
+          <span>RUN</span>
+          <span class="pildora-sep" aria-hidden="true"></span>
+          <span data-rel="pildora-texto">Descarga la última versión</span>
+        </a>
+        <h1>Simulador de PLC para aprender KOP y AWL</h1>
+        <p class="entradilla">
+          Automatizacion es un simulador de autómatas programables gratuito para tu ordenador.
+          Programa en KOP (esquema de contactos o Ladder) y en AWL (lista de instrucciones o STL), pulsa RUN
+          y mira cómo la CPU recorre el ciclo de scan, cuenta los temporizadores y enciende las salidas, sin necesidad de hardware.
+        </p>
+      </div>
+
+      <div class="contenedor">
+        <figure class="captura captura-portada" data-captura="img5">
+          <div class="captura-marco">
+            <img alt="Simulador de PLC Automatizacion: programa AWL en RUN con Observar, entradas y salidas y cronograma de señales" width="1304" height="951">
+          </div>
+        </figure>
+      </div>
+
+      <div class="contenedor bloque-descargas" id="descargar">
+        <div class="descargas-cabeza">
+          <h2>Descarga gratis el simulador de PLC</h2>
+          <p class="version" data-rel="version">Los botones llevan siempre a la última versión publicada.</p>
+        </div>
+
+        <div class="descargas">
+          <article class="descarga" data-so="mac">
+            <span class="descarga-sello">Tu sistema</span>
+            <svg class="icono icono-so"><use href="#i-portatil" /></svg>
+            <h3>macOS</h3>
+            <p class="descarga-req">Apple Silicon: M1 o posterior</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="mac-dmg" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Descargar <span class="ext">.dmg</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">Abre el <code>.dmg</code> y arrastra Automatizacion a Aplicaciones. No funciona en Mac con procesador Intel.</p>
+          </article>
+
+          <article class="descarga" data-so="win">
+            <span class="descarga-sello">Tu sistema</span>
+            <svg class="icono icono-so"><use href="#i-pantalla" /></svg>
+            <h3>Windows / Linux</h3>
+            <p class="descarga-req">Windows 10 y 11 de 64 bits · Linux con Wine</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="win-exe" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Instalador <span class="ext">.exe</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+              <a class="btn btn-secundario" data-fichero="win-zip" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Portable <span class="ext">.zip</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">El portable no se instala: descomprímelo y abre <code>Automatizacion.exe</code>. En Linux se abre con Wine (<a href="#linux">probado en Arch Linux</a>).</p>
+          </article>
+        </div>
+
+        <p class="descarga-otras">
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases" data-rel="notas">Notas de la versión y versiones anteriores</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">Código fuente</a>
+          <span aria-hidden="true">·</span>
+          <a href="#preguntas">Problemas al abrirla</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Recorrido por la app (capturas img1…img15, salvo la img5 de la portada) ───────── -->
+    <section class="seccion seccion-alterna" id="funciones">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Funciones</p>
+          <h2>Funciones del simulador, pantalla a pantalla</h2>
+          <p>De la teoría y los ejemplos a tus propios proyectos con entradas, salidas, marcas y cronogramas.</p>
+        </div>
+
+        <div class="pasos">
+          <!-- img1 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">01</p>
+                <h3>Tres secciones para empezar</h3>
+                <p>La pantalla de inicio reúne lo que trae la app: el simulador libre para escribir y probar tus programas, «Aprender» con la teoría y «Ejemplos» con programas resueltos.</p>
+              </div>
+              <ul class="lista">
+                <li>Al abrirla, la app va directamente al simulador libre.</li>
+                <li>La barra lateral lleva a cada sección, a los ajustes y a la ayuda.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img1">
+              <div class="captura-marco"><img alt="Pantalla de inicio con las secciones Simulador libre, Aprender y Ejemplos" width="756" height="180" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img2 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">02</p>
+                <h3>Aprender: toda la teoría, con buscador</h3>
+                <p>Un temario organizado por capítulos, con índice y buscador: cómo funciona el autómata y su ciclo de scan, áreas de memoria, tipos de datos y constantes, direccionamiento simbólico, estructura de bloques, KOP, AWL y las equivalencias entre los dos.</p>
+              </div>
+              <ul class="lista">
+                <li>Esquemas y tablas con las consecuencias prácticas que más se preguntan.</li>
+                <li>Capítulos de errores típicos y trampas de examen, nemotécnica alemana e inglesa y glosario.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img2">
+              <div class="captura-marco"><img alt="Sección Aprender: índice de capítulos y el ciclo de scan explicado con un esquema" width="1289" height="399" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img3 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">03</p>
+                <h3>31 ejemplos resueltos</h3>
+                <p>Ejemplos agrupados por temas, de la lógica combinacional a los enclavamientos, los flancos y más. Cada uno se abre listo para ejecutarlo, cambiar las entradas y modificarlo.</p>
+              </div>
+              <ul class="lista">
+                <li>La etiqueta KOP indica que la solución también está dibujada en esquema de contactos.</li>
+                <li>Cuando pasas sus pruebas, el ejemplo queda marcado con ✔ 100 %.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img3">
+              <div class="captura-marco"><img alt="Lista de ejemplos agrupados por temas, con la etiqueta KOP y uno superado al 100 %" width="1024" height="742" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img4 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">04</p>
+                <h3>Abre un ejemplo y míralo funcionar</h3>
+                <p>A la izquierda, el enunciado con la solución en KOP y en AWL y las pruebas que la comprueban. A la derecha, el banco de trabajo en RUN: los segmentos KOP con su barra de herramientas, las entradas y salidas y, abajo, el analizador lógico.</p>
+              </div>
+              <ul class="lista">
+                <li>«Comprobar» pasa las pruebas sobre tu versión y «Restaurar» vuelve a la original.</li>
+                <li>RUN, STOP y MRES; ciclo a ciclo o instrucción a instrucción; a ×1, ×10 o ×100.</li>
+                <li>En KOP, el cable verde y continuo lleva corriente; el azul discontinuo, no.</li>
+                <li>Contactos NA y NC, bobinas, ramas en paralelo y catálogo de elementos, también con teclas (<kbd>F2</kbd>, <kbd>F3</kbd>, <kbd>F7</kbd>…).</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img4">
+              <div class="captura-marco"><img alt="Ejemplo abierto: enunciado, segmentos KOP en RUN, panel de entradas y salidas y analizador lógico" width="1304" height="793" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img6, img7, img8, img9 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">05</p>
+                <h3>Tus proyectos, organizados en carpetas</h3>
+                <p>En el simulador libre, cada proyecto es una carpeta con sus bloques. Se crea en cuatro pasos, y después puedes añadirle todo lo que necesites.</p>
+              </div>
+              <ul class="lista">
+                <li>Renombra, duplica y exporta proyectos (<code>.json</code>) o su fuente AWL (<code>.awl</code>), e impórtalos en otro equipo.</li>
+                <li>Todo se guarda en tu ordenador: sin cuentas y sin conexión.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-4">
+              <figure class="captura" data-captura="img6">
+                <div class="captura-marco"><img alt="Botón «Nuevo» del explorador de proyectos" width="220" height="48" loading="lazy"></div>
+                <figcaption><b>1</b>Pulsa «Nuevo» en el explorador de proyectos.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img7">
+                <div class="captura-marco"><img alt="Diálogo «Nuevo proyecto» para escribir el nombre de la carpeta" width="419" height="184" loading="lazy"></div>
+                <figcaption><b>2</b>Ponle nombre a la carpeta.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img8">
+                <div class="captura-marco"><img alt="Menú de clic derecho de un proyecto: crear OB1, FC1, OB100 o tabla de variables" width="425" height="227" loading="lazy"></div>
+                <figcaption><b>3</b>Con clic derecho, crea el OB1, una función FC, el OB100 de arranque o una tabla de variables.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img9">
+                <div class="captura-marco"><img alt="Proyecto vacío con el aviso «Falta el OB1» y el botón «Crear OB1»" width="520" height="293" loading="lazy"></div>
+                <figcaption><b>4</b>Un proyecto vacío te recuerda que falta el OB1, el bloque que la CPU ejecuta en cada ciclo.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img10, img11 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">06</p>
+                <h3>Editor AWL con «Observar»</h3>
+                <p>El programa se escribe por segmentos, cada uno con su título. En RUN, «Observar» muestra junto a cada línea el RLO, el STA y los dos acumuladores, y al lado de cada operando, su valor en ese momento.</p>
+              </div>
+              <ul class="lista">
+                <li>Resaltado de sintaxis, autocompletado y errores marcados mientras escribes.</li>
+                <li>Nemotécnica alemana (<code>U</code>, <code>E</code>, <code>A</code>) o inglesa (<code>A</code>, <code>I</code>, <code>Q</code>) con el botón DE/EN.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img10">
+                <div class="captura-marco"><img alt="Segmento AWL con título y columnas RLO, STA, ACU1 y ACU2 por línea" width="491" height="491" loading="lazy"></div>
+                <figcaption>Cada línea con su RLO, STA, ACU1 y ACU2, y el valor de cada operando a su lado.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img11">
+                <div class="captura-marco"><img alt="Campo de título del segmento AWL en edición" width="479" height="504" loading="lazy"></div>
+                <figcaption>Clic en el título del segmento para escribirlo.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img12 -->
+          <article class="paso">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">07</p>
+                <h3>Entradas y salidas a mano</h3>
+                <p>Las entradas son interruptores de palanca y las salidas, pilotos que se encienden. <code>E 124.0</code>–<code>E 125.7</code> y <code>A 124.0</code>–<code>A 125.7</code> están siempre a la vista, y además aparecen las que use tu programa, con su símbolo si lo tiene.</p>
+              </div>
+              <ul class="lista">
+                <li><code>E 124.0</code>–<code>E 124.7</code> también con las teclas <kbd>1</kbd>–<kbd>8</kbd>; <code>E 125</code>, con el ratón.</li>
+                <li><kbd>Mayús</kbd> + clic o <kbd>Mayús</kbd> + tecla: pulsador, vale 1 solo mientras lo mantienes.</li>
+                <li>Clic derecho para cambiar el tipo de una entrada o quitarla del panel, y «Añadir entrada» para cualquier otra dirección.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img12">
+              <div class="captura-marco"><img alt="Panel E/S con interruptores E 124 y E 125 y pilotos A 4, A 124 y A 125" width="564" height="687" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img13, img14 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">08</p>
+                <h3>Marcas por bytes y marca de ciclo</h3>
+                <p>Las marcas que usa el programa se agrupan por byte, con sus ocho bits en fila; los que no usa salen atenuados.</p>
+              </div>
+              <ul class="lista">
+                <li>Activa la marca de ciclo en «Hardware» y su byte aparece arriba: cada bit oscila solo, de 0,1 s a 2 s, con su periodo debajo.</li>
+                <li>Perfecta para intermitentes: <code>U M 0.5</code> / <code>= A 124.7</code> hace parpadear una salida con periodo de 1 s.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img13">
+                <div class="captura-marco"><img alt="Marcas M 10 y M 20 bit a bit, con los bits sin usar atenuados" width="552" height="200" loading="lazy"></div>
+                <figcaption>Marcas M 10 y M 20, bit a bit.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img14">
+                <div class="captura-marco"><img alt="Marca de ciclo en M 0 con el periodo de cada bit y varios bits encendidos" width="558" height="303" loading="lazy"></div>
+                <figcaption>La marca de ciclo en M 0: los bits encendidos parpadean.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">09</p>
+                <h3>Señales E/S: el cronograma</h3>
+                <p>En el panel de abajo, un cronograma dibuja cómo cambian con el tiempo las entradas, salidas, marcas, temporizadores y contadores que elijas. Aquí, <code>M 0.2</code> es la marca de ciclo de 0,4 s.</p>
+              </div>
+              <ul class="lista">
+                <li>«Seguir» en tiempo real, zoom y cursores A y B para medir Δt.</li>
+                <li>Disparo para congelar el momento justo y exportación a CSV o PNG.</li>
+                <li>En la misma tira: mensajes, el AWL generado desde el KOP, la traza del ciclo y las tablas de variables que acoples abajo.</li>
+                <li>Con el botón ⧉ se abre en otra ventana, para llevarlo a otro monitor.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img15">
+              <div class="captura-marco"><img alt="Cronograma de señales con entradas, un contador y la marca de ciclo M 0.2 oscilando" width="1085" height="322" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img16 · img17 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
+                <h3>Tabla de variables: observar y forzar</h3>
+                <p>Con clic derecho en el OB1 → «Insertar nuevo objeto» → «Tabla de variables» se abre <code>VAT_1</code> en una ventana dentro de la app, que se queda encima mientras sigues programando. Las lentes leen los valores de la CPU en vivo.</p>
+              </div>
+              <ul class="lista">
+                <li>Cada fila con su formato: BOOL, BIN, HEX, DEC, REAL, S5TIME, TIME o CHAR, solo los que encajan con el operando.</li>
+                <li>«Valor de forzado» para escribir un valor una vez o mantenerlo forzado en cada ciclo.</li>
+                <li>Se mueve y se minimiza, o se acopla abajo junto a las señales. Se guarda con el proyecto.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img16">
+                <div class="captura-marco"><img alt="Tabla de variables VAT_1 flotando sobre el editor AWL, con MW 110 en HEX y MD 30 y MD 100 en REAL" width="1021" height="656" loading="lazy"></div>
+                <figcaption>En una ventana dentro de la app, encima del código.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img17">
+                <div class="captura-marco"><img alt="Tabla de variables VAT_1 acoplada en el panel de abajo, junto a Señales E/S, con MD 30 y MD 100 en REAL" width="702" height="184" loading="lazy"></div>
+                <figcaption>O acoplada abajo, junto a «Señales E/S».</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Cómo funciona (demo interactiva) ───────── -->
+    <section class="seccion" id="como-funciona">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Cómo funciona</p>
+          <h2>Cómo funciona un PLC: KOP, AWL y el ciclo de scan</h2>
+          <p>
+            El editor KOP traduce cada segmento a un AWL equivalente, y los dos se ejecutan en el mismo motor.
+            Prueba aquí un segmento sencillo: acciona los interruptores (o pulsa las teclas <kbd>1</kbd> y <kbd>2</kbd>, como en la app).
+          </p>
+        </div>
+
+        <div class="demo" id="demo">
+          <div class="demo-panel demo-kop">
+            <p class="demo-titulo">KOP · Segmento 1</p>
+            <svg class="escalera" viewBox="0 0 640 150" role="img" aria-label="Segmento KOP: contacto normalmente abierto E 124.0 en serie con contacto normalmente cerrado E 124.1 que activan la bobina A 124.0">
+              <line class="barra" x1="20" y1="20" x2="20" y2="130" />
+              <line class="barra" x1="620" y1="20" x2="620" y2="130" />
+              <line class="cable" data-p="0" x1="22" y1="85" x2="150" y2="85" />
+              <g class="elem" data-p="1">
+                <line x1="150" y1="62" x2="150" y2="108" />
+                <line x1="190" y1="62" x2="190" y2="108" />
+              </g>
+              <text x="170" y="46">E 124.0</text>
+              <line class="cable" data-p="1" x1="190" y1="85" x2="330" y2="85" />
+              <g class="elem" data-p="2">
+                <line x1="330" y1="62" x2="330" y2="108" />
+                <line x1="370" y1="62" x2="370" y2="108" />
+                <line x1="336" y1="104" x2="364" y2="66" />
+              </g>
+              <text x="350" y="46">E 124.1</text>
+              <line class="cable" data-p="2" x1="370" y1="85" x2="476" y2="85" />
+              <g class="elem" data-p="2">
+                <path d="M486 64 Q470 85 486 106" />
+                <path d="M514 64 Q530 85 514 106" />
+              </g>
+              <text x="500" y="46">A 124.0</text>
+              <line class="cable" data-p="2" x1="524" y1="85" x2="618" y2="85" />
+            </svg>
+            <p class="demo-leyenda">
+              <span><i class="muestra muestra-on"></i>con corriente</span>
+              <span><i class="muestra muestra-off"></i>sin corriente</span>
+            </p>
+          </div>
+
+          <div class="demo-panel demo-awl">
+            <p class="demo-titulo">AWL · Observar</p>
+            <table class="awl">
+              <thead><tr><th>Instrucción</th><th>RLO</th><th>STA</th></tr></thead>
+              <tbody>
+                <tr><td><b>U</b>&nbsp;&nbsp;E 124.0</td><td data-v="rlo1">0</td><td data-v="sta1">0</td></tr>
+                <tr><td><b>UN</b>&nbsp;E 124.1</td><td data-v="rlo2">0</td><td data-v="sta2">0</td></tr>
+                <tr><td><b>=</b>&nbsp;&nbsp;A 124.0</td><td data-v="rlo3">0</td><td data-v="sta3">0</td></tr>
+              </tbody>
+            </table>
+            <p class="demo-nota">RLO: resultado lógico tras cada línea. STA: estado del bit leído o escrito.</p>
+          </div>
+
+          <div class="demo-es">
+            <div class="palancas">
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="0">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">E 124.0 <kbd>1</kbd></span>
+              </button>
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="1">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">E 124.1 <kbd>2</kbd></span>
+              </button>
+            </div>
+            <div class="flecha-es" aria-hidden="true"><svg class="icono"><use href="#i-flecha" /></svg></div>
+            <div class="salida">
+              <span class="piloto" id="piloto" aria-hidden="true"></span>
+              <span class="palanca-etiqueta">A 124.0</span>
+              <span class="sr-only" id="piloto-estado" aria-live="polite">A 124.0 apagada</span>
+            </div>
+            <p class="demo-pista">Con <kbd>Mayús</kbd> + tecla, la entrada funciona como un pulsador: vale 1 solo mientras la mantienes.</p>
+          </div>
+        </div>
+
+        <ol class="ciclo" aria-label="Ciclo de scan">
+          <li style="--i:0"><span class="ciclo-num">1</span><b>Temporizadores</b><span>Avanzan según el tiempo de ciclo.</span></li>
+          <li style="--i:1"><span class="ciclo-num">2</span><b>Lee entradas</b><span>La periferia se copia a la imagen de entradas.</span></li>
+          <li style="--i:2"><span class="ciclo-num">3</span><b>Ejecuta el OB1</b><span>Y el OB100 en el primer ciclo tras pasar a RUN.</span></li>
+          <li style="--i:3"><span class="ciclo-num">4</span><b>Escribe salidas</b><span>La imagen de salidas pasa a los pilotos.</span></li>
+        </ol>
+        <p class="ciclo-pie">
+          El motor está escrito en TypeScript y reproduce una CPU de dos acumuladores: palabra de estado, temporizadores,
+          contadores, saltos y aritmética. Se comprueba con pruebas automáticas contra un intérprete de referencia,
+          instrucción a instrucción.
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Usos ───────── -->
+    <section class="seccion seccion-alterna" id="usos">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Usos</p>
+          <h2>Para quién es este simulador de PLC</h2>
+        </div>
+        <div class="usos">
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-birrete" /></svg>
+            <h3>Preparar exámenes de autómatas</h3>
+            <p>Para estudiantes de FP (Automatización y Robótica Industrial, Mantenimiento Electromecánico) e ingeniería: practica los ejercicios típicos con el RLO y los acumuladores a la vista.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-chip" /></svg>
+            <h3>Probar antes del laboratorio</h3>
+            <p>Comprueba tu programa con direcciones reales, como <code>E 124.0</code> o <code>A 124.0</code>, antes de cargarlo en el autómata.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-pizarra" /></svg>
+            <h3>Explicar en clase</h3>
+            <p>Para docentes de automatización: proyecta el ciclo de scan, el flujo de corriente y los cronogramas mientras explicas un temporizador o un contador.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-libro" /></svg>
+            <h3>Iniciarte en la automatización</h3>
+            <p>Si quieres aprender automatización industrial por tu cuenta: teoría completa y ejemplos que se ejecutan, sin hardware, sin licencias y sin conexión.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Preguntas ───────── -->
+    <section class="seccion" id="preguntas">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">Preguntas</p>
+          <h2>Preguntas frecuentes</h2>
+        </div>
+        <div class="preguntas">
+          <details>
+            <summary>¿Qué es un PLC o autómata programable?</summary>
+            <p>Un PLC (controlador lógico programable) o autómata programable es el ordenador industrial que gobierna máquinas e instalaciones: lee pulsadores y sensores por sus entradas, ejecuta el programa en un ciclo que se repite sin parar y activa motores, válvulas o pilotos por sus salidas. Este simulador reproduce ese funcionamiento en tu ordenador.</p>
+          </details>
+          <details>
+            <summary>¿Qué diferencia hay entre KOP y AWL?</summary>
+            <p>Son dos formas de escribir el mismo programa. KOP (esquema de contactos, en inglés Ladder o LAD) es gráfico y se parece a un esquema eléctrico. AWL (lista de instrucciones, en inglés STL) es texto, más cercano a cómo trabaja la CPU. En la app puedes ver el AWL que genera cada segmento KOP.</p>
+          </details>
+          <details>
+            <summary>¿Necesito un autómata real para practicar?</summary>
+            <p>No. El simulador hace de CPU: activas las entradas con interruptores o con el teclado, ves las salidas, las marcas, los temporizadores y los contadores, y puedes avanzar instrucción a instrucción. Cuando trabajes con un autómata real, llegarás con el programa ya probado.</p>
+          </details>
+          <details>
+            <summary>macOS dice que no puede abrir la app</summary>
+            <p>La app no está firmada por Apple. La primera vez, abre <b>Ajustes del Sistema → Privacidad y seguridad</b> y pulsa <b>«Abrir igualmente»</b> junto al aviso de Automatizacion. También puedes ejecutar en el Terminal:</p>
+            <div class="comando">
+              <code id="cmd-xattr">xattr -dr com.apple.quarantine /Applications/Automatizacion.app</code>
+              <button type="button" class="copiar" data-copiar="cmd-xattr">Copiar</button>
+            </div>
+          </details>
+          <details>
+            <summary>Windows muestra un aviso de SmartScreen</summary>
+            <p>El ejecutable no está firmado por Microsoft. Pulsa <b>«Más información»</b> y luego <b>«Ejecutar de todas formas»</b>.</p>
+          </details>
+          <details id="linux">
+            <summary>¿Funciona en Linux?</summary>
+            <p>No hay versión nativa para Linux, pero la de Windows funciona con la capa de compatibilidad <b>Wine</b>: descarga el instalador <code>.exe</code> o el portable <code>.zip</code> y ábrelo con Wine. Un usuario la usa con esta configuración:</p>
+            <ul class="ficha">
+              <li><span>Distribución</span>Arch Linux</li>
+              <li><span>Kernel</span>Linux 7.2.9-arch1-1</li>
+              <li><span>Shell</span>bash 5.3.20</li>
+              <li><span>Wine</span>11.19</li>
+            </ul>
+          </details>
+          <details>
+            <summary>¿Dónde se guardan mis proyectos?</summary>
+            <p>En tu ordenador, nunca en internet: en macOS, en <code>~/Library/Application Support/Automatizacion</code>; en Windows, en <code>%APPDATA%\Automatizacion</code>. Se conservan al actualizar la app, y puedes exportar cada proyecto como <code>.json</code> o como fuente <code>.awl</code>.</p>
+          </details>
+          <details>
+            <summary>¿Cómo actualizo a una versión nueva?</summary>
+            <p>Desde la versión 0.22.0, el menú <b>Automatizacion ▸ Buscar actualizaciones…</b> (en Windows, <b>Ayuda ▸ Buscar actualizaciones…</b>) te dice si hay una nueva y abre su página. También puedes descargarla desde aquí. En macOS, cierra la app con <kbd>⌘Q</kbd> y arrástrala otra vez a Aplicaciones (Reemplazar). En Windows, ejecuta el instalador nuevo: sustituye al anterior sin tocar tus proyectos.</p>
+          </details>
+          <details>
+            <summary>¿Funciona en un Mac con procesador Intel?</summary>
+            <p>No. La versión de macOS está compilada para Apple Silicon (M1, M2, M3 y posteriores).</p>
+          </details>
+          <details>
+            <summary>¿En qué idioma está?</summary>
+            <p>La interfaz y la teoría están en español. El código puede escribirse con nemotécnica alemana o inglesa.</p>
+          </details>
+          <details>
+            <summary>¿Es gratis?</summary>
+            <p>Sí. Es de código abierto con licencia MIT: sin anuncios y sin cuentas. Funciona sin conexión; solo se conecta a internet si le pides buscar actualizaciones.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Sobre mí ───────── -->
+    <section class="seccion seccion-alterna" id="sobre-mi">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">Sobre mí</p>
+          <h2>Quién hay detrás</h2>
+        </div>
+        <article class="autor">
+          <div class="autor-avatar" aria-hidden="true">A</div>
+          <div class="autor-texto">
+            <h3>Adrian</h3>
+            <p class="autor-cargo">Ing. de Datos en Procesos Industriales</p>
+            <p>Desarrollé Automatizacion para practicar la programación de autómatas en KOP y AWL, y la comparto gratis y con código abierto para que a otros también les sirva para aprender.</p>
+            <div class="autor-enlaces">
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon">
+                <svg class="icono"><use href="#i-github" /></svg>
+                Perfil en GitHub
+              </a>
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/issues">Sugerencias y fallos</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+
+  <dialog class="visor" id="visor" aria-label="Captura ampliada">
+    <img alt="">
+    <button type="button" class="visor-cerrar" aria-label="Cerrar">×</button>
+  </dialog>
+</body>
+</html>

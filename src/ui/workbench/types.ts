@@ -2,7 +2,8 @@ import type { Formato } from '../../core/format';
 import type { SignalView } from '../../sim/analyzer';
 import type { InputTipo } from '../../sim/SimController';
 
-export interface VatFila { text: string; fmt: Formato }
+/** `forzado`: «Valor de forzado» de la ventana de la tabla (texto tal cual lo escribe el alumno) */
+export interface VatFila { text: string; fmt: Formato; forzado?: string }
 
 /** Tabla de variables del proyecto (VAT_1…) */
 export interface VatTabla { nombre: string; filas: VatFila[] }

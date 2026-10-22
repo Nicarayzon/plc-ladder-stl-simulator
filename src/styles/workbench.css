@@ -108,7 +108,6 @@
 .vat .val { font-family: var(--mono); white-space: nowrap; }
 .vat .forced { color: var(--warn); font-weight: 600; }
 /* tabla de variables en el panel de abajo: sin estirar a todo el ancho */
-.vat-abajo { max-width: 900px; }
 .tz-bar { height: 6px; border-radius: 3px; background: var(--bg-elev3); overflow: hidden; min-width: 60px; }
 .tz-bar div { height: 100%; background: var(--accent); }
 .stw { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; text-align: center; }
@@ -201,3 +200,58 @@
 .hw-sec-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); font-weight: 600; margin-bottom: 10px; }
 .hw-table { margin-top: 10px; }
 .hw-table td, .hw-table th { padding: 3px 8px; }
+
+/* ───────── tabla de variables («Var - VAT_n»): ventana flotante dentro de la app o abajo ───────── */
+.vatf { position: fixed; display: flex; flex-direction: column; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); overflow: hidden; }
+.vatf-head { display: flex; align-items: center; gap: 4px; height: 34px; padding: 0 6px 0 12px; background: var(--bg-elev2); border-bottom: 1px solid var(--border); cursor: move; flex: none; user-select: none; }
+.vatf.min .vatf-head { border-bottom: 0; }
+.vatf-head .tit { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 2px; }
+.vatf-head .btn { cursor: pointer; }
+.vatf-body { flex: 1; min-height: 0; }
+.vatf-tam { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; }
+.vatw.abajo { background: var(--bg-elev); }
+.vatw.abajo .vatw-tools { flex-wrap: nowrap; overflow-x: auto; }
+.vatw.abajo .vatw-status { border-top: 0; height: auto; padding: 0; }
+.vatw-abajo-body { flex: 1; min-height: 0; overflow: auto; outline: none; }
+@media print {
+  body.imprimiendo-vat * { visibility: hidden; }
+  body.imprimiendo-vat .vat-imprimir, body.imprimiendo-vat .vat-imprimir * { visibility: visible; }
+  body.imprimiendo-vat .vat-imprimir { position: fixed; inset: 0; }
+}
+.vatw { height: 100%; display: flex; flex-direction: column; background: var(--bg-elev); font-size: 12.5px; user-select: none; }
+.vatw.ayuda, .vatw.ayuda * { cursor: help !important; }
+.vatw-menubar { display: flex; flex-wrap: wrap; gap: 1px; padding: 3px 6px; border-bottom: 1px solid var(--border); flex: none; }
+.vatw-menubar button { height: 24px; padding: 0 9px; border: 0; background: none; border-radius: 5px; cursor: pointer; }
+.vatw-menubar button:hover, .vatw-menubar button.open { background: var(--bg-hover); }
+.vatw-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 1px; padding: 3px 6px; border-bottom: 1px solid var(--border); flex: none; }
+.vatw-tools .sep { height: 18px; margin: 0 4px; }
+.vatw-tools .btn[aria-disabled='true'] { opacity: 0.4; cursor: default; }
+.vatw-tools .btn[aria-disabled='true']:hover { background: transparent; }
+.vatw-mdi { flex: 1; min-height: 0; position: relative; overflow: hidden; background: var(--bg); }
+.vatw-sub { position: absolute; display: flex; flex-direction: column; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 8px; box-shadow: var(--shadow); overflow: hidden; }
+.vatw-sub.max { inset: 0; border-radius: 0; border: 0; box-shadow: none; }
+.vatw-sub.min { left: 8px; bottom: 8px; width: 300px; }
+.vatw-sub-head { display: flex; align-items: center; gap: 4px; height: 30px; padding: 0 4px 0 10px; border-bottom: 1px solid var(--border); background: var(--bg-elev2); flex: none; }
+.vatw-sub.min .vatw-sub-head { border-bottom: 0; }
+.vatw-sub-head .tit { flex: 1; min-width: 0; white-space: pre; overflow: hidden; text-overflow: ellipsis; font-weight: 600; padding-left: 2px; }
+.vatw-sub-body { flex: 1; min-height: 0; overflow: auto; outline: none; }
+.vatw-sub-tam { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize; }
+/* la ventana es about:blank sin doctype (modo quirks): las tablas no heredan la letra */
+.vatw-grid { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; font-size: 12.5px; line-height: 1.45; }
+.vatw-grid th { position: sticky; top: 0; z-index: 1; height: 26px; padding: 0 6px; background: var(--bg-elev2); color: var(--text-dim); font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border-strong); }
+.vatw-grid th:nth-child(2) { text-align: center; padding: 0; }
+.vatw-grid td { position: relative; height: 24px; padding: 0 6px; white-space: nowrap; overflow: hidden; border-right: 1px solid var(--border); border-bottom: 1px dotted var(--border-strong); cursor: default; }
+.vatw-grid td.n { padding: 0; text-align: center; background: var(--bg-elev2); color: var(--text-dim); font-size: 11.5px; }
+.vatw-grid td.ind { padding: 0; text-align: center; }
+.vatw-grid td.op, .vatw-grid td.val, .vatw-grid td.forz { font-family: var(--mono); font-size: 12px; white-space: pre; }
+.vatw-grid td.val { background: var(--bg-elev3); }
+.vatw-grid td.sel { box-shadow: inset 0 0 0 2px var(--text); }
+.vatw-grid td input { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0 6px; border: 0; outline: none; background: var(--bg); box-shadow: inset 0 0 0 2px var(--accent); font: inherit; color: var(--text); }
+.vatw-fmt-ab { position: absolute; right: 6px; top: 6px; color: var(--text-dim); }
+.vatw-f { display: inline-block; font-size: 10.5px; font-weight: 700; color: var(--warn); }
+.vatw-status { display: flex; align-items: center; gap: 4px; height: 26px; padding: 0 6px 0 10px; border-top: 1px solid var(--border); flex: none; font-size: 12px; color: var(--text-dim); }
+.vatw-status-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vatw-status .panel { display: inline-flex; align-items: center; justify-content: center; height: 19px; border: 1px solid var(--border); border-radius: 4px; flex: none; }
+.vatw-status .cpu.run { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 600; }
+.vatw-status .cpu.stop { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); font-weight: 600; }
+.vatw-mdi-vacia { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-faint); font-size: 12.5px; pointer-events: none; text-align: center; padding: 20px; }

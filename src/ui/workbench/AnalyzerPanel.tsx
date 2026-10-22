@@ -4,12 +4,13 @@ import type { SimController } from '../../sim/SimController';
 import { AnalyzerBuffer, type Signal, type SignalView } from '../../sim/analyzer';
 import { useSimTick } from './useSim';
 import { Icon } from '../common/Icon';
-import { downloadText, toast } from '../common/ui';
+import { Desplegable, downloadText, toast } from '../common/ui';
 import { fmtReal } from '../../core/format';
 import { inputBits, outputBits } from '../../core/usage';
 
 const ROW = 34;
 const AXIS = 22;
+const VISTAS: { value: SignalView; label: string }[] = [{ value: 'dec', label: 'DEC' }, { value: 'hex', label: 'HEX' }, { value: 'analog', label: 'curva' }, { value: 'real', label: 'REAL' }];
 
 function fmtVal(v: number, view: SignalView): string {
   if (Number.isNaN(v)) return '—';
@@ -398,11 +399,9 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
         {(curA !== null || curB !== null) && <button className="btn small ghost" onClick={() => { setCurA(null); setCurB(null); }}>Quitar cursores</button>}
         <span className="spacer" />
         {!readOnly && (
-          <select className="input" style={{ height: 24, padding: '0 4px', fontSize: 12 }} value={sim.trigger ? `${sim.trigger.signalId}:${sim.trigger.edge}` : ''} aria-label="Disparo"
-            onChange={(e) => { const v = e.target.value; sim.trigger = v ? { signalId: +v.split(':')[0], edge: v.split(':')[1] as 'sube' } : null; notify(); }}>
-            <option value="">Sin disparo</option>
-            {buf.signals.flatMap((s) => (['sube', 'baja', 'cambia'] as const).map((e) => <option key={`${s.id}:${e}`} value={`${s.id}:${e}`}>Pausar si {s.label} {e === 'sube' ? '↑' : e === 'baja' ? '↓' : 'cambia'}</option>))}
-          </select>
+          <Desplegable style={{ height: 24, padding: '0 6px', fontSize: 12 }} value={sim.trigger ? `${sim.trigger.signalId}:${sim.trigger.edge}` : ''} aria-label="Disparo"
+            options={[{ value: '', label: 'Sin disparo' }, ...buf.signals.flatMap((s) => (['sube', 'baja', 'cambia'] as const).map((e) => ({ value: `${s.id}:${e}`, label: `Pausar si ${s.label} ${e === 'sube' ? '↑' : e === 'baja' ? '↓' : 'cambia'}` })))]}
+            onChange={(v) => { sim.trigger = v ? { signalId: +v.split(':')[0], edge: v.split(':')[1] as 'sube' } : null; notify(); }} />
         )}
         <button className="btn small" onClick={() => downloadText('cronograma.csv', buf.toCSV(), 'text/csv')} title="Exportar a CSV">CSV</button>
         <button className="btn small" onClick={exportPng} title="Exportar imagen">PNG</button>
@@ -416,10 +415,8 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
               <span className="nm" title={s.text}>{s.label}</span>
               <span className="vl">{fmtVal(valueAt(s, hover), s.view)}</span>
               {!readOnly && s.reader.size > 0 && (
-                <select className="input" style={{ height: 20, padding: '0 2px', fontSize: 10.5, width: 52 }} value={s.view} aria-label="Vista"
-                  onChange={(e) => { s.view = e.target.value as SignalView; notify(); }}>
-                  <option value="dec">DEC</option><option value="hex">HEX</option><option value="analog">curva</option><option value="real">REAL</option>
-                </select>
+                <Desplegable style={{ height: 20, padding: '0 4px', fontSize: 10.5, width: 52, gap: 2 }} value={s.view} options={VISTAS} aria-label="Vista"
+                  onChange={(v) => { s.view = v; notify(); }} />
               )}
               {!readOnly && <button className="btn small ghost icon" onClick={() => { buf.remove(s.id); notify(); }} aria-label={`Quitar ${s.label}`}><Icon name="x" size={12} /></button>}
             </div>

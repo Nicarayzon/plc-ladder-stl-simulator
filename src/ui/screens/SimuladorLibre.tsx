@@ -27,7 +27,7 @@ export function SimuladorLibre() {
   const [w, startW] = useSplit('libre-explorer', 210, 150, 380);
   const [open, setOpen] = useState(true);
   const senales = useSenalesVentana();
-  /** Tabla de variables que hay que abrir en el panel de abajo (clic en el explorador) */
+  /** Tabla de variables que hay que abrir en su ventana (clic en el explorador) */
   const [vatPedida, setVatPedida] = useState<{ proj: string; nombre: string; n: number } | null>(null);
   const abrirVat = (id: string, nombre: string) => { setActual(id); setVatPedida({ proj: id, nombre, n: Date.now() }); };
   return (
@@ -203,7 +203,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
                     </div>
                   ))}
                   {(p.wb.vats ?? []).map((v) => (
-                    <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={`Tabla de variables ${v.nombre}: se abre abajo, junto a las señales`}
+                    <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={`Tabla de variables ${v.nombre}: se abre en su ventana`}
                       onClick={() => onOpenVat(p.id, v.nombre)} onKeyDown={(e) => { if (e.key === 'Enter') onOpenVat(p.id, v.nombre); }}
                       onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: menuVat(p, v.nombre) }); }}>
                       <span className="ex-bicon">VAT</span>
@@ -234,7 +234,7 @@ function ProjectWorkbench({ proj, block, onBlock, explorerHidden, onShowExplorer
   return (
     <Workbench sim={sim} programa={proj.programa} onChange={(p) => actualizar(id, { programa: p })}
       wbState={proj.wb} onWbState={(wb) => actualizar(id, { wb })} ioVariant="switches" layoutKey="libre" hardware senales={{ ...senales, nombre: proj.nombre }}
-      block={block} onBlock={onBlock} vatAbajo vatPedida={vatPedida} onVatAtendida={onVatAtendida}
+      block={block} onBlock={onBlock} vatVentanas proyecto={proj.nombre} vatPedida={vatPedida} onVatAtendida={onVatAtendida}
       title={(
         <span className="row" style={{ gap: 6 }}>
           {explorerHidden && <button className="btn small icon" onClick={onShowExplorer} title="Mostrar el explorador de proyectos" aria-label="Mostrar proyectos"><Icon name="folder" size={14} /></button>}

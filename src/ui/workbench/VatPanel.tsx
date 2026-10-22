@@ -4,7 +4,7 @@ import { FORMATOS, type Formato, fmtValue, parseUserValue } from '../../core/for
 import { makeReader, readRaw, type Reader } from '../../sim/readers';
 import { useSimTick } from './useSim';
 import { Icon } from '../common/Icon';
-import { toast } from '../common/ui';
+import { Desplegable, toast } from '../common/ui';
 import { normAddr } from './symbols';
 import { operandosDe } from './vat';
 import type { VatFila } from './types';
@@ -17,6 +17,8 @@ function defaultFmt(r: Reader): Formato {
   if (r.kind === 'counterBcd') return 'BCD';
   return 'DEC';
 }
+
+const OPCIONES_FMT = FORMATOS.map((f) => ({ value: f, label: f }));
 
 /** «T n» y «Z n» con su valor (S5TIME y C#): el formato es fijo */
 const tzValor = (r: Reader) => r.kind === 'timerS5' || r.kind === 'counterBcd';
@@ -84,10 +86,8 @@ export function VatPanel({ sim, rows, onRows, symbols, symByAddr, valorTZ = fals
                   {err && <div className="err-text" style={{ fontSize: 11 }}>{(r as Error).message}</div>}
                 </td>
                 <td>
-                  <select className="input" style={{ height: 24, padding: '0 4px' }} value={row.fmt} disabled={err || r.size === 0 || tzValor(r)} aria-label="Formato"
-                    onChange={(e) => onRows(rows.map((x, j) => (j === i ? { ...x, fmt: e.target.value as Formato } : x)))}>
-                    {FORMATOS.map((f) => <option key={f} value={f}>{f}</option>)}
-                  </select>
+                  <Desplegable style={{ height: 24, padding: '0 6px' }} value={row.fmt} options={OPCIONES_FMT} disabled={err || r.size === 0 || tzValor(r)} aria-label="Formato"
+                    onChange={(fmt) => onRows(rows.map((x, j) => (j === i ? { ...x, fmt } : x)))} />
                 </td>
                 <td className={`num val ${forced ? 'forced' : ''}`} title={forced ? 'Forzado' : undefined}>
                   {err || Number.isNaN(raw) ? '—' : fmtValue(raw, r.size, row.fmt)}{forced && ' F'}
