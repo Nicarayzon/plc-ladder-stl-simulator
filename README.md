@@ -175,7 +175,9 @@ Más detalle en [`00_LEEME.md`](00_LEEME.md) y en la especificación de partida,
 
 Hecho por **Adrian**, Ing. de Datos en Procesos Industriales ([@Nicarayzon](https://github.com/Nicarayzon) en GitHub).
 
-¿Has encontrado un fallo o tienes una idea? Abre una [incidencia](https://github.com/Nicarayzon/plc-ladder-stl-simulator/issues) e indica tu sistema, la versión de la app (sale en la barra lateral) y los pasos para reproducirlo. Si el problema está en un programa, pega también su código AWL.
+¿Tienes una duda, una idea o un programa que quieras enseñar? Escribe en [Discussions](https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions).
+
+¿Has encontrado un fallo? Abre una [incidencia](https://github.com/Nicarayzon/plc-ladder-stl-simulator/issues) e indica tu sistema, la versión de la app (sale en la barra lateral) y los pasos para reproducirlo. Si el problema está en un programa, pega también su código AWL.
 
 ## Licencia
 

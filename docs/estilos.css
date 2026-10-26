@@ -523,6 +523,7 @@ kbd {
 .preguntas details[open] summary::after { transform: rotate(45deg); }
 .preguntas details > p { padding: 0 20px 16px; color: var(--text-dim); }
 .preguntas details code { white-space: normal; word-break: break-word; }
+.preguntas-pie { margin-top: 24px; text-align: center; color: var(--text-dim); }
 
 .ficha {
   list-style: none; margin: 0 20px 18px; padding: 0;
@@ -562,6 +563,7 @@ kbd {
 .autor h3 { font-size: 1.35rem; }
 .autor-cargo { margin: 2px 0 12px; color: var(--accent); font-weight: 600; }
 .autor-texto > p:not(.autor-cargo) { color: var(--text-dim); }
+.autor-texto > p:not(.autor-cargo) + p { margin-top: 10px; }
 .autor-enlaces { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 @media (max-width: 520px) { .autor { flex-direction: column; } }
 
