@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KOP (Kontaktplan) Schritt für Schritt: Kontakte, Spulen, Reihe und parallel · Automatizacion</title>
+  <meta name="description" content="Wie man einen Kontaktplan (KOP) liest und programmiert, Schritt für Schritt: Schließer und Öffner, Kontakte in Reihe (UND) und parallel (ODER), Spulen, Setzen, Rücksetzen und NOT, mit Beispielen zum Ausprobieren und ihrer Entsprechung in AWL.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/kop-contactos-y-bobinas/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-contacts-and-coils/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/kop-contactos-y-bobinas/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="KOP (Kontaktplan) Schritt für Schritt: Kontakte, Spulen, Reihe und parallel">
+  <meta property="og:description" content="Wie man einen Kontaktplan (KOP) liest und programmiert, Schritt für Schritt: Schließer und Öffner, Kontakte in Reihe (UND) und parallel (ODER), Spulen, Setzen, Rücksetzen und NOT, mit Beispielen zum Ausprobieren und ihrer Entsprechung in AWL.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"KOP (Kontaktplan) Schritt für Schritt: Kontakte, Spulen, Reihe und parallel","description":"Wie man einen Kontaktplan (KOP) liest und programmiert, Schritt für Schritt: Schließer und Öffner, Kontakte in Reihe (UND) und parallel (ODER), Spulen, Setzen, Rücksetzen und NOT, mit Beispielen zum Ausprobieren und ihrer Entsprechung in AWL.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist KOP (Kontaktplan)?","acceptedAnswer":{"@type":"Answer","text":"Die grafische SPS-Sprache, die wie ein Stromlaufplan aussieht: Der Strom kommt aus einer Schiene links, fließt durch Kontakte und kommt rechts an Spulen an. Auf Englisch heißt sie Ladder (LAD oder LD)."}},{"@type":"Question","name":"Was ist der Unterschied zwischen einem Schließer und einem Öffner in KOP?","acceptedAnswer":{"@type":"Answer","text":"Der Schließer --| |-- leitet, wenn sein Bit 1 ist, der Öffner --|/|--, wenn es 0 ist. Beide fragen nur den Zustand des Bits ab: Sie wissen nicht, wie der echte Taster verdrahtet ist."}},{"@type":"Question","name":"Was bedeuten zwei Kontakte in Reihe oder parallel?","acceptedAnswer":{"@type":"Answer","text":"In Reihe eine UND-Verknüpfung: Der Strom fließt nur, wenn beide leiten. Parallel eine ODER-Verknüpfung: Es reicht, wenn einer leitet."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"KOP: Kontakte und Spulen","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/kop-contactos-y-bobinas/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/ladder-contacts-and-coils/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/kop-kontakte-und-spulen/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/" aria-current="page">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/" aria-current="page">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>KOP: Kontakte und Spulen</span></nav>
+      <h1>KOP (Kontaktplan) Schritt für Schritt: Kontakte, Spulen, Reihe und parallel</h1>
+      <p class="articulo-entradilla">Wie man einen Kontaktplan (KOP) liest und programmiert, Schritt für Schritt: Schließer und Öffner, Kontakte in Reihe (UND) und parallel (ODER), Spulen, Setzen, Rücksetzen und NOT, mit Beispielen zum Ausprobieren und ihrer Entsprechung in AWL.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="wie-man-einen-kontaktplan-liest">Wie man einen Kontaktplan liest</h2>
+<p>Ein KOP-Programm wird wie ein <strong>Stromlaufplan aus Kontakten und Spulen</strong> gezeichnet und genauso gelesen:</p>
+<ul>
+<li>Das Programm ist in <strong>Netzwerke</strong> gegliedert. Jedes Netzwerk ist eine „Zeile“ des Plans, mit seiner Logik und seinem Ausgang.</li>
+<li>Links steht die <strong>Stromschiene</strong>: Von ihr geht der „Strom“ aus.</li>
+<li>Der Strom fließt <strong>von links nach rechts</strong> durch die <strong>Kontakte</strong>. Jeder Kontakt lässt den Strom durch oder unterbricht ihn, je nach dem Wert eines Bits (eines Eingangs, eines Ausgangs, eines Merkers…).</li>
+<li>Rechts steht die <strong>Spule</strong>: Kommt Strom an, schreibt sie eine 1 in ihr Bit; kommt keiner an, schreibt sie eine 0.</li>
+</ul>
+<p>Dieser „Strom“ ist kein echter Strom: Es ist das <strong>Verknüpfungsergebnis</strong>, das die CPU beim Bearbeiten des Netzwerks berechnet, eine 1 oder eine 0. In AWL heißt es <strong>VKE</strong> (siehe <a href="../awl-vke-und-bitverknuepfung/#bitverknupfung-vke-erstabfrage-und-sta">Bitverknüpfung: VKE, Erstabfrage und STA</a>). Im Simulator wird der Teil mit Stromfluss <strong>grün durchgezogen</strong> angezeigt und der Teil ohne Stromfluss <strong>blau gestrichelt</strong>.</p>
+<p>Probiere es aus: Schalte den Eingang E 0.0 ein und beobachte, wie der Strom durch den Kontakt zur Spule fließt, die den Ausgang A 4.0 einschaltet.</p>
+<div class="ejemplo mini" id="probar-na"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-na&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-na.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-na.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-na.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-na.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// ist E0.0 gleich 1?</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// das Ergebnis an den Ausgang</span></code></pre></div></section>
+<section><h2 id="schlie-er">Schließer</h2>
+<p>Der Schließer <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--| |--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M25 10h10"/></svg> <strong>fragt: „Ist dieses Bit 1?“</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bit des Kontakts</th><th>Leitet er?</th></tr></thead><tbody><tr><td>0</td><td>Nein: Er unterbricht den Strom</td></tr><tr><td>1</td><td>Ja: Er lässt den Strom durch</td></tr></tbody></table></div>
+<p>Er funktioniert wie ein Taster mit Schließer: Ist das Bit 1, „schließt“ er den Stromkreis. Er ist der meistverwendete Kontakt: Mit ihm fragt man Taster, Sensoren, Merker und auch Ausgänge ab. In AWL entspricht er der Anweisung <code>U</code> (siehe <a href="../awl-vke-und-bitverknuepfung/#u-und">AWL: VKE und Bitlogik: U: UND</a>).</p></section>
+<section><h2 id="offner">Öffner</h2>
+<p>Der Öffner <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--|/|--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M14.5 16L21.5 4"/><path d="M25 10h10"/></svg> <strong>fragt: „Ist dieses Bit 0?“</strong> Er ist der umgekehrte Schließer:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bit des Kontakts</th><th>Leitet er?</th></tr></thead><tbody><tr><td>0</td><td>Ja: Er lässt den Strom durch</td></tr><tr><td>1</td><td>Nein: Er unterbricht den Strom</td></tr></tbody></table></div>
+<p>Probiere es aus: Mit E 0.0 auf 0 leuchtet die Leuchte. Schaltest du E 0.0 ein, öffnet der Kontakt und die Leuchte geht aus.</p>
+<div class="ejemplo mini" id="probar-nc"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><line x1="47" y1="55" x2="65" y2="37" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-nc&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-nc.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-nc.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-nc.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-nc.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">UN</span>    <span class="t-op">E 0.0</span>           <span class="t-com">// ist E0.0 gleich 0?</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre></div>
+<p>In AWL entspricht er <code>UN</code> (siehe <a href="../awl-vke-und-bitverknuepfung/#un-und-nicht">UN: UND NICHT</a>).</p>
+<blockquote>
+<p><strong>Verwechsle den Kontakt im Programm nicht mit dem echten Taster.</strong> Der Kontakt im Programm fragt nur den Wert des Bits ab; er weiß nicht, wie der Taster verdrahtet ist. Ein Halt-Taster wird als Öffner verdrahtet (in Ruhe 1) und im Programm mit einem <strong>Schließer</strong> abgefragt (siehe <a href="../sps-zyklus/#sicherheitsverdrahtung-physischer-kontakt-kontakt-im-programm">Sicherheitsverdrahtung: physischer Kontakt ≠ Kontakt im Programm</a>).</p>
+</blockquote></section>
+<section><h2 id="kontakte-in-reihe-die-und-verknupfung">Kontakte in Reihe: die UND-Verknüpfung</h2>
+<p>Setzt du Kontakte <strong>hintereinander</strong>, kommt der Strom nur dann an der Spule an, wenn <strong>alle leiten</strong>. Das ist die <strong>UND</strong>-Verknüpfung:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>E 0.0</th><th>E 0.1</th><th>A 4.0</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td><strong>1</strong></td></tr></tbody></table></div>
+<p>Probiere es aus: A 4.0 schaltet nur ein, wenn beide Eingänge eingeschaltet sind.</p>
+<div class="ejemplo mini" id="probar-y"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// und außerdem E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ E0.1</span></code></pre></div>
+<p>In Reihe kannst du Schließer und Öffner mischen. „Ein <strong>und kein</strong> Alarm“ ist zum Beispiel ein Schließer für Ein in Reihe mit einem Öffner für den Alarm:</p>
+<div class="ejemplo mini" id="probar-y-no"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y-no.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-y-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y-no.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// Ein</span>
+      <span class="t-ins">UN</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// und kein Alarm</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="kontakte-parallel-die-oder-verknupfung">Kontakte parallel: die ODER-Verknüpfung</h2>
+<p>Setzt du Kontakte in <strong>parallele Zweige</strong>, kommt Strom an der Spule an, wenn <strong>mindestens ein</strong> Zweig leitet. Das ist die <strong>ODER</strong>-Verknüpfung:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>E 0.0</th><th>E 0.1</th><th>A 4.0</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td><strong>1</strong></td></tr><tr><td>1</td><td>0</td><td><strong>1</strong></td></tr><tr><td>1</td><td>1</td><td><strong>1</strong></td></tr></tbody></table></div>
+<p>Damit schaltet man zum Beispiel ein Licht von zwei verschiedenen Tastern aus ein. Probiere es aus:</p>
+<div class="ejemplo mini" id="probar-o"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// oder E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ E0.1</span></code></pre></div>
+<p>Ein paralleler Zweig kann auch einen Öffner haben: Hier schaltet A 4.0 ein, wenn E 0.0 gleich 1 ist <strong>oder</strong> wenn E 0.1 gleich 0 ist.</p>
+<div class="ejemplo mini" id="probar-o-no"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o-no.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-o-no.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o-no.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">ON</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// oder E0.1 ist 0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="reihe-und-parallel-kombinieren">Reihe und parallel kombinieren</h2>
+<p>Echte Pläne mischen beides, und man liest sie wie einen Stromkreis: Der Strom muss <strong>durch einen der parallelen Zweige und danach durch die Kontakte in Reihe</strong> fließen.</p>
+<p>In diesem Beispiel ist A 4.0 = (E 0.0 <strong>oder</strong> E 0.1) <strong>und</strong> E 0.2. Probiere es aus: Schalte E 0.2 ein und danach einen der beiden anderen.</p>
+<div class="ejemplo mini" id="probar-combinado"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-combinado&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-comb.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-comb.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-comb.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-comb.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-comb.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-comb.s1.5&quot;,&quot;op&quot;:&quot;E 0.2&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-comb.s1.6&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U(</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = (E0.0 ∨ E0.1) ∧ E0.2</span></code></pre></div>
+<p>So sind fast alle Steuerungen aufgebaut. Eine Ein/Aus-Schaltung mit Selbsthaltung ist zum Beispiel „(Ein <strong>oder</strong> der Motor selbst) <strong>und</strong> Halt“ (siehe <a href="../selbsthaltung-setzen-ruecksetzen/#in-kop-spulen-selbsthaltung-und-flipflops">In KOP: Spulen, Selbsthaltung und Flipflops</a>). Um so eine Kombination in AWL umzusetzen, verwendet man Klammern oder <code>O</code> ohne Operand (siehe <a href="../awl-vke-und-bitverknuepfung/#und-vor-oder-o-ohne-operand-und-klammern">„UND vor ODER“: <code>O</code> ohne Operand und Klammern</a> und <a href="../kop-awl-entsprechungen/#muster-fur-reihen-und-parallelschaltung">Muster für Reihen- und Parallelschaltung</a>).</p></section>
+<section><h2 id="spulen-setzen-rucksetzen-und-not">Spulen, Setzen, Rücksetzen und NOT</h2>
+<p>Rechts im Netzwerk stehen die Elemente, die das Ergebnis <strong>schreiben</strong>:</p>
+<ul>
+<li><strong>Spule <svg class="kop-ico" viewBox="0 0 18 20" width="18" height="20" role="img" aria-label="( )"><path d="M6 3Q1 10 6 17M12 3Q17 10 12 17"/></svg></strong>: Sie schreibt das Ergebnis immer: 1, wenn Strom ankommt, 0, wenn nicht. Jeder Operand sollte im ganzen Programm <strong>nur eine Spule</strong> haben; hat er zwei, zählt nur die letzte (siehe <a href="../sps-zyklus/#praktische-folgen-oft-gefragt">Praktische Folgen (oft gefragt)</a>).</li>
+<li><strong>Mehrere Spulen parallel</strong> am Ende eines Netzwerks bekommen denselben Strom: Sie haben alle denselben Wert.</li>
+<li><strong>Setzen <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(S)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">S</text></svg></strong> und <strong>Rücksetzen <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(R)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">R</text></svg></strong>: Kommt Strom an, setzen sie das Bit auf 1 bzw. auf 0; kommt keiner an, <strong>tun sie nichts</strong>, und das Bit behält seinen Wert. Damit „merkt“ sich das Programm etwas (siehe <a href="../selbsthaltung-setzen-ruecksetzen/#in-kop-spulen-selbsthaltung-und-flipflops">In KOP: Spulen, Selbsthaltung und Flipflops</a>).</li>
+<li><strong>NOT <svg class="kop-ico" viewBox="0 0 50 20" width="50" height="20" role="img" aria-label="--|NOT|--"><path d="M1 10h10"/><rect x="11" y="3" width="27.799999999999997" height="14" rx="2"/><text x="24.9" y="13.5" text-anchor="middle" class="ki-txt">NOT</text><path d="M38.8 10h10"/></svg></strong>: Es kehrt den Strom um. Was als 1 ankommt, geht als 0 weiter, und umgekehrt.</li>
+</ul>
+<p>Probiere es aus: Mit E 0.0 schalten die beiden Spulen des ersten Netzwerks gleichzeitig ein; die des zweiten macht das Gegenteil, wegen des NOT.</p>
+<div class="ejemplo mini" id="probar-bobinas"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="98" y1="110" x2="182" y2="110" class="w"></line><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g><g class="el"><rect x="184" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="110" x2="212" y2="110" class="w"></line><path d="M 217 99 Q 210 110 217 121" class="sym-line " fill="none"></path><path d="M 231 99 Q 238 110 231 121" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="71" width="90" height="16" fill="transparent"></rect><text x="224" y="83" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="125" y2="46" class="w"></line><line x1="155" y1="46" x2="182" y2="46" class="w"></line><rect x="125" y="37" width="30" height="18" rx="3" class="sym-box"></rect><text x="140" y="50" text-anchor="middle" class="boxtxt">NOT</text></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.2</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-bobinas&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-bob.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-bob.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-bob.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-bob.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}},{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-bob.s1.4&quot;,&quot;op&quot;:&quot;A 4.1&quot;}}]},{&quot;id&quot;:&quot;mini-bob.s2&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-bob.s2.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-bob.s2.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NOT&quot;,&quot;id&quot;:&quot;mini-bob.s2.3&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-bob.s2.4&quot;,&quot;op&quot;:&quot;A 4.2&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// zwei Zuweisungen mit demselben VKE</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">NOT</span>                   <span class="t-com">// negiert das VKE</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.2</span></code></pre></div></section>
+<section><h2 id="zusammenfassung-und-regeln-fur-den-aufbau">Zusammenfassung und Regeln für den Aufbau</h2>
+<ul>
+<li><strong>Netzwerk</strong>: die Programmeinheit. Jedes Netzwerk hat einen Titel, einen Kommentar und seine Schaltung.</li>
+<li><strong>Stromschiene</strong>: links. Der „Strom“ fließt von links nach rechts.</li>
+<li><strong>Kontakt</strong>: <strong>fragt</strong> den Zustand eines Bits <strong>ab</strong>.
+<ul>
+<li>Schließer <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--| |--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M25 10h10"/></svg> leitet, wenn das Bit 1 ist.</li>
+<li>Öffner <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--|/|--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M14.5 16L21.5 4"/><path d="M25 10h10"/></svg> leitet, wenn das Bit 0 ist.</li>
+</ul>
+</li>
+<li><strong>Reihenschaltung</strong> = UND. <strong>Parallelschaltung</strong> = ODER.</li>
+<li><strong>Spule</strong>: <strong>schreibt</strong> das Ergebnis der Verknüpfung links von ihr (das VKE) in ein Bit.</li>
+<li><strong>Box</strong>: eine Funktion mit dem Freigabeeingang <strong>EN</strong> und dem Ausgang <strong>ENO</strong>. ENO = 1, wenn EN = 1 ist und die Operation fehlerfrei ausgeführt wurde.</li>
+</ul>
+<p><strong>Regeln für den Aufbau</strong>:</p>
+<ul>
+<li>Die Ausgangselemente (Spulen und abschließende Boxen) stehen rechts. Am Ende eines Netzwerks können <strong>mehrere Spulen parallel</strong> stehen.</li>
+<li>Der Konnektor <svg class="kop-ico" viewBox="0 0 41 20" width="41" height="20" role="img" aria-label="--(#)--"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">#</text><path d="M29.6 10h10"/></svg> und einige Boxen können mitten in einem Zweig stehen.</li>
+<li>Strom darf nicht von rechts nach links fließen, und Zweige dürfen nicht offen bleiben.</li>
+<li>Ein Sprungziel (<code>LABEL</code>) steht immer <strong>am Anfang eines Netzwerks</strong>.</li>
+<li>Hat ein in AWL geschriebenes Netzwerk keine grafische Darstellung, bleibt es beim Umschalten der Ansicht in AWL.</li>
+</ul>
+<p><strong>Online-Beobachtung</strong>: Stromfluss wird <strong>grün durchgezogen</strong> angezeigt, kein Stromfluss <strong>blau gestrichelt</strong>.</p></section>
+<section><h2 id="bitverknupfungen">Bitverknüpfungen</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>KOP-Symbol</th><th>Name</th><th>Funktion</th><th>AWL</th></tr></thead><tbody><tr><td><svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--| |--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M25 10h10"/></svg></td><td>Schließer</td><td>Leitet, wenn der Operand = 1</td><td><code>U op</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--|/|--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M14.5 16L21.5 4"/><path d="M25 10h10"/></svg></td><td>Öffner</td><td>Leitet, wenn der Operand = 0</td><td><code>UN op</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 50 20" width="50" height="20" role="img" aria-label="--|NOT|--"><path d="M1 10h10"/><rect x="11" y="3" width="27.799999999999997" height="14" rx="2"/><text x="24.9" y="13.5" text-anchor="middle" class="ki-txt">NOT</text><path d="M38.8 10h10"/></svg></td><td>Negieren</td><td>Kehrt den Stromfluss (VKE) um</td><td><code>NOT</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="--( )"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M22 3Q27 10 22 17"/></svg></td><td>Spule</td><td>Operand := VKE</td><td><code>= op</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 41 20" width="41" height="20" role="img" aria-label="--(#)--"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">#</text><path d="M29.6 10h10"/></svg></td><td>Konnektor</td><td>Speichert das Zwischen-VKE in einem Bit und macht weiter</td><td><code>= op</code> (in der Mitte)</td></tr><tr><td><svg class="kop-ico" viewBox="0 0 31 20" width="31" height="20" role="img" aria-label="--(S)"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">S</text></svg></td><td>Setzen</td><td>Wenn VKE = 1 → Operand := 1</td><td><code>S op</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 31 20" width="31" height="20" role="img" aria-label="--(R)"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">R</text></svg></td><td>Rücksetzen</td><td>Wenn VKE = 1 → Operand := 0</td><td><code>R op</code></td></tr><tr><td>Box <code>SR</code></td><td>Flipflop, <strong>rücksetzdominant</strong></td><td>S setzt, R setzt zurück; sind beide = 1, gewinnt R</td><td><code>U s / S op / U r / R op</code></td></tr><tr><td>Box <code>RS</code></td><td>Flipflop, <strong>setzdominant</strong></td><td>Sind beide = 1, gewinnt S</td><td><code>U r / R op / U s / S op</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 41 20" width="41" height="20" role="img" aria-label="--(P)--"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">P</text><path d="M29.6 10h10"/></svg></td><td>Positive Flanke des VKE</td><td>1 für <strong>einen Zyklus</strong>, wenn das VKE von 0 auf 1 wechselt</td><td><code>FP Merker</code></td></tr><tr><td><svg class="kop-ico" viewBox="0 0 41 20" width="41" height="20" role="img" aria-label="--(N)--"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">N</text><path d="M29.6 10h10"/></svg></td><td>Negative Flanke des VKE</td><td>1 für einen Zyklus, wenn das VKE von 1 auf 0 wechselt</td><td><code>FN Merker</code></td></tr><tr><td>Box <code>POS</code> / <code>NEG</code></td><td>Flanke eines Operanden</td><td>Erkennt die Flanke eines bestimmten Bits (mit seinem Merker M_BIT)</td><td>(Code mit <code>FP</code>/<code>FN</code>)</td></tr><tr><td><svg class="kop-ico" viewBox="0 0 51 20" width="51" height="20" role="img" aria-label="--(SAVE)"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M44.4 3Q49.4 10 44.4 17"/><text x="30.2" y="13.5" text-anchor="middle" class="ki-txt">SAVE</text></svg></td><td>VKE sichern</td><td>Kopiert das VKE in das Bit BIE</td><td><code>SAVE</code></td></tr></tbody></table></div></section>
+<section><h2 id="verknupfungen-mit-kontakten">Verknüpfungen mit Kontakten</h2>
+<div class="figura-rejilla"><figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="UND: A4.0 = E0.0 ∧ E0.1"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><figcaption class="figura-pie">UND: A4.0 = E0.0 ∧ E0.1</figcaption></figure><figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="ODER: A4.0 = E0.0 ∨ E0.1"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><figcaption class="figura-pie">ODER: A4.0 = E0.0 ∨ E0.1</figcaption></figure><figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="474" height="76" viewBox="0 0 474 76" class="kop-svg" role="img" aria-label="NAND: UND, mit NOT negiert"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="266" y1="46" x2="350" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="209" y2="46" class="w"></line><line x1="239" y1="46" x2="266" y2="46" class="w"></line><rect x="209" y="37" width="30" height="18" rx="3" class="sym-box"></rect><text x="224" y="50" text-anchor="middle" class="boxtxt">NOT</text></g><g class="el"><rect x="352" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="350" y1="46" x2="380" y2="46" class="w"></line><path d="M 385 35 Q 378 46 385 57" class="sym-line " fill="none"></path><path d="M 399 35 Q 406 46 399 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="348" y="7" width="90" height="16" fill="transparent"></rect><text x="392" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><figcaption class="figura-pie">NAND: UND, mit NOT negiert</figcaption></figure><figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="NOR: ODER, mit NOT negiert"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="125" y2="46" class="w"></line><line x1="155" y1="46" x2="182" y2="46" class="w"></line><rect x="125" y="37" width="30" height="18" rx="3" class="sym-box"></rect><text x="140" y="50" text-anchor="middle" class="boxtxt">NOT</text></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><figcaption class="figura-pie">NOR: ODER, mit NOT negiert</figcaption></figure><figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="Exklusiv-ODER (XOR): a·b̄ + ā·b"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.2</text></g></g></svg></div></div><figcaption class="figura-pie">Exklusiv-ODER (XOR): a·b̄ + ā·b</figcaption></figure></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>a</th><th>b</th><th>UND</th><th>ODER</th><th>NAND</th><th>NOR</th><th>XOR</th><th>XNOR</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div></section>
+<section><h2 id="statusbits-als-kontakte">Statusbits als Kontakte</h2>
+<p>Kontakte <code>OV</code>, <code>OS</code>, <code>UO</code>, <code>BR</code>, <code>==0</code>, <code>&lt;&gt;0</code>, <code>&gt;0</code>, <code>&lt;0</code>, <code>&gt;=0</code> und <code>&lt;=0</code>. Sie fragen das Ergebnis der letzten Arithmetik- oder Vergleichsoperation ab (siehe <a href="../awl-vke-und-bitverknuepfung/#cpu-register">AWL: VKE und Bitlogik: CPU-Register</a>).</p></section>
+<section><h2 id="geloste-beispiele">Gelöste Beispiele</h2>
+        <article class="ejemplo" id="e01">
+          <h3><span class="codigo">E01</span>Schließer und Öffner</h3>
+          <p><strong>Aufgabe</strong>: Die Leuchte A4.0 leuchtet, wenn E0.0 = 1 ist, und die Leuchte A4.1, wenn E0.0 = 0 ist.</p>
+<p><strong>Konzepte</strong>: Ein Kontakt <strong>fragt</strong> den Zustand eines Bits <strong>ab</strong> (siehe <a href="../sps-zyklus/#sicherheitsverdrahtung-physischer-kontakt-kontakt-im-programm">Sicherheitsverdrahtung: physischer Kontakt ≠ Kontakt im Programm</a> und <a href="#bitverknupfungen">Bitverknüpfungen</a>).</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><line x1="47" y1="55" x2="65" y2="37" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E01&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>
+      <span class="t-ins">UN</span>    <span class="t-op">E 0.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span></code></pre>
+        </article>
+<article class="ejemplo" id="e02">
+          <h3><span class="codigo">E02</span>UND (Reihe) und ODER (parallel)</h3>
+          <p><strong>Aufgabe</strong>: A4.0 = E0.0 UND E0.1. A4.1 = E0.0 ODER E0.1.</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E02&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code><span class="t-com">// Netzwerk 1: UND</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>
+<span class="t-com">// Netzwerk 2: ODER</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span></code></pre>
+        </article>
+<article class="ejemplo" id="e03">
+          <h3><span class="codigo">E03</span>NAND, NOR und Exklusiv-ODER</h3>
+          <p><strong>Aufgabe</strong>: A4.0 = NAND, A4.1 = NOR und A4.2 = XOR von E0.0 und E0.1.</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="474" height="76" viewBox="0 0 474 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="266" y1="46" x2="350" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="209" y2="46" class="w"></line><line x1="239" y1="46" x2="266" y2="46" class="w"></line><rect x="209" y="37" width="30" height="18" rx="3" class="sym-box"></rect><text x="224" y="50" text-anchor="middle" class="boxtxt">NOT</text></g><g class="el"><rect x="352" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="350" y1="46" x2="380" y2="46" class="w"></line><path d="M 385 35 Q 378 46 385 57" class="sym-line " fill="none"></path><path d="M 399 35 Q 406 46 399 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="348" y="7" width="90" height="16" fill="transparent"></rect><text x="392" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="125" y2="46" class="w"></line><line x1="155" y1="46" x2="182" y2="46" class="w"></line><rect x="125" y="37" width="30" height="18" rx="3" class="sym-box"></rect><text x="140" y="50" text-anchor="middle" class="boxtxt">NOT</text></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 3</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.2</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E03&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 4.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code><span class="t-com">// NAND</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">NOT</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>
+<span class="t-com">// NOR</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">NOT</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>
+<span class="t-com">// XOR (AWL hat dafür die Anweisung X)</span>
+      <span class="t-ins">X</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">X</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.2</span></code></pre>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist KOP (Kontaktplan)?</summary><div class="faq-respuesta"><p>Die grafische SPS-Sprache, die wie ein Stromlaufplan aussieht: Der Strom kommt aus einer Schiene links, fließt durch Kontakte und kommt rechts an Spulen an. Auf Englisch heißt sie Ladder (LAD oder LD).</p></div></details>
+          <details><summary>Was ist der Unterschied zwischen einem Schließer und einem Öffner in KOP?</summary><div class="faq-respuesta"><p>Der Schließer <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--| |--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M25 10h10"/></svg> leitet, wenn sein Bit 1 ist, der Öffner <svg class="kop-ico" viewBox="0 0 36 20" width="36" height="20" role="img" aria-label="--|/|--"><path d="M1 10h10"/><path d="M13 3v14M23 3v14"/><path d="M14.5 16L21.5 4"/><path d="M25 10h10"/></svg>, wenn es 0 ist. Beide fragen nur den Zustand des Bits ab: Sie wissen nicht, wie der echte Taster verdrahtet ist.</p></div></details>
+          <details><summary>Was bedeuten zwei Kontakte in Reihe oder parallel?</summary><div class="faq-respuesta"><p>In Reihe eine UND-Verknüpfung: Der Strom fließt nur, wenn beide leiten. Parallel eine ODER-Verknüpfung: Es reicht, wenn einer leitet.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../bausteine-ob-fc-fb-db/"><span>← Zurück</span><b>Bausteine OB, FC, FB, DB</b></a>
+        <a class="pag-sig" href="../awl-vke-und-bitverknuepfung/"><span>Weiter →</span><b>AWL: VKE und Bitlogik</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Ausprobieren","pista":"Klicke auf die Eingänge.","pistaMayus":"Mit Umschalt + Klick wirkt ein Eingang als Taster, solange du ihn gedrückt hältst.","reiniciar":"Neu starten","valorNoValido":"Ungültiger Wert"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speicherbereiche der SPS: Eingänge, Ausgänge, Merker, Zeiten und Zähler · Automatizacion</title>
+  <meta name="description" content="Die Speicherbereiche einer SPS (E, A, M, T, Z, DB, L und Peripherie), wie Bits, Bytes, Wörter und Doppelwörter adressiert werden und wofür Merker verwendet werden.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/areas-de-memoria/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/memory-areas/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/areas-de-memoria/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Speicherbereiche der SPS: Eingänge, Ausgänge, Merker, Zeiten und Zähler">
+  <meta property="og:description" content="Die Speicherbereiche einer SPS (E, A, M, T, Z, DB, L und Peripherie), wie Bits, Bytes, Wörter und Doppelwörter adressiert werden und wofür Merker verwendet werden.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Speicherbereiche der SPS: Eingänge, Ausgänge, Merker, Zeiten und Zähler","description":"Die Speicherbereiche einer SPS (E, A, M, T, Z, DB, L und Peripherie), wie Bits, Bytes, Wörter und Doppelwörter adressiert werden und wofür Merker verwendet werden.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Aus welchen Bytes besteht das Merkerwort MW 10?","acceptedAnswer":{"@type":"Answer","text":"Aus MB10 und MB11. Ein Wort sind 2 Bytes ab der angegebenen Adresse: MB10 ist das höherwertige und MB11 das niederwertige Byte. Deshalb verwendet man Wörter in Zweierschritten (MW10, MW12…)."}},{"@type":"Question","name":"Warum ist EW 0 gleich 256, wenn nur der Eingang E 0.0 an ist?","acceptedAnswer":{"@type":"Answer","text":"Weil das Byte mit der niedrigsten Adresse das höchstwertige ist: EB0 ist das höherwertige Byte von EW0, und E0.0 ist sein Bit 8. Wäre nur E1.0 an, wäre EW0 gleich 1."}},{"@type":"Question","name":"Welchen Wert liefert ein Analogeingang bei 10 V oder 20 mA?","acceptedAnswer":{"@type":"Answer","text":"27648, das Ende des Nennbereichs. Darüber liegt der Übersteuerungsbereich bis 32511, und der Wert 32767 zeigt einen Überlauf oder Drahtbruch an."}},{"@type":"Question","name":"Was sind remanente Merker?","acceptedAnswer":{"@type":"Answer","text":"Merker, die ihren Wert nach einem Spannungsausfall oder einem Übergang von STOP nach RUN behalten. Das wird in den Eigenschaften der CPU eingestellt; bei vielen CPUs sind standardmäßig MB0..MB15 remanent."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Speicherbereiche","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/areas-de-memoria/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/memory-areas/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/speicherbereiche/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/" aria-current="page">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/" aria-current="page">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Speicherbereiche</span></nav>
+      <h1>Speicherbereiche der SPS: Eingänge, Ausgänge, Merker, Zeiten und Zähler</h1>
+      <p class="articulo-entradilla">Die Speicherbereiche einer SPS (E, A, M, T, Z, DB, L und Peripherie), wie Bits, Bytes, Wörter und Doppelwörter adressiert werden und wofür Merker verwendet werden.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="uberblick">Überblick</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bereich</th><th>Deutsch</th><th>Englisch</th><th>Inhalt</th><th>Zugriff im Programm</th><th>Mögliche Zugriffe</th></tr></thead><tbody><tr><td>Eingänge</td><td><strong>E</strong></td><td>I</td><td>Prozessabbild der Eingänge (PAE)</td><td>Lesen. Schreiben ist möglich, wird aber im nächsten Zyklus überschrieben</td><td><code>E</code>, <code>EB</code>, <code>EW</code>, <code>ED</code></td></tr><tr><td>Ausgänge</td><td><strong>A</strong></td><td>Q</td><td>Prozessabbild der Ausgänge (PAA)</td><td>Lesen und Schreiben</td><td><code>A</code>, <code>AB</code>, <code>AW</code>, <code>AD</code></td></tr><tr><td>Merker</td><td><strong>M</strong></td><td>M</td><td>Allgemeiner interner Speicher</td><td>Lesen und Schreiben</td><td><code>M</code>, <code>MB</code>, <code>MW</code>, <code>MD</code></td></tr><tr><td>Zeiten</td><td><strong>T</strong></td><td>T</td><td>Zeiten (zum Beispiel T0..T255)</td><td>Zeitoperationen</td><td><code>T n</code></td></tr><tr><td>Zähler</td><td><strong>Z</strong></td><td>C</td><td>Zähler (0..999)</td><td>Zähloperationen</td><td><code>Z n</code></td></tr><tr><td>Datenbausteine</td><td><strong>DB / DI</strong></td><td>DB / DI</td><td>Globale Daten (DB) oder Instanzdaten (DI)</td><td>Lesen und Schreiben</td><td><code>DBX</code>, <code>DBB</code>, <code>DBW</code>, <code>DBD</code> / <code>DIX</code>...</td></tr><tr><td>Lokaldaten</td><td><strong>L</strong></td><td>L</td><td>Temporäre Variablen des laufenden Bausteins</td><td>Lesen und Schreiben</td><td><code>L</code>, <code>LB</code>, <code>LW</code>, <code>LD</code></td></tr><tr><td>Peripherie</td><td><strong>PE / PA</strong></td><td>PI / PQ</td><td>Direkter Zugriff auf die Baugruppen, ohne Prozessabbild</td><td>Lesen (PE) und Schreiben (PA)</td><td><code>PEB</code>, <code>PEW</code>, <code>PED</code>, <code>PAB</code>, <code>PAW</code>, <code>PAD</code> (<strong>kein Bitzugriff</strong>)</td></tr></tbody></table></div></section>
+<section><h2 id="bit-byte-wort-und-doppelwort">Bit, Byte, Wort und Doppelwort</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Format</th><th>Größe</th><th>Beispiel</th><th>Bedeutung des Beispiels</th></tr></thead><tbody><tr><td>Bit</td><td>1 Bit</td><td><code>E 0.3</code></td><td>Eingang, Byte 0, Bit 3 (Bits 0 bis 7)</td></tr><tr><td>Byte (B)</td><td>8 Bit</td><td><code>MB 10</code></td><td>Merkerbyte 10</td></tr><tr><td>Wort (W)</td><td>16 Bit</td><td><code>MW 10</code></td><td>Bytes MB10 und MB11</td></tr><tr><td>Doppelwort (D)</td><td>32 Bit</td><td><code>MD 10</code></td><td>Bytes MB10, MB11, MB12 und MB13</td></tr></tbody></table></div>
+<p><strong>Bytereihenfolge (Big Endian)</strong>: Das Byte mit der <strong>niedrigsten Adresse ist das höchstwertige</strong>.</p>
+<figure class="figura-tabla"><div class="tabla"><table class="mapa">
+    <tr><th>Doppelwort</th><td colspan="4" class="m-d">MD 10</td></tr>
+    <tr><th>Wörter</th><td colspan="2" class="m-w">MW 10</td><td colspan="2" class="m-w">MW 12</td></tr>
+    <tr><th>Bytes</th><td class="m-b">MB 10</td><td class="m-b">MB 11</td><td class="m-b">MB 12</td><td class="m-b">MB 13</td></tr>
+    <tr><th>Bits von MD 10</th><td class="m-bits">31…24</td><td class="m-bits">23…16</td><td class="m-bits">15…8</td><td class="m-bits">7…0</td></tr>
+  </table></div><figcaption class="figura-pie">Das Byte mit der niedrigsten Adresse ist das höchstwertige: MW10 = MB10 · 256 + MB11, also ist MB10 das High-Byte von MW10.</figcaption></figure>
+<p>Position jedes Bits in einem Wort, zum Beispiel <code>EW 0</code>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bit von <code>EW 0</code></th><th>15</th><th>14</th><th>…</th><th>8</th><th>7</th><th>…</th><th>0</th></tr></thead><tbody><tr><td>Physisches Bit</td><td>E0.7</td><td>E0.6</td><td>…</td><td><strong>E0.0</strong></td><td>E1.7</td><td>…</td><td><strong>E1.0</strong></td></tr></tbody></table></div>
+<blockquote>
+<p><strong>Klassische Falle</strong>: Ist nur <code>E 0.0</code> = 1, dann ist <code>EW 0</code> = 256 (W#16#0100), nicht 1. Ist nur <code>E 1.0</code> = 1, ist <code>EW 0</code> = 1.</p>
+</blockquote>
+<p><strong>Überlappungen</strong>: <code>MW 10</code> und <code>MW 11</code> teilen sich das Byte <code>MB 11</code>. Damit keine Daten überschrieben werden, verwendet man Wörter in Zweierschritten (<code>MW10</code>, <code>MW12</code>...) und Doppelwörter in Viererschritten (<code>MD20</code>, <code>MD24</code>...).</p></section>
+<section><h2 id="e-a-adressen">E/A-Adressen</h2>
+<ul>
+<li><strong>Steckplatzorientierte Adressierung (Standard)</strong>: Im Baugruppenträger 0 ist Steckplatz 1 die Stromversorgung, Steckplatz 2 die CPU, Steckplatz 3 die Anschaltungsbaugruppe (IM) und die Steckplätze 4 bis 11 die Signalbaugruppen.
+<ul>
+<li><strong>Digitale</strong> Baugruppen: Anfangsbyte = (Steckplatz − 4) × 4. Zum Beispiel belegt Steckplatz 4 E0.0..E3.7, und Steckplatz 5 beginnt bei Byte 4.</li>
+<li><strong>Analoge</strong> Baugruppen: Anfangsadresse = 256 + (Steckplatz − 4) × 16. Zum Beispiel belegt Steckplatz 4 PEW256..PEW270.</li>
+</ul>
+</li>
+<li><strong>Kompakt-CPUs</strong> (in Übungsgeräten sehr verbreitet): Die integrierte E/A liegt meist bei E124.0..E126.7 und A124.0..A125.7, die analogen Kanäle bei PEW752.. / PAW752... Prüfe sie immer in der <strong>Hardwarekonfiguration</strong>, denn sie lässt sich ändern.</li>
+<li><strong>Analogwerte</strong>: Der Nennbereich ist <strong>0..27648</strong> und entspricht zum Beispiel 0..10 V oder 4..20 mA. Über 27648 liegt der Übersteuerungsbereich (bis 32511). Der Wert <strong>32767</strong> zeigt einen Überlauf oder Drahtbruch an.</li>
+</ul></section>
+<section><h2 id="merker-m">Merker (M)</h2>
+<p>Merker sind der „Bit-Arbeitsspeicher“ des Programmierers. Sie werden verwendet als:</p>
+<ul>
+<li><strong>Hilfsmerker</strong>: Zwischenergebnisse, die an mehreren Stellen gebraucht werden.</li>
+<li><strong>Schrittmerker</strong>: In Ablaufsteuerungen und GRAFCET ist jeder Schritt ein Merker, der mit S gesetzt und mit R rückgesetzt wird.</li>
+<li><strong>Flankenmerker</strong>: der Speicher, den <code>FP</code> und <code>FN</code> brauchen. <strong>Für jede Flanke ein eigener Merker, der für nichts anderes verwendet wird.</strong></li>
+<li><strong>Zahlenwerte</strong>: <code>MW</code> für INT, <code>MD</code> für DINT oder REAL.</li>
+</ul>
+<p><strong>Remanente Merker</strong>: Sie behalten ihren Wert nach einem Spannungsausfall oder einem Übergang STOP→RUN. Das wird unter <em>Eigenschaften der CPU → Remanenz</em> eingestellt. Bei vielen CPUs sind standardmäßig <strong>MB0..MB15</strong> remanent.</p>
+<p><strong>Taktmerker</strong>: ein Merkerbyte, dessen Bits sich von selbst ändern, jedes mit einer festen Frequenz. Damit lassen sich Leuchten ohne Zeiten blinken lassen (siehe <a href="../taktmerker/#taktmerker">Taktmerker: Taktmerker</a>).</p></section>
+<section><h2 id="lokaldaten-l-und-datenbausteine-db">Lokaldaten (L) und Datenbausteine (DB)</h2>
+<ul>
+<li><strong>L (temporäre Daten)</strong>: Sie existieren nur, während der Baustein läuft. <strong>Zu Beginn des Bausteins ist ihr Wert undefiniert</strong>, deshalb müssen sie geschrieben werden, bevor sie gelesen werden. Im OB1 enthalten die ersten 20 Bytes (LB0..LB19) die Startinformation des OB, deshalb beginnen die temporären Daten des Anwenders bei LB20.</li>
+<li><strong>Globale DBs</strong>: Der Zugriff erfolgt mit der vollständigen Adresse (<code>DB1.DBW 0</code>) oder indem man den DB zuerst öffnet (<code>AUF DB 1</code>) und dann <code>DBW 0</code>, <code>DBX 2.0</code> usw. verwendet.</li>
+<li><strong>Instanz-DB (DI)</strong>: der eigene Speicher jedes Aufrufs eines FB. Dort werden seine Parameter und seine statischen Variablen (STAT) gespeichert.</li>
+</ul></section>
+<section><h2 id="teste-dein-wissen">Teste dein Wissen</h2><p class="nota">Überlege dir die Antwort, bevor du die Lösung aufklappst.</p>
+        <article class="pregunta" id="q06">
+          <h3><span class="codigo">Q06</span>Bytereihenfolge</h3>
+          <p>Wenn nur E0.0 = 1 ist, welchen Wert hat MW30? Und wenn nur E1.0 = 1 ist?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">EW 0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 30</span></code></pre>
+<details><summary>Lösung</summary>
+<ul>
+<li>Nur E0.0 = 1: <strong>256</strong>. EB0 ist das höherwertige Byte von EW0.</li>
+<li>Nur E1.0 = 1: <strong>1</strong>.</li>
+</ul>
+</details>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Aus welchen Bytes besteht das Merkerwort MW 10?</summary><div class="faq-respuesta"><p>Aus MB10 und MB11. Ein Wort sind 2 Bytes ab der angegebenen Adresse: MB10 ist das höherwertige und MB11 das niederwertige Byte. Deshalb verwendet man Wörter in Zweierschritten (MW10, MW12…).</p></div></details>
+          <details><summary>Warum ist EW 0 gleich 256, wenn nur der Eingang E 0.0 an ist?</summary><div class="faq-respuesta"><p>Weil das Byte mit der niedrigsten Adresse das höchstwertige ist: EB0 ist das höherwertige Byte von EW0, und E0.0 ist sein Bit 8. Wäre nur E1.0 an, wäre EW0 gleich 1.</p></div></details>
+          <details><summary>Welchen Wert liefert ein Analogeingang bei 10 V oder 20 mA?</summary><div class="faq-respuesta"><p>27648, das Ende des Nennbereichs. Darüber liegt der Übersteuerungsbereich bis 32511, und der Wert 32767 zeigt einen Überlauf oder Drahtbruch an.</p></div></details>
+          <details><summary>Was sind remanente Merker?</summary><div class="faq-respuesta"><p>Merker, die ihren Wert nach einem Spannungsausfall oder einem Übergang von STOP nach RUN behalten. Das wird in den Eigenschaften der CPU eingestellt; bei vielen CPUs sind standardmäßig MB0..MB15 remanent.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../sps-zyklus/"><span>← Zurück</span><b>Der SPS-Zyklus</b></a>
+        <a class="pag-sig" href="../datentypen/"><span>Weiter →</span><b>Datentypen</b></a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tipos de datos y constantes: INT, DINT, REAL, BCD y S5TIME · Automatizacion</title>
+  <meta name="description" content="Tipos de datos de KOP y AWL con su rango y sus constantes: BOOL, BYTE, WORD, INT, DINT, REAL, S5TIME y TIME. Cómo funciona el BCD, el formato interno de S5TIME y el direccionamiento simbólico.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/data-types/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/datentypen/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Tipos de datos y constantes: INT, DINT, REAL, BCD y S5TIME">
+  <meta property="og:description" content="Tipos de datos de KOP y AWL con su rango y sus constantes: BOOL, BYTE, WORD, INT, DINT, REAL, S5TIME y TIME. Cómo funciona el BCD, el formato interno de S5TIME y el direccionamiento simbólico.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Tipos de datos y constantes: INT, DINT, REAL, BCD y S5TIME","description":"Tipos de datos de KOP y AWL con su rango y sus constantes: BOOL, BYTE, WORD, INT, DINT, REAL, S5TIME y TIME. Cómo funciona el BCD, el formato interno de S5TIME y el direccionamiento simbólico.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué es el BCD y para qué se usa en los autómatas?","acceptedAnswer":{"@type":"Answer","text":"Es una forma de guardar números en la que cada grupo de 4 bits es una cifra decimal del 0 al 9: W#16#0123 en BCD vale 123. Lo usan las ruedas de dígitos, los displays y los valores de tiempo y de contaje."}},{"@type":"Question","name":"¿Cómo se guarda S5T#5S en el acumulador?","acceptedAnswer":{"@type":"Answer","text":"Como W#16#0500: base de tiempo de 10 ms (bits 13-12 = 00) y el valor 500 en BCD."}},{"@type":"Question","name":"¿Por qué L 500 no sirve como valor de tiempo?","acceptedAnswer":{"@type":"Answer","text":"Porque 500 en binario es W#16#01F4, que contiene la cifra F y no es un BCD válido. Al arrancar el temporizador hay un error y la CPU pasa a STOP. Hay que escribir L S5T#5S."}},{"@type":"Question","name":"¿Cómo paso un número INT a REAL?","acceptedAnswer":{"@type":"Answer","text":"En dos pasos: ITD (INT a DINT) y después DTR (DINT a REAL). En KOP, con los cuadros I_DI y DI_R. No existe una conversión directa de INT a REAL."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Tipos de datos","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/tipos-de-datos/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/data-types/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/datentypen/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/" aria-current="page">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/" aria-current="page">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Tipos de datos</span></nav>
+      <h1>Tipos de datos y constantes: INT, DINT, REAL, BCD y S5TIME</h1>
+      <p class="articulo-entradilla">Tipos de datos de KOP y AWL con su rango y sus constantes: BOOL, BYTE, WORD, INT, DINT, REAL, S5TIME y TIME. Cómo funciona el BCD, el formato interno de S5TIME y el direccionamiento simbólico.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="tipos-simples">Tipos simples</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Tipo</th><th>Bits</th><th>Rango</th><th>Constante de ejemplo (AWL)</th></tr></thead><tbody><tr><td>BOOL</td><td>1</td><td>0 / 1</td><td>(los bits no se cargan con <code>L</code>)</td></tr><tr><td>BYTE</td><td>8</td><td>0..255</td><td><code>B#16#1F</code></td></tr><tr><td>WORD</td><td>16</td><td>0..FFFF</td><td><code>W#16#00FF</code>, <code>2#0000000011111111</code>, <code>C#123</code> (BCD), <code>B#(1,2)</code></td></tr><tr><td>DWORD</td><td>32</td><td>0..FFFF FFFF</td><td><code>DW#16#00010000</code>, <code>B#(1,2,3,4)</code></td></tr><tr><td>CHAR</td><td>8</td><td>carácter ASCII</td><td><code>&#x27;A&#x27;</code></td></tr><tr><td>INT</td><td>16</td><td>−32768..32767</td><td><code>123</code>, <code>-5</code></td></tr><tr><td>DINT</td><td>32</td><td>−2147483648..2147483647</td><td><code>L#100000</code>, <code>L#-1</code></td></tr><tr><td>REAL</td><td>32</td><td>±1,175495e−38..±3,402823e+38 (IEEE 754)</td><td><code>1.5</code>, <code>2.764800e+004</code></td></tr><tr><td>S5TIME</td><td>16</td><td>0 ms..2 h 46 min 30 s</td><td><code>S5T#5S</code>, <code>S5T#1M30S</code>, <code>S5T#500MS</code></td></tr><tr><td>TIME</td><td>32</td><td>±24 días 20 h 31 min 23 s 647 ms (en ms)</td><td><code>T#1M30S</code>, <code>T#500MS</code></td></tr><tr><td>DATE</td><td>16</td><td>1990-01-01..2168-12-31 (días desde 1990)</td><td><code>D#2026-10-13</code></td></tr><tr><td>TIME_OF_DAY</td><td>32</td><td>0:00:00.000..23:59:59.999 (ms desde medianoche)</td><td><code>TOD#12:30:00.000</code></td></tr></tbody></table></div>
+<ul>
+<li><strong>Tipos compuestos</strong>: DATE_AND_TIME (8 bytes en BCD), STRING[n] (n+2 bytes), ARRAY, STRUCT y UDT.</li>
+<li><strong>Tipos de parámetro</strong>: TIMER, COUNTER, BLOCK_FC, BLOCK_FB, BLOCK_DB, POINTER (6 bytes) y ANY (10 bytes).</li>
+</ul></section>
+<section><h2 id="bcd-decimal-codificado-en-binario">BCD (decimal codificado en binario)</h2>
+<p>En BCD cada grupo de 4 bits (nibble) es una cifra decimal del 0 al 9. Por ejemplo, <code>W#16#0123</code> en BCD vale <strong>123</strong>. Lo usan las ruedas de dígitos (preselectores), los displays y los valores de tiempo (S5TIME) y de contaje.</p>
+<ul>
+<li><strong>BCD de palabra (3 cifras con signo)</strong>: los bits 11..0 son las tres cifras y los bits 15..12 el signo (<code>0000</code> positivo, <code>1111</code> negativo). Rango ±999.</li>
+<li><strong>BCD de doble palabra (7 cifras con signo)</strong>: rango ±9 999 999.</li>
+<li>Una cifra de A a F <strong>no es BCD válido</strong>. Por ejemplo, <code>BTI</code> sobre <code>W#16#00A1</code> provoca un <strong>error de conversión BCD</strong> (OB121), y si el OB121 no existe la CPU pasa a STOP.</li>
+</ul></section>
+<section><h2 id="formato-interno-de-s5time">Formato interno de S5TIME</h2>
+<figure class="figura-tabla"><div class="tabla"><table class="mapa mapa-bits">
+    <tr><th>Bit</th><td class="m-bits">15</td><td class="m-bits">14</td><td class="m-bits">13</td><td class="m-bits">12</td><td class="m-bits">11</td><td class="m-bits">10</td><td class="m-bits">9</td><td class="m-bits">8</td><td class="m-bits">7</td><td class="m-bits">6</td><td class="m-bits">5</td><td class="m-bits">4</td><td class="m-bits">3</td><td class="m-bits">2</td><td class="m-bits">1</td><td class="m-bits">0</td></tr>
+    <tr><th></th><td colspan="2" class="m-gris">sin uso</td><td colspan="2" class="m-d">base</td><td colspan="4" class="m-w">centenas</td><td colspan="4" class="m-b">decenas</td><td colspan="4" class="m-w">unidades</td></tr>
+    <tr><th>S5T#5S</th><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor uno">1</td><td class="m-valor">0</td><td class="m-valor uno">1</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td><td class="m-valor">0</td></tr>
+  </table></div><figcaption class="figura-pie">S5T#5S se guarda como W#16#0500: base 00 (10 ms) y las cifras 5, 0 y 0 en BCD, es decir, 500 × 10 ms = 5 s.</figcaption></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Base (bits 13–12)</th><th>Resolución</th><th>Rango</th></tr></thead><tbody><tr><td>00</td><td>10 ms</td><td>10 ms – 9 s 990 ms</td></tr><tr><td>01</td><td>100 ms</td><td>100 ms – 1 min 39 s 900 ms</td></tr><tr><td>10</td><td>1 s</td><td>1 s – 16 min 39 s</td></tr><tr><td>11</td><td>10 s</td><td>10 s – 2 h 46 min 30 s</td></tr></tbody></table></div>
+<p>El editor elige automáticamente la base más fina en la que cabe el valor:</p>
+<ul>
+<li><code>S5T#5S</code> = 500 × 10 ms → <strong>W#16#0500</strong></li>
+<li><code>S5T#12S</code> = 120 × 100 ms → <strong>W#16#1120</strong></li>
+<li><code>S5T#2M</code> = 120 × 1 s → <strong>W#16#2120</strong></li>
+</ul>
+<blockquote>
+<p><strong>Trampa</strong>: <code>L 500</code> <strong>no</strong> son 5 segundos. 500 en binario es W#16#01F4, que contiene la cifra F, así que no es BCD válido y provoca un error. Hay que escribir <code>L S5T#5S</code> o <code>L W#16#0500</code>.</p>
+</blockquote></section>
+<section><h2 id="real">REAL</h2>
+<p>Los REAL siguen el estándar IEEE 754 de 32 bits. Hay que tener en cuenta dos cosas:</p>
+<ul>
+<li>Para operar enteros con REAL hay que convertirlos antes: <strong>INT → DINT → REAL</strong> (<code>ITD</code> y luego <code>DTR</code>).</li>
+<li>No conviene comparar dos REAL con <code>==R</code>: es mejor comparar con un margen.</li>
+</ul></section>
+<section><h2 id="direccionamiento-simbolico">Direccionamiento simbólico</h2>
+<ul>
+<li>La <strong>tabla de símbolos</strong> asigna a cada operando un nombre, un tipo de datos y un comentario. Por ejemplo: <code>&quot;Marcha&quot;</code> → E 0.0, BOOL, &quot;Pulsador de marcha NA&quot;.</li>
+<li>En el código, los símbolos globales van <strong>entre comillas dobles</strong> (<code>U &quot;Marcha&quot;</code>) y las variables locales del bloque llevan <strong>#</strong> (<code>U #Paro</code>).</li>
+<li>En el editor: <em>Ver → Representación simbólica</em> y <em>Ver → Mostrar → Información del símbolo</em>.</li>
+</ul></section>
+<section><h2 id="ejemplos-resueltos">Ejemplos resueltos</h2>
+        <article class="ejemplo" id="e24">
+          <h3><span class="codigo">E24</span>Rueda de dígitos BCD y display</h3>
+          <p><strong>Enunciado</strong>:</p>
+<ul>
+<li>EW2 = rueda de 3 dígitos en BCD. MW70 = su valor entero.</li>
+<li>MW72 = MW70 + 1.</li>
+<li>AW6 = MW72 en BCD, para un display de 3 dígitos.</li>
+</ul>
+<p><strong>Conceptos</strong>: BCD y orden de bytes. AW6 = AB6 (byte alto) + AB7 (byte bajo).</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><p class="kop-titulo">Segmento 1 · BCD → INT</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">BCD_I</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">EW 2</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 70</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 2 · Sumar 1</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">ADD_I</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MW 70</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">1</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 72</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 3 · INT → BCD al display</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">I_BCD</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MW 72</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">AW 6</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E24&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;EW 2&quot;,&quot;tipo&quot;:&quot;WORD&quot;,&quot;valor&quot;:&quot;W#16#0123&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 6.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 7.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 7.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 7.5&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MW 70&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;123&quot;},{&quot;op&quot;:&quot;MW 72&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;124&quot;},{&quot;op&quot;:&quot;AW 6&quot;,&quot;tipo&quot;:&quot;WORD&quot;,&quot;valor&quot;:&quot;W#16#0124&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">EW 2</span>
+      <span class="t-ins">BTI</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 70</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 70</span>
+      <span class="t-ins">L</span>     <span class="t-cte">1</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 72</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 72</span>
+      <span class="t-ins">ITB</span>
+      <span class="t-ins">T</span>     <span class="t-op">AW 6</span></code></pre>
+        </article></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Qué es el BCD y para qué se usa en los autómatas?</summary><div class="faq-respuesta"><p>Es una forma de guardar números en la que cada grupo de 4 bits es una cifra decimal del 0 al 9: <code>W#16#0123</code> en BCD vale 123. Lo usan las ruedas de dígitos, los displays y los valores de tiempo y de contaje.</p></div></details>
+          <details><summary>¿Cómo se guarda S5T#5S en el acumulador?</summary><div class="faq-respuesta"><p>Como <code>W#16#0500</code>: base de tiempo de 10 ms (bits 13-12 = 00) y el valor 500 en BCD.</p></div></details>
+          <details><summary>¿Por qué <code>L 500</code> no sirve como valor de tiempo?</summary><div class="faq-respuesta"><p>Porque 500 en binario es <code>W#16#01F4</code>, que contiene la cifra F y no es un BCD válido. Al arrancar el temporizador hay un error y la CPU pasa a STOP. Hay que escribir <code>L S5T#5S</code>.</p></div></details>
+          <details><summary>¿Cómo paso un número INT a REAL?</summary><div class="faq-respuesta"><p>En dos pasos: <code>ITD</code> (INT a DINT) y después <code>DTR</code> (DINT a REAL). En KOP, con los cuadros <code>I_DI</code> y <code>DI_R</code>. No existe una conversión directa de INT a REAL.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <a class="pag-ant" href="../areas-de-memoria/"><span>← Anterior</span><b>Áreas de memoria</b></a>
+        <a class="pag-sig" href="../bloques-ob-fc-fb-db/"><span>Siguiente →</span><b>Bloques OB, FC, FB y DB</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Pruébalo","pista":"Haz clic en las entradas.","pistaMayus":"Con Mayús + clic, la entrada funciona como un pulsador mientras la mantienes.","reiniciar":"Reiniciar","valorNoValido":"Valor no válido"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Indirekte Adressierung und MCR in AWL · Automatizacion</title>
+  <meta name="description" content="Speicherindirekte und registerindirekte Adressierung in AWL, das Format des Bereichszeigers und das Master Control Relay (MCR), mit einem Beispiel, das eine Tabelle von Wörtern aufsummiert.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/direccionamiento-indirecto-y-mcr/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/indirect-addressing-and-mcr/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/direccionamiento-indirecto-y-mcr/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Indirekte Adressierung und MCR in AWL">
+  <meta property="og:description" content="Speicherindirekte und registerindirekte Adressierung in AWL, das Format des Bereichszeigers und das Master Control Relay (MCR), mit einem Beispiel, das eine Tabelle von Wörtern aufsummiert.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Indirekte Adressierung und MCR in AWL","description":"Speicherindirekte und registerindirekte Adressierung in AWL, das Format des Bereichszeigers und das Master Control Relay (MCR), mit einem Beispiel, das eine Tabelle von Wörtern aufsummiert.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist indirekte Adressierung in AWL?","acceptedAnswer":{"@type":"Answer","text":"Eine Adresse zu verwenden, die an anderer Stelle gespeichert ist, statt sie fest in den Code zu schreiben. Zum Beispiel lädt L MW [MD 30] das Wort, dessen Adresse in MD30 steht. Damit durchläuft man Tabellen in einer Schleife."}},{"@type":"Question","name":"Wie berechnet man einen Zeiger P#?","acceptedAnswer":{"@type":"Answer","text":"Bytenummer × 8 + Bitnummer. P#10.0 ist 80 und P#2.0 ist 16: Deshalb rückt ein Zeiger um ein Wort weiter, wenn man P#2.0 addiert."}},{"@type":"Question","name":"Ersetzt das MCR einen Not-Halt?","acceptedAnswer":{"@type":"Answer","text":"Nein. Das MCR bewirkt nur, dass in einem Bereich des Programms die Zuweisungen = und die Transfers T eine 0 schreiben. Ein Not-Halt muss getrennt verdrahtet werden, außerhalb des Programms."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Indirekte Adressierung","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/direccionamiento-indirecto-y-mcr/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/indirect-addressing-and-mcr/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/indirekte-adressierung-und-mcr/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/" aria-current="page">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/" aria-current="page">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Indirekte Adressierung</span></nav>
+      <h1>Indirekte Adressierung und MCR in AWL</h1>
+      <p class="articulo-entradilla">Speicherindirekte und registerindirekte Adressierung in AWL, das Format des Bereichszeigers und das Master Control Relay (MCR), mit einem Beispiel, das eine Tabelle von Wörtern aufsummiert.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="indirekte-adressierung-fortgeschritten">Indirekte Adressierung (fortgeschritten)</h2>
+<ul>
+<li><strong>Speicherindirekt</strong>: Die Adresse steht in einem Merker oder einem Datum, im Zeigerformat. Zum Beispiel: <code>L MW [MD 30]</code> oder <code>U E [MD 34]</code>.</li>
+<li><strong>Registerindirekt</strong>: <code>LAR1 P#M 100.0</code> und danach <code>L MW [AR1, P#2.0]</code>.</li>
+<li>Format des Bereichszeigers (32 Bit): Bytenummer × 8 + Bitnummer. Zum Beispiel entspricht <code>P#10.0</code> dem Wert 80.</li>
+</ul>
+<p>Beispiel: MW100..MW118 mit einem Zeiger durchlaufen und aufsummieren.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-cte">P#100.0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 30</span>           <span class="t-com">// Zeiger auf das erste Element</span>
+      <span class="t-ins">L</span>     <span class="t-cte">0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 40</span>           <span class="t-com">// Summe = 0</span>
+      <span class="t-ins">L</span>     <span class="t-cte">10</span>              <span class="t-com">// 10 Elemente</span>
+<span class="t-meta">SIG:</span>  <span class="t-ins">T</span>     <span class="t-op">MW 34</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW [MD 30]</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">P#2.0</span>           <span class="t-com">// nächstes Wort</span>
+      <span class="t-ins">+D</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 30</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 34</span>
+      <span class="t-ins">LOOP</span>  <span class="t-op">SIG</span></code></pre></section>
+<section><h2 id="mcr-master-control-relay">MCR (Master Control Relay)</h2>
+<ul>
+<li><code>MCRA</code> aktiviert den MCR-Bereich und <code>MCRD</code> deaktiviert ihn.</li>
+<li>Innerhalb von <code>MCR(</code> … <code>)MCR</code> schreiben alle Zuweisungen <code>=</code> und alle Transfers <code>T</code> den Wert 0, wenn die Bedingung vor <code>MCR(</code> gleich 0 ist. <code>S</code> und <code>R</code> wirken dann nicht.</li>
+<li><strong>Es ersetzt keinen fest verdrahteten Not-Halt-Kreis.</strong></li>
+</ul></section>
+<section><h2 id="geloste-beispiele">Gelöste Beispiele</h2>
+        <article class="ejemplo" id="e29">
+          <h3><span class="codigo">E29</span>Tabelle mit indirekter Adressierung aufsummieren</h3>
+          <p><strong>Aufgabe</strong>: MW40 = Summe der 10 Wörter MW100, MW102, …, MW118.</p>
+<p><strong>Konzepte</strong>: Bereichszeiger (<code>P#Byte.Bit</code> = Byte × 8 + Bit), <code>L MW [MD 30]</code> und <code>LOOP</code> (siehe <a href="#indirekte-adressierung-fortgeschritten">Indirekte Adressierung (fortgeschritten)</a>). Gibt es nur in AWL: In KOP gibt es keine Darstellung dafür.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-cte">P#100.0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 30</span>       <span class="t-com">// Zeiger auf das erste Element (100 × 8 = 800)</span>
+      <span class="t-ins">L</span>     <span class="t-cte">0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 40</span>       <span class="t-com">// Summe = 0</span>
+      <span class="t-ins">L</span>     <span class="t-cte">10</span>          <span class="t-com">// 10 Elemente</span>
+<span class="t-meta">SIG:</span>  <span class="t-ins">T</span>     <span class="t-op">MW 34</span>       <span class="t-com">// Schleifenzähler</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW [MD 30]</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">P#2.0</span>       <span class="t-com">// ein Wort weiter (2 Bytes = 16)</span>
+      <span class="t-ins">+D</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 30</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 34</span>
+      <span class="t-ins">LOOP</span>  <span class="t-op">SIG</span></code></pre><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E29&quot;,&quot;kop&quot;:false,&quot;awl&quot;:&quot;      L     P#100.0\n      T     MD 30       // puntero al primer elemento (100 × 8 = 800)\n      L     0\n      T     MW 40       // suma = 0\n      L     10          // 10 elementos\nSIG:  T     MW 34       // contador del bucle\n      L     MW 40\n      L     MW [MD 30]\n      +I\n      T     MW 40\n      L     MD 30\n      L     P#2.0       // avanza una palabra (2 bytes = 16)\n      +D\n      T     MD 30\n      L     MW 34\n      LOOP  SIG\n&quot;,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;MW 100&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;1&quot;},{&quot;op&quot;:&quot;MW 102&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;2&quot;},{&quot;op&quot;:&quot;MW 104&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;3&quot;},{&quot;op&quot;:&quot;MW 106&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;4&quot;},{&quot;op&quot;:&quot;MW 108&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;5&quot;},{&quot;op&quot;:&quot;MW 110&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;6&quot;},{&quot;op&quot;:&quot;MW 112&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;7&quot;},{&quot;op&quot;:&quot;MW 114&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;8&quot;},{&quot;op&quot;:&quot;MW 116&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;9&quot;},{&quot;op&quot;:&quot;MW 118&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;10&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;MW 40&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;55&quot;},{&quot;op&quot;:&quot;MD 30&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;960&quot;}]}"></div>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist indirekte Adressierung in AWL?</summary><div class="faq-respuesta"><p>Eine Adresse zu verwenden, die an anderer Stelle gespeichert ist, statt sie fest in den Code zu schreiben. Zum Beispiel lädt <code>L MW [MD 30]</code> das Wort, dessen Adresse in MD30 steht. Damit durchläuft man Tabellen in einer Schleife.</p></div></details>
+          <details><summary>Wie berechnet man einen Zeiger P#?</summary><div class="faq-respuesta"><p>Bytenummer × 8 + Bitnummer. <code>P#10.0</code> ist 80 und <code>P#2.0</code> ist 16: Deshalb rückt ein Zeiger um ein Wort weiter, wenn man <code>P#2.0</code> addiert.</p></div></details>
+          <details><summary>Ersetzt das MCR einen Not-Halt?</summary><div class="faq-respuesta"><p>Nein. Das MCR bewirkt nur, dass in einem Bereich des Programms die Zuweisungen <code>=</code> und die Transfers <code>T</code> eine 0 schreiben. Ein Not-Halt muss getrennt verdrahtet werden, außerhalb des Programms.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../spruenge-und-schleifen/"><span>← Zurück</span><b>Sprünge und Schleifen</b></a>
+        <a class="pag-sig" href="../kop-awl-entsprechungen/"><span>Weiter →</span><b>KOP ↔ AWL</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Ausprobieren","pista":"Klicke auf die Eingänge.","pistaMayus":"Mit Umschalt + Klick wirkt ein Eingang als Taster, solange du ihn gedrückt hältst.","reiniciar":"Neu starten","valorNoValido":"Ungültiger Wert"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

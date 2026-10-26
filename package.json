@@ -16,6 +16,7 @@
     "test:diff": "DIFF=1 vitest run tests/core/differential.test.ts",
     "e2e": "playwright test",
     "icon": "node scripts/make-icon.mjs",
+    "web:teoria": "node scripts/web-teoria.mjs",
     "dist": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64",
     "dist:dev": "npm run dist && node scripts/publicar.mjs dev",
     "publicar:prod": "node scripts/publicar.mjs prod"

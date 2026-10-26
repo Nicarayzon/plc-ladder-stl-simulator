@@ -1,0 +1,316 @@
+/* Páginas de teoría (docs/<idioma>/<carpeta>/). Se cargan después de estilos.css y usan sus colores. */
+
+:root {
+  --code-bg: #12151a;
+  --cte: #e5a35a;
+  --meta: #c792ea;
+  --cota: #ffa94d;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) { --code-bg: #f8f9fb; --cte: #b45f06; --meta: #8a3fc7; --cota: #ea7a0c; }
+}
+:root[data-theme='light'] { --code-bg: #f8f9fb; --cte: #b45f06; --meta: #8a3fc7; --cota: #ea7a0c; }
+
+/* ───────── Cabecera ───────── */
+
+.menu a.activo { color: var(--text); background: var(--bg-elev2); }
+
+.idiomas { display: flex; gap: 2px; padding: 3px; margin-right: 4px; border: 1px solid var(--border); border-radius: 10px; }
+.idiomas a {
+  padding: 3px 8px; border-radius: 7px;
+  font: 600 0.75rem/1.4 var(--mono); color: var(--text-dim); text-decoration: none;
+}
+.idiomas a:hover { color: var(--text); background: var(--bg-elev2); }
+.idiomas a[aria-current] { color: var(--accent); background: var(--accent-bg); }
+
+/* ───────── Distribución: índice a la izquierda y artículo ───────── */
+
+.teoria {
+  display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 56px; align-items: start;
+  padding-top: 40px; padding-bottom: 88px;
+}
+
+.lateral { position: sticky; top: 86px; max-height: calc(100vh - 110px); overflow-y: auto; font-size: 0.9rem; }
+.lateral-titulo { margin-bottom: 10px; font: 600 0.78rem var(--mono); letter-spacing: 0.12em; text-transform: uppercase; }
+.lateral-titulo a { color: var(--accent); text-decoration: none; }
+.lateral ol, .indice-movil ol { display: grid; gap: 1px; margin: 0; padding: 0; list-style: none; }
+.lateral li a, .indice-movil li a {
+  display: block; padding: 6px 10px; border-radius: 8px;
+  color: var(--text-dim); text-decoration: none; line-height: 1.35;
+}
+.lateral li a:hover, .indice-movil li a:hover { color: var(--text); background: var(--bg-elev2); }
+.lateral li a[aria-current], .indice-movil li a[aria-current] { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+
+.indice-movil { display: none; }
+
+@media (max-width: 960px) {
+  .teoria { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 24px; }
+  .lateral { display: none; }
+  .indice-movil { display: block; margin-bottom: 28px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-elev); }
+  .indice-movil summary { padding: 12px 16px; cursor: pointer; font-weight: 600; }
+  .indice-movil ol { padding: 0 8px 10px; font-size: 0.95rem; }
+}
+
+/* ───────── Artículo ───────── */
+
+.articulo { min-width: 0; max-width: 780px; }
+
+.migas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; color: var(--text-faint); font-size: 0.88rem; }
+.migas a { color: var(--text-dim); text-decoration: none; }
+.migas a:hover { color: var(--accent); }
+
+.articulo h1 { margin-bottom: 16px; font-size: clamp(1.85rem, 3.6vw, 2.6rem); font-weight: 750; }
+.articulo-entradilla { color: var(--text-dim); font-size: 1.12rem; }
+
+.articulo-cuerpo > section { margin-top: 52px; }
+.articulo-cuerpo h2 { margin-bottom: 18px; font-size: 1.55rem; font-weight: 700; scroll-margin-top: 80px; }
+.articulo-cuerpo h3 { margin-bottom: 14px; font-size: 1.15rem; scroll-margin-top: 80px; }
+.articulo-cuerpo :is(p, ul, ol, pre, blockquote, .tabla, .kop) { margin: 0 0 16px; }
+.articulo-cuerpo :is(ul, ol) { padding-left: 1.3em; }
+.articulo-cuerpo li + li { margin-top: 4px; }
+.articulo-cuerpo li > :is(ul, ol) { margin: 6px 0 0; }
+.articulo-cuerpo strong { font-weight: 650; }
+.articulo-cuerpo hr { margin: 28px 0; border: 0; border-top: 1px solid var(--border); }
+
+.articulo-cuerpo blockquote {
+  margin-left: 0; padding: 12px 16px;
+  border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0;
+  background: var(--bg-elev); color: var(--text-dim);
+}
+.articulo-cuerpo blockquote > :last-child { margin-bottom: 0; }
+
+/* Tablas: se desplazan solas en pantallas estrechas */
+.tabla { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+.tabla table { width: 100%; border-collapse: collapse; font-size: 0.92rem; line-height: 1.45; }
+.tabla :is(th, td) { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.tabla th { background: var(--bg-elev2); font-weight: 600; }
+.tabla tr:last-child td { border-bottom: 0; }
+
+/* Código: AWL resaltado y esquemas en texto (cronogramas, KOP en ASCII) */
+.articulo-cuerpo pre {
+  overflow-x: auto; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--code-bg); font: 13.5px/1.55 var(--mono);
+}
+.articulo-cuerpo pre code { padding: 0; border: 0; border-radius: 0; background: none; font-size: inherit; white-space: pre; }
+.articulo-cuerpo pre.esquema { line-height: 1.35; }
+.t-ins { color: var(--accent); font-weight: 600; }
+.t-cte { color: var(--cte); }
+.t-com { color: var(--text-faint); font-style: italic; }
+.t-meta { color: var(--meta); font-weight: 600; }
+
+/* ───────── Ejemplos y preguntas ───────── */
+
+.nota { margin-bottom: 18px; color: var(--text-dim); }
+
+.ejemplo, .pregunta {
+  margin-bottom: 20px; padding: 22px 24px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-elev);
+}
+.ejemplo > :last-child, .pregunta > :last-child { margin-bottom: 0; }
+.ejemplo h3, .pregunta h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.codigo {
+  padding: 2px 7px; border-radius: 6px;
+  background: var(--accent-bg); color: var(--accent);
+  font: 700 0.75rem var(--mono); letter-spacing: 0.03em;
+}
+@media (max-width: 600px) { .ejemplo, .pregunta { padding: 18px 16px; } }
+.ejemplo.mini { padding: 16px 18px; }
+.ejemplo.mini .kop-titulo { display: none; }
+
+.pregunta details { margin: 0; padding-top: 12px; border-top: 1px solid var(--border); }
+.pregunta summary { color: var(--accent); font-weight: 600; cursor: pointer; }
+.pregunta details[open] summary { margin-bottom: 12px; }
+.pregunta details > :last-child { margin-bottom: 0; }
+
+/* ───────── KOP (mismo dibujo que la app) ───────── */
+
+.kop { display: grid; gap: 10px; }
+.kop-seg { overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--code-bg); }
+.kop-titulo { margin: 0 !important; padding: 6px 12px; border-bottom: 1px solid var(--border); color: var(--text-faint); font-size: 0.8rem; }
+.kop-lienzo { overflow-x: auto; padding: 4px 0; }
+.kop-svg { display: block; max-width: 100%; height: auto; font-family: var(--mono); }
+@media (max-width: 600px) { .kop-svg { max-width: none; } }
+.kop-svg .rail { stroke: var(--text-dim); stroke-width: 3; }
+.kop-svg .w { fill: none; stroke: var(--wire); stroke-width: 1.6; }
+.kop-svg .dot { fill: var(--wire); stroke: none; }
+.kop-svg .sym-line { fill: none; stroke: var(--text); stroke-width: 2; }
+.kop-svg .sym-box { fill: var(--bg-elev); stroke: var(--text-dim); stroke-width: 1.4; }
+.kop-svg .boxtxt { fill: var(--text); font-size: 11px; font-weight: 700; }
+.kop-svg .pin { fill: var(--text-dim); font-size: 10.5px; }
+.kop-svg .op { fill: var(--text); font-size: 12px; font-weight: 600; }
+.kop-svg .op.optional { fill: var(--text-faint); font-weight: 400; }
+.kop-svg .sym { fill: var(--text-faint); font-family: var(--font); font-size: 10px; }
+.kop-svg .stub { fill: var(--bg); stroke: var(--text-faint); stroke-width: 1.4; }
+.kop-svg :is(.hit, .slot) { fill: none; stroke: none; }
+/* flujo de corriente (ejemplos interactivos): verde continuo con corriente, azul discontinuo sin ella */
+.kop-svg .rail.on { stroke: var(--power); }
+.kop-svg .w.on { stroke: var(--power); stroke-width: 3; }
+.kop-svg .w.off { stroke: var(--nopower); stroke-dasharray: 5 4; }
+.kop-svg :is(.rail, .w).skip { stroke: var(--text-faint); }
+.kop-svg .dot.on { fill: var(--power); }
+.kop-svg .dot.off { fill: var(--nopower); }
+.kop-svg .sym-line.c-on { stroke: var(--power); }
+.kop-svg .sym-line.c-off { stroke: var(--nopower); }
+.kop-svg .sym-box.c-on { stroke: var(--power); stroke-width: 2.2; }
+.kop-svg .sym-box.c-off { stroke: var(--nopower); }
+.kop-svg .live { fill: var(--power); font-size: 10px; font-weight: 600; }
+
+/* ───────── Cronogramas (simulados con el motor de la app) ───────── */
+
+.crono { margin: 0 0 16px; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--code-bg); }
+.crono-titulo { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+.crono-titulo b { margin-right: 6px; color: var(--accent); font-family: var(--mono); }
+.crono-titulo span { margin-left: 6px; color: var(--text-faint); font: 0.8rem var(--mono); }
+.crono-lienzo { overflow-x: auto; padding: 6px 4px 0; }
+.crono-svg { display: block; width: 100%; min-width: 540px; height: auto; }
+.crono-pie { margin: 0 !important; padding: 8px 14px 12px; color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+.crono-linea { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.crono-linea.q { stroke: var(--power); }
+.crono-relleno { fill: color-mix(in srgb, var(--accent) 14%, transparent); }
+.crono-relleno.q { fill: color-mix(in srgb, var(--power) 16%, transparent); }
+.crono-nombre { fill: var(--text); font: 600 13px var(--mono); }
+.crono-eje { fill: none; stroke: var(--border-strong); }
+.crono-eje-texto { fill: var(--text-faint); font: 11px var(--mono); }
+.crono-rejilla { stroke: var(--border); }
+.crono-guia { fill: none; stroke: var(--cota); stroke-dasharray: 3 4; opacity: 0.5; }
+.crono-cota { fill: none; stroke: var(--cota); stroke-width: 1.6; }
+.crono-cota-texto { fill: var(--cota); font: italic 700 15px var(--font); }
+
+/* GRAFCET (página de secuencias) */
+.crono-svg.gf { min-width: 480px; }
+.gf-etapa { fill: var(--bg-elev); stroke: var(--text); stroke-width: 1.8; }
+.gf-num { fill: var(--text); font: 700 16px var(--mono); }
+.gf-marca { fill: var(--accent); font: 600 12px var(--mono); }
+.gf-linea { fill: none; stroke: var(--text-dim); stroke-width: 1.6; }
+.gf-transicion { stroke: var(--text); stroke-width: 3.5; }
+.gf-accion { fill: color-mix(in srgb, var(--power) 10%, transparent); stroke: var(--power); stroke-width: 1.4; }
+.gf-texto { fill: var(--text); font: 13px var(--mono); }
+.gf-texto.tenue { fill: var(--text-faint); font-family: var(--font); }
+.gf-flecha { fill: var(--text-dim); }
+
+/* ───────── Figuras que sustituyen a los esquemas en ASCII ───────── */
+
+.figura-pie { margin: 0 !important; padding: 2px 4px 0; color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+.figura-rejilla { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin: 0 0 16px; }
+.figura-rejilla .kop { margin: 0; align-content: start; }
+.figura-tabla { margin: 0 0 16px; }
+.figura-tabla .tabla { margin-bottom: 8px; }
+
+/* ciclo de scan */
+.fc-caja { fill: var(--bg-elev); stroke: var(--border-strong); stroke-width: 1.4; }
+.fc-principal { fill: color-mix(in srgb, var(--accent) 12%, var(--bg-elev)); stroke: var(--accent); }
+.fc-titulo { fill: var(--text); font: 600 14px var(--font); }
+.fc-detalle { fill: var(--text-faint); font: 12px var(--mono); }
+.fc-linea { fill: none; stroke: var(--text-dim); stroke-width: 1.6; }
+.fc-punta { fill: var(--text-dim); }
+
+/* mapas de bytes y de bits */
+.mapa th { width: 1%; white-space: nowrap; }
+.mapa td { border-left: 1px solid var(--border); text-align: center !important; font: 600 0.9rem var(--mono); }
+.mapa .m-d { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.mapa .m-w { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.mapa .m-b { background: color-mix(in srgb, var(--power) 10%, transparent); }
+.mapa .m-gris { color: var(--text-faint); font-weight: 400; }
+.mapa .m-bits { color: var(--text-faint); font-weight: 400; font-size: 0.8rem; }
+.mapa .m-valor { color: var(--text-faint); }
+.mapa .m-valor.uno { color: var(--power); font-weight: 700; }
+.mapa-bits :is(td, th) { padding: 6px 5px !important; }
+.mapa-bits td { min-width: 24px; }
+.linea-awl .codigo-celda { font-size: 0.95rem; }
+
+/* símbolos KOP en línea (--| |--, --(S)…) */
+.kop-ico {
+  display: inline-block; width: auto; height: 1.3em; vertical-align: -0.32em; overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round;
+}
+.kop-ico rect { fill: none; }
+.kop-ico .ki-txt { fill: currentColor; stroke: none; font: 700 9px var(--mono); }
+
+/* ───────── Preguntas frecuentes ───────── */
+
+.articulo .faq { --superficie: var(--bg-elev); }
+.faq-respuesta { padding: 0 20px 6px; color: var(--text-dim); }
+.faq-respuesta > :last-child { margin-bottom: 10px; }
+
+/* ───────── Panel «Pruébalo» ───────── */
+
+.vivo:empty { display: none; }
+.vivo-panel { margin: 0 0 16px; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-elev2); }
+.vivo-cabeza {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.92rem;
+}
+.vivo-pista { flex: 1 1 240px; color: var(--text-faint); font-size: 0.84rem; line-height: 1.4; }
+@media (pointer: coarse) { .vivo-mayus { display: none; } }
+.vivo-reiniciar {
+  padding: 4px 11px; border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--bg-elev); color: var(--text-dim); font: inherit; font-size: 0.84rem; cursor: pointer;
+}
+.vivo-reiniciar:hover { color: var(--text); border-color: var(--accent); }
+.vivo-es { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 30px; padding: 18px; }
+.vivo-es .palanca { touch-action: none; }
+.vivo-salidas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.vivo-campo { display: inline-flex; flex-direction: column; gap: 6px; color: var(--text-dim); font: 0.82rem var(--mono); }
+.vivo-campo input {
+  width: 9.5em; padding: 6px 9px;
+  border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--bg); color: var(--text); font: 600 0.92rem var(--mono);
+}
+.vivo-campo input:focus { outline: none; border-color: var(--accent); }
+.vivo-campo.mal input { border-color: #e5484d; }
+.vivo-valor {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-elev); color: var(--text-dim); font: 0.82rem var(--mono);
+}
+.vivo-valor b { color: var(--text); font-weight: 700; }
+.vivo-q { width: 9px; height: 9px; border-radius: 50%; background: var(--led-off); }
+.vivo-q.on { background: var(--power); box-shadow: 0 0 8px color-mix(in srgb, var(--power) 60%, transparent); }
+
+/* ───────── Practica y paginación ───────── */
+
+.practica {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px;
+  margin-top: 64px; padding: 24px 28px;
+  border: 1px solid var(--border-strong); border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent-bg), transparent 70%), var(--bg-elev);
+}
+.practica > div { flex: 1 1 340px; }
+.practica .btn { flex: none; }
+.practica h2 { margin-bottom: 6px; font-size: 1.25rem; }
+.practica p { max-width: 520px; color: var(--text-dim); }
+
+.paginacion { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+.paginacion a {
+  display: flex; flex-direction: column; gap: 2px; padding: 14px 18px;
+  border: 1px solid var(--border); border-radius: 12px;
+  color: var(--text); text-decoration: none;
+}
+.paginacion a:hover { border-color: var(--accent); }
+.paginacion a span { color: var(--text-faint); font-size: 0.82rem; }
+.paginacion .pag-sig { grid-column: 2; text-align: right; }
+@media (max-width: 520px) {
+  .paginacion { grid-template-columns: minmax(0, 1fr); }
+  .paginacion .pag-sig { grid-column: 1; }
+  .paginacion > span:empty { display: none; }
+}
+
+/* ───────── Portada de la teoría ───────── */
+
+.teoria-portada { padding-top: clamp(48px, 8vw, 88px); padding-bottom: 88px; }
+.teoria-portada h1 { margin-bottom: 16px; font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 750; }
+.teoria-portada .encabezado { margin-bottom: 44px; }
+
+.temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.temas a {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; gap: 4px 14px; height: 100%; padding: 18px 20px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-elev); color: var(--text); text-decoration: none;
+}
+.temas a:hover { border-color: var(--accent); }
+.tema-num { grid-row: span 2; padding-top: 3px; color: var(--accent); font: 700 0.85rem var(--mono); }
+.temas b { font-size: 1.02rem; }
+.tema-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+@media (max-width: 400px) { .temas { grid-template-columns: minmax(0, 1fr); } }

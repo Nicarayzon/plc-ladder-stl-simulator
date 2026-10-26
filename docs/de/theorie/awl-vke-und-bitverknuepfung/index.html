@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWL (Anweisungsliste) Schritt für Schritt: U, UN, O, ON, X und das VKE · Automatizacion</title>
+  <meta name="description" content="Die Verknüpfungsanweisungen der AWL einzeln erklärt: U, UN, O, ON, X, XN, =, S, R und NOT, wie das VKE berechnet wird, wie man mit Klammern gruppiert und wie man eine Aufgabe von Hand löst, mit Beispielen zum Ausprobieren.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/stl-rlo-and-bit-logic/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="AWL (Anweisungsliste) Schritt für Schritt: U, UN, O, ON, X und das VKE">
+  <meta property="og:description" content="Die Verknüpfungsanweisungen der AWL einzeln erklärt: U, UN, O, ON, X, XN, =, S, R und NOT, wie das VKE berechnet wird, wie man mit Klammern gruppiert und wie man eine Aufgabe von Hand löst, mit Beispielen zum Ausprobieren.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"AWL (Anweisungsliste) Schritt für Schritt: U, UN, O, ON, X und das VKE","description":"Die Verknüpfungsanweisungen der AWL einzeln erklärt: U, UN, O, ON, X, XN, =, S, R und NOT, wie das VKE berechnet wird, wie man mit Klammern gruppiert und wie man eine Aufgabe von Hand löst, mit Beispielen zum Ausprobieren.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist das VKE in AWL?","acceptedAnswer":{"@type":"Answer","text":"Das Verknüpfungsergebnis: das Bit des Statusworts, in dem sich das Ergebnis der Verknüpfungsanweisungen (U, O, X…) aufbaut. Die Zuweisungen =, S und R schreiben es in einen Operanden."}},{"@type":"Question","name":"Wofür ist das Bit /ER (Erstabfrage)?","acceptedAnswer":{"@type":"Answer","text":"Es zeigt an, ob die nächste Verknüpfungsanweisung eine neue Kette beginnt. Bei /ER = 0 kopiert das nächste U, O oder X den Operanden ins VKE, statt ihn damit zu verknüpfen."}},{"@type":"Question","name":"Warum berechnet U a / O b / U c nicht „a oder (b und c)“?","acceptedAnswer":{"@type":"Answer","text":"Weil AWL der Reihe nach auswertet: Es berechnet (a ∨ b) ∧ c. Für a ∨ (b ∧ c) braucht man O ohne Operand oder Klammern."}},{"@type":"Question","name":"Wie viele verschachtelte Klammern erlaubt AWL?","acceptedAnswer":{"@type":"Answer","text":"Sieben Ebenen. Werden sie überschritten, tritt ein Fehler auf und die CPU geht in STOP."}},{"@type":"Question","name":"Was macht die Anweisung SET in AWL?","acceptedAnswer":{"@type":"Answer","text":"Sie setzt das VKE auf 1 und schließt die Verknüpfungskette ab (/ER = 0). Sie setzt keinen Operanden auf 1: Dafür gibt es S."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"AWL: VKE und Bitlogik","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/awl-rlo-y-logica-de-bits/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/stl-rlo-and-bit-logic/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/awl-vke-und-bitverknuepfung/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/" aria-current="page">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/" aria-current="page">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>AWL: VKE und Bitlogik</span></nav>
+      <h1>AWL (Anweisungsliste) Schritt für Schritt: U, UN, O, ON, X und das VKE</h1>
+      <p class="articulo-entradilla">Die Verknüpfungsanweisungen der AWL einzeln erklärt: U, UN, O, ON, X, XN, =, S, R und NOT, wie das VKE berechnet wird, wie man mit Klammern gruppiert und wie man eine Aufgabe von Hand löst, mit Beispielen zum Ausprobieren.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="wie-man-ein-awl-programm-liest">Wie man ein AWL-Programm liest</h2>
+<p>In AWL wird das Programm <strong>als Text</strong> geschrieben, eine Anweisung pro Zeile. Jede Zeile hat eine <strong>Operation</strong> und fast immer einen <strong>Operanden</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Zeile</th><th>Operation</th><th>Operand</th><th>Gelesen als</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td><code>U</code> (UND)</td><td><code>E 0.0</code></td><td>„und Eingang 0.0“</td></tr><tr><td><code>UN E 0.1</code></td><td><code>UN</code> (UND NICHT)</td><td><code>E 0.1</code></td><td>„und nicht Eingang 0.1“</td></tr><tr><td><code>= A 4.0</code></td><td><code>=</code> (zuweisen)</td><td><code>A 4.0</code></td><td>„das Ergebnis an Ausgang 4.0“</td></tr></tbody></table></div>
+<p>Die CPU bearbeitet die Zeilen <strong>von oben nach unten</strong>. Die Verknüpfungsanweisungen berechnen nach und nach ein Ergebnis, das <strong>VKE</strong> (Verknüpfungsergebnis), das dem „Strom“ in KOP entspricht: Jede Anweisung verknüpft das VKE mit ihrem Operanden, und am Ende schreibt <code>=</code> es in einen Ausgang.</p>
+<p>Beispiel, Zeile für Zeile, mit E 0.0 = 1 und E 0.1 = 0:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Was sie macht</th><th>VKE danach</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td>Erste Anweisung der Kette: kopiert E 0.0</td><td>1</td></tr><tr><td><code>U E 0.1</code></td><td>1 UND 0</td><td>0</td></tr><tr><td><code>= A 4.0</code></td><td>Schreibt das VKE in A 4.0</td><td>A 4.0 = 0</td></tr></tbody></table></div>
+<p>Die <strong>erste</strong> Verknüpfungsanweisung nach einer Zuweisung verknüpft nichts: Sie <strong>kopiert</strong> ihren Operanden ins VKE. Das ist die „Erstabfrage“ (siehe <a href="#bitverknupfung-vke-erstabfrage-und-sta">Bitverknüpfung: VKE, Erstabfrage und STA</a>).</p></section>
+<section><h2 id="u-und">U: UND</h2>
+<p><code>U</code> bedeutet <strong>„und außerdem ist dieses Bit 1“</strong>. Es verknüpft das VKE mit dem Operanden über ein <strong>UND</strong>: Das Ergebnis bleibt nur 1, wenn der Operand 1 ist.</p>
+<ul>
+<li>In KOP entspricht das einem <strong>Schließer in Reihe</strong>.</li>
+<li>Mehrere <code>U</code> hintereinander: Das Ergebnis ist nur 1, wenn <strong>alle</strong> erfüllt sind.</li>
+</ul>
+<div class="ejemplo mini" id="probar-y"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// und außerdem E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ E0.1</span></code></pre></div></section>
+<section><h2 id="un-und-nicht">UN: UND NICHT</h2>
+<p><code>UN</code> bedeutet <strong>„und außerdem ist dieses Bit 0“</strong>. Es ist ein UND mit negiertem Operanden: VKE := VKE ∧ ¬Operand.</p>
+<ul>
+<li>In KOP entspricht das einem <strong>Öffner in Reihe</strong>.</li>
+<li>So schreibt man Bedingungen wie „Ein <strong>und kein</strong> Alarm“:</li>
+</ul>
+<div class="ejemplo mini" id="probar-y-no"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y-no.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-y-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y-no.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// Ein</span>
+      <span class="t-ins">UN</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// und kein Alarm</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="o-oder">O: ODER</h2>
+<p><code>O</code> bedeutet <strong>„oder dieses Bit ist 1“</strong>. Es verknüpft das VKE mit dem Operanden über ein <strong>ODER</strong>: Das Ergebnis ist 1, wenn irgendeine der Bedingungen erfüllt ist.</p>
+<ul>
+<li>In KOP entspricht das einem <strong>Schließer parallel</strong>.</li>
+<li>Bei einer Parallelschaltung einzelner Kontakte schreibt man auch in die erste Zeile <code>O</code> (<code>O E 0.0 / O E 0.1</code>), obwohl <code>U E 0.0 / O E 0.1</code> dasselbe ergäbe: Die erste Anweisung kopiert nur den Operanden.</li>
+</ul>
+<div class="ejemplo mini" id="probar-o"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// oder E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ E0.1</span></code></pre></div></section>
+<section><h2 id="on-oder-nicht">ON: ODER NICHT</h2>
+<p><code>ON</code> bedeutet <strong>„oder dieses Bit ist 0“</strong>: VKE := VKE ∨ ¬Operand. In KOP entspricht das einem <strong>Öffner parallel</strong>.</p>
+<div class="ejemplo mini" id="probar-o-no"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o-no.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-o-no.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o-no.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">ON</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// oder E0.1 ist 0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="x-und-xn-exklusiv-oder">X und XN: Exklusiv-ODER</h2>
+<p><code>X</code> ist das <strong>Exklusiv-ODER</strong>: Das Ergebnis ist 1, wenn <strong>nur einer</strong> der beiden 1 ist, und 0, wenn beide gleich sind. <code>XN</code> ist das Gegenteil: 1, wenn beide gleich sind.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>E 0.0</th><th>E 0.1</th><th><code>X E 0.0 / X E 0.1</code></th><th><code>X E 0.0 / XN E 0.1</code></th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table></div>
+<p>Eine typische Anwendung ist die <strong>Wechselschaltung</strong> im Flur: zwei Schalter, einer an jedem Ende, und jeder von beiden wechselt den Zustand des Lichts. In KOP gibt es keinen Exklusiv-ODER-Kontakt: Man zeichnet es mit zwei Zweigen (siehe <a href="../kop-kontakte-und-spulen/#verknupfungen-mit-kontakten">Verknüpfungen mit Kontakten</a>), wie in diesem Netzwerk.</p>
+<div class="ejemplo mini" id="probar-xor"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-xor&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-xor.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-xor.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.3&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-xor.s1.4&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-xor.s1.5&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.6&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-xor.s1.7&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-xor.s1.8&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-xor.s1.9&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">X</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// Schalter am einen Ende des Flurs</span>
+      <span class="t-ins">X</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// Schalter am anderen Ende</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// jeder der beiden Schalter wechselt das Licht</span></code></pre></div></section>
+<section><h2 id="s-und-r-das-ergebnis-schreiben">=, S und R: das Ergebnis schreiben</h2>
+<p>Wenn die Verknüpfung berechnet ist, muss das VKE irgendwohin geschrieben werden:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Was sie macht</th><th>In KOP</th></tr></thead><tbody><tr><td><code>= A 4.0</code></td><td>A 4.0 := VKE, immer (1 oder 0)</td><td>Spule <svg class="kop-ico" viewBox="0 0 18 20" width="18" height="20" role="img" aria-label="( )"><path d="M6 3Q1 10 6 17M12 3Q17 10 12 17"/></svg></td></tr><tr><td><code>S A 4.0</code></td><td>Wenn VKE = 1, A 4.0 := 1. Bei VKE = 0 passiert nichts</td><td>Spule <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(S)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">S</text></svg></td></tr><tr><td><code>R A 4.0</code></td><td>Wenn VKE = 1, A 4.0 := 0. Bei VKE = 0 passiert nichts</td><td>Spule <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(R)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">R</text></svg></td></tr></tbody></table></div>
+<ul>
+<li>Nach <code>=</code>, <code>S</code> oder <code>R</code> ist die Kette abgeschlossen: Das nächste <code>U</code> oder <code>O</code> beginnt eine neue Verknüpfung.</li>
+<li>Man kann mehrere <code>=</code> hintereinander schreiben, um dasselbe Ergebnis mehreren Ausgängen zuzuweisen.</li>
+<li>Mit <code>S</code> und <code>R</code> „merkt“ sich das Bit seinen Wert. Probiere es aus: Ein Impuls an E 0.0 schaltet A 4.0 ein, das nach dem Loslassen von E 0.0 eingeschaltet bleibt, bis E 0.1 es ausschaltet.</li>
+</ul>
+<div class="ejemplo mini" id="probar-set-reset"><figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">S</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">R</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-set-reset&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-sr.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-sr.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-sr.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;S&quot;,&quot;id&quot;:&quot;mini-sr.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]},{&quot;id&quot;:&quot;mini-sr.s2&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-sr.s2.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-sr.s2.2&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;R&quot;,&quot;id&quot;:&quot;mini-sr.s2.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">S</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// wenn E0.0 = 1, wird A4.0 gesetzt und bleibt 1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">R</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// wenn E0.1 = 1, wird A4.0 wieder 0</span></code></pre></div></section>
+<section><h2 id="not-set-und-clr">NOT, SET und CLR</h2>
+<p>Diese drei Anweisungen haben keinen Operanden und wirken <strong>direkt auf das VKE</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Was sie macht</th><th>Anwendungsbeispiel</th></tr></thead><tbody><tr><td><code>NOT</code></td><td>Negiert das VKE</td><td><code>U E 0.0 / U E 0.1 / NOT / = A 4.0</code> ist ein NAND</td></tr><tr><td><code>SET</code></td><td>Setzt das VKE auf 1</td><td>Eine feste 1 schreiben: <code>SET / = M 0.0</code></td></tr><tr><td><code>CLR</code></td><td>Setzt das VKE auf 0</td><td>Eine feste 0 schreiben: <code>CLR / = M 0.0</code></td></tr></tbody></table></div>
+<blockquote>
+<p><strong>Vorsicht mit <code>SET</code></strong>: Es setzt keinen Operanden auf 1, sondern nur das VKE. Um ein Bit zu setzen, verwendet man <code>S</code>.</p>
+</blockquote></section>
+<section><h2 id="format">Format</h2>
+<figure class="figura-tabla"><div class="tabla"><table class="linea-awl">
+    <tr><th>Sprungmarke (optional)</th><th>Operation</th><th>Operand</th><th>Kommentar</th></tr>
+    <tr><td><code class="codigo-celda"><span class="t-meta">ENDE:</span></code></td><td><code class="codigo-celda"><span class="t-ins">U</span></code></td><td><code class="codigo-celda">E 0.0</code></td><td><code class="codigo-celda"><span class="t-com">// UND mit Eingang 0.0</span></code></td></tr>
+  </table></div></figure>
+<ul>
+<li>Eine Anweisung pro Zeile. Der Code ist wie in KOP in <strong>Netzwerke</strong> gegliedert.</li>
+<li><strong>Sprungziele (Marken)</strong>: bis zu 4 Zeichen, beginnen mit einem Buchstaben und enden mit <code>:</code>.</li>
+<li>Kommentare beginnen mit <code>//</code>. In AWL-Quellen endet jede Anweisung mit <code>;</code>.</li>
+<li>Leerzeichen zwischen Bereich und Adresse spielen keine Rolle: <code>E 0.0</code> ist dasselbe wie <code>E0.0</code>.</li>
+</ul></section>
+<section><h2 id="cpu-register">CPU-Register</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Register</th><th>Größe</th><th>Verwendung</th></tr></thead><tbody><tr><td><strong>AKKU1</strong>, <strong>AKKU2</strong></td><td>32 Bit</td><td>Akkumulatoren. <code>L</code> lädt in AKKU1, der bisherige Inhalt wandert in AKKU2. Die Operationen rechnen AKKU2 (op) AKKU1. CPUs mit 4 Akkus haben zusätzlich AKKU3 und AKKU4</td></tr><tr><td><strong>AR1</strong>, <strong>AR2</strong></td><td>32 Bit</td><td>Adressregister (indirekte Adressierung)</td></tr><tr><td><strong>DB / DI</strong></td><td>16 Bit</td><td>Nummer des geöffneten globalen DB und des geöffneten Instanz-DB</td></tr><tr><td><strong>Statuswort</strong></td><td>16 Bit (9 werden verwendet)</td><td>Siehe Tabelle</td></tr></tbody></table></div>
+<p><strong>Statuswort</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bit</th><th>Name</th><th>Englisch</th><th>Bedeutung</th></tr></thead><tbody><tr><td>0</td><td><strong>/ER</strong></td><td>/FC</td><td><strong>Erstabfrage</strong>. 0 = die nächste Verknüpfung beginnt eine neue Kette. 1 = Kette läuft</td></tr><tr><td>1</td><td><strong>VKE</strong></td><td>RLO</td><td><strong>Verknüpfungsergebnis</strong> der Kette</td></tr><tr><td>2</td><td><strong>STA</strong></td><td>STA</td><td><strong>Status</strong> des zuletzt abgefragten Bits (sein tatsächlicher Wert, vor einer Negation)</td></tr><tr><td>3</td><td><strong>OR</strong></td><td>OR</td><td>Speicher für „UND vor ODER“ (siehe <a href="#und-vor-oder-o-ohne-operand-und-klammern">„UND vor ODER“: <code>O</code> ohne Operand und Klammern</a>)</td></tr><tr><td>4</td><td><strong>OS</strong></td><td>OS</td><td><strong>Gespeicherter</strong> Überlauf. Wird durch <code>SPS</code>, beim Aufruf eines Bausteins und am Bausteinende auf 0 gesetzt</td></tr><tr><td>5</td><td><strong>OV</strong></td><td>OV</td><td>Überlauf bei der <strong>letzten</strong> Arithmetikoperation</td></tr><tr><td>6</td><td><strong>A0</strong></td><td>CC0</td><td>Anzeige 0</td></tr><tr><td>7</td><td><strong>A1</strong></td><td>CC1</td><td>Anzeige 1</td></tr><tr><td>8</td><td><strong>BIE</strong></td><td>BR</td><td>Binärergebnis. Wird für ENO und <code>SAVE</code> verwendet</td></tr></tbody></table></div>
+<p><strong>Bedeutung von A1/A0</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>A1</th><th>A0</th><th>Nach Arithmetik</th><th>Nach Vergleich (AKKU2 mit AKKU1)</th><th>Nach Schieben</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>Ergebnis = 0</td><td>AKKU2 = AKKU1</td><td>zuletzt hinausgeschobenes Bit = 0</td></tr><tr><td>0</td><td>1</td><td>Ergebnis &lt; 0</td><td>AKKU2 &lt; AKKU1</td><td>—</td></tr><tr><td>1</td><td>0</td><td>Ergebnis &gt; 0</td><td>AKKU2 &gt; AKKU1</td><td>zuletzt hinausgeschobenes Bit = 1</td></tr><tr><td>1</td><td>1</td><td>Division durch 0 / ungültige REAL-Zahl</td><td>ungeordnet (ungültige REAL-Zahl)</td><td>—</td></tr></tbody></table></div></section>
+<section><h2 id="bitverknupfung-vke-erstabfrage-und-sta">Bitverknüpfung: VKE, Erstabfrage und STA</h2>
+<p>Jede Verknüpfungsanweisung verknüpft <strong>das aktuelle VKE</strong> mit <strong>dem Bit des Operanden</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wenn /ER = 0 (Erstabfrage)</th><th>Wenn /ER = 1 (Kette läuft)</th></tr></thead><tbody><tr><td><code>U op</code> (UND)</td><td>VKE := op</td><td>VKE := VKE ∧ op</td></tr><tr><td><code>UN op</code> (UND NICHT)</td><td>VKE := ¬op</td><td>VKE := VKE ∧ ¬op</td></tr><tr><td><code>O op</code> (ODER)</td><td>VKE := op</td><td>VKE := VKE ∨ op</td></tr><tr><td><code>ON op</code> (ODER NICHT)</td><td>VKE := ¬op</td><td>VKE := VKE ∨ ¬op</td></tr><tr><td><code>X op</code> (Exklusiv-ODER)</td><td>VKE := op</td><td>VKE := VKE ⊕ op</td></tr><tr><td><code>XN op</code> (Exklusiv-ODER NICHT)</td><td>VKE := ¬op</td><td>VKE := VKE ⊕ ¬op</td></tr></tbody></table></div>
+<p>Nach jeder von ihnen gilt: <strong>/ER := 1</strong> und <strong>STA := Wert des Operanden</strong>.</p>
+<p><strong>Anweisungen, die die Kette abschließen (/ER := 0)</strong>, ohne das VKE zu ändern:</p>
+<ul>
+<li><code>=</code>, <code>S</code> und <code>R</code>.</li>
+<li>Die Zeitoperationen (<code>SI</code>, <code>SV</code>, <code>SE</code>, <code>SS</code>, <code>SA</code>, <code>R T</code>, <code>FR T</code>).</li>
+<li>Die Zähloperationen (<code>ZV</code>, <code>ZR</code>, <code>S Z</code>, <code>R Z</code>).</li>
+</ul>
+<p>Deshalb <strong>lassen sich mehrere Zuweisungen</strong> mit demselben VKE <strong>aneinanderreihen</strong>:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>      <span class="t-com">// A4.0 := E0.0 ∧ E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>      <span class="t-com">// A4.1 bekommt dasselbe VKE</span>
+      <span class="t-ins">S</span>     <span class="t-op">M 0.0</span>      <span class="t-com">// und setzt auch M0.0, wenn es 1 ist</span></code></pre>
+<p><strong>Anweisungen, die VKE und /ER NICHT verändern</strong>: <code>L</code>, <code>T</code>, Arithmetik, Umwandlung, <code>TAK</code>, <code>INC</code>, <code>DEC</code>... Eine Verknüpfungskette kann „über sie hinweg“ weiterlaufen:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 10</span>      <span class="t-com">// ändert das VKE nicht</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 12</span>      <span class="t-com">// wird IMMER ausgeführt (T hängt nicht vom VKE ab)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>      <span class="t-com">// A4.0 := E0.0</span></code></pre>
+<p><strong>Operationen direkt auf das VKE</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>NOT</code></td><td>VKE := ¬VKE</td></tr><tr><td><code>SET</code></td><td>VKE := 1 (und /ER := 0)</td></tr><tr><td><code>CLR</code></td><td>VKE := 0 (und /ER := 0)</td></tr><tr><td><code>SAVE</code></td><td>BIE := VKE</td></tr></tbody></table></div></section>
+<section><h2 id="und-vor-oder-o-ohne-operand-und-klammern">„UND vor ODER“: <code>O</code> ohne Operand und Klammern</h2>
+<p>AWL wertet <strong>der Reihe nach</strong> aus: <code>U E0.0 / O E0.1 / U E0.2</code> berechnet <strong>(E0.0 ∨ E0.1) ∧ E0.2</strong> und nicht E0.0 ∨ (E0.1 ∧ E0.2). Zum Gruppieren gibt es zwei Werkzeuge.</p>
+<p><strong>a) <code>O</code> ohne Operand</strong> trennt UND-Gruppen, die mit ODER verknüpft werden:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>                 <span class="t-com">// (E0.0 ∧ E0.1)  ∨ ...</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.3</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>       <span class="t-com">// A4.0 = (E0.0 ∧ E0.1) ∨ (E0.2 ∧ E0.3)</span></code></pre>
+<p>Was intern passiert: <code>O</code> speichert das Ergebnis der ersten Gruppe im Bit <strong>OR</strong> und setzt /ER = 0. Solange OR = 1 ist, lassen die folgenden <code>U</code> und <code>UN</code> das VKE auf 1, weil das Ergebnis schon feststeht. <code>=</code> setzt OR := 0.</p>
+<p><strong>b) Klammern</strong>: <code>U(</code>, <code>UN(</code>, <code>O(</code>, <code>ON(</code>, <code>X(</code>, <code>XN(</code> ... <code>)</code>.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U(</span>                <span class="t-com">// E0.0 ∧ ( ... )</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>       <span class="t-com">// A4.1 = E0.0 ∧ (E0.1 ∨ E0.2)</span></code></pre>
+<ul>
+<li>Beim Öffnen der Klammer werden das VKE, das Bit OR und die ausstehende Verknüpfung im <strong>Klammerstack</strong> gespeichert, und eine neue Kette beginnt (/ER = 0).</li>
+<li>Beim Schließen mit <code>)</code> wird das Gespeicherte zurückgeholt und mit dem VKE aus der Klammer verknüpft.</li>
+<li>Es sind <strong>bis zu 7 Klammerebenen</strong> erlaubt.</li>
+</ul></section>
+<section><h2 id="statusbits-als-operanden">Statusbits als Operanden</h2>
+<p><code>U OV</code>, <code>U OS</code>, <code>U BIE</code>, <code>U ==0</code>, <code>U &lt;&gt;0</code>, <code>U &gt;0</code>, <code>U &lt;0</code>, <code>U &gt;=0</code>, <code>U &lt;=0</code> und <code>U UO</code> (ungeordnet). Sie funktionieren auch mit <code>UN</code>, <code>O</code>, <code>ON</code>, <code>X</code> und <code>XN</code>.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 42</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 44</span>
+      <span class="t-ins">U</span>     <span class="t-op">OV</span>              <span class="t-com">// ist diese Addition übergelaufen?</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 1.0</span></code></pre></section>
+<section><h2 id="zustandstabelle-aufgaben-von-hand-losen">Zustandstabelle (Aufgaben von Hand lösen)</h2>
+<p>Man notiert Zeile für Zeile den Zustand von /ER, VKE, STA und OR. Beispiel mit E0.0 = 1, E0.1 = 0, E0.2 = 1 und E0.3 = 1:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>/ER vorher</th><th>STA</th><th>VKE nachher</th><th>OR</th><th>Kommentar</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td>0</td><td>1</td><td>1</td><td>0</td><td>Erstabfrage: VKE := 1</td></tr><tr><td><code>U E 0.1</code></td><td>1</td><td>0</td><td>0</td><td>0</td><td>1 ∧ 0</td></tr><tr><td><code>O</code></td><td>1</td><td>1</td><td>0</td><td>0</td><td>OR := VKE (0); /ER := 0</td></tr><tr><td><code>U E 0.2</code></td><td>0</td><td>1</td><td>1</td><td>0</td><td>Erstabfrage der 2. Gruppe</td></tr><tr><td><code>U E 0.3</code></td><td>1</td><td>1</td><td>1</td><td>0</td><td>1 ∧ 1</td></tr><tr><td><code>= A 4.0</code></td><td>1</td><td>1</td><td>1</td><td>0</td><td><strong>A4.0 = 1</strong>; /ER := 0 (STA = geschriebener Wert)</td></tr></tbody></table></div>
+<p>Mit E0.0 = E0.1 = 1 und E0.2 = E0.3 = 0: Nach <code>O</code> ist das Bit OR = 1. Die beiden folgenden <code>U</code> lassen das VKE auf 1, deshalb ist A4.0 = 1.</p></section>
+<section><h2 id="geloste-beispiele">Gelöste Beispiele</h2>
+        <article class="ejemplo" id="e04">
+          <h3><span class="codigo">E04</span>„UND vor ODER“ mit <code>O</code> ohne Operand</h3>
+          <p><strong>Aufgabe</strong>: A4.0 = (E0.0 ∧ E0.1) ∨ (E0.2 ∧ E0.3).</p>
+<p><strong>Konzepte</strong>: das Bit OR und die Erstabfrage (siehe <a href="#und-vor-oder-o-ohne-operand-und-klammern">„UND vor ODER“: <code>O</code> ohne Operand und Klammern</a>).</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.3</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E04&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.3&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.3</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+        </article>
+<article class="ejemplo" id="e05">
+          <h3><span class="codigo">E05</span>Klammern: UND mit einer ODER-Gruppe</h3>
+          <p><strong>Aufgabe</strong>: A4.1 = E0.0 ∧ (E0.1 ∨ E0.2).</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="98" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E05&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U(</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span></code></pre>
+        </article></section>
+<section><h2 id="teste-dein-wissen">Teste dein Wissen</h2><p class="nota">Überlege dir die Antwort, bevor du die Lösung aufklappst.</p>
+        <article class="pregunta" id="q01">
+          <h3><span class="codigo">Q01</span>AWL wird der Reihe nach ausgewertet</h3>
+          <p>Mit E0.0 = 1, E0.1 = 0 und E0.2 = 0: Welchen Wert hat A4.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Lösung</summary>
+<p><strong>A4.0 = 0</strong>. Berechnet wird (E0.0 ∨ E0.1) ∧ E0.2 = (1 ∨ 0) ∧ 0 = 0, nicht 1 ∨ (0 ∧ 0).</p>
+</details>
+        </article>
+<article class="pregunta" id="q02">
+          <h3><span class="codigo">Q02</span><code>O</code> ohne Operand</h3>
+          <p>Dieselben Eingänge wie in Q01. Welchen Wert hat A4.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Lösung</summary>
+<p><strong>A4.0 = 1</strong>. Berechnet wird E0.0 ∨ (E0.1 ∧ E0.2).</p>
+</details>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist das VKE in AWL?</summary><div class="faq-respuesta"><p>Das Verknüpfungsergebnis: das Bit des Statusworts, in dem sich das Ergebnis der Verknüpfungsanweisungen (<code>U</code>, <code>O</code>, <code>X</code>…) aufbaut. Die Zuweisungen <code>=</code>, <code>S</code> und <code>R</code> schreiben es in einen Operanden.</p></div></details>
+          <details><summary>Wofür ist das Bit /ER (Erstabfrage)?</summary><div class="faq-respuesta"><p>Es zeigt an, ob die nächste Verknüpfungsanweisung eine neue Kette beginnt. Bei /ER = 0 kopiert das nächste <code>U</code>, <code>O</code> oder <code>X</code> den Operanden ins VKE, statt ihn damit zu verknüpfen.</p></div></details>
+          <details><summary>Warum berechnet <code>U a / O b / U c</code> nicht „a oder (b und c)“?</summary><div class="faq-respuesta"><p>Weil AWL der Reihe nach auswertet: Es berechnet (a ∨ b) ∧ c. Für a ∨ (b ∧ c) braucht man <code>O</code> ohne Operand oder Klammern.</p></div></details>
+          <details><summary>Wie viele verschachtelte Klammern erlaubt AWL?</summary><div class="faq-respuesta"><p>Sieben Ebenen. Werden sie überschritten, tritt ein Fehler auf und die CPU geht in STOP.</p></div></details>
+          <details><summary>Was macht die Anweisung SET in AWL?</summary><div class="faq-respuesta"><p>Sie setzt das VKE auf 1 und schließt die Verknüpfungskette ab (/ER = 0). Sie setzt keinen Operanden auf 1: Dafür gibt es <code>S</code>.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../kop-kontakte-und-spulen/"><span>← Zurück</span><b>KOP: Kontakte und Spulen</b></a>
+        <a class="pag-sig" href="../selbsthaltung-setzen-ruecksetzen/"><span>Weiter →</span><b>Selbsthaltung, Setzen, Rücksetzen</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Ausprobieren","pista":"Klicke auf die Eingänge.","pistaMayus":"Mit Umschalt + Klick wirkt ein Eingang als Taster, solange du ihn gedrückt hältst.","reiniciar":"Neu starten","valorNoValido":"Ungültiger Wert"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

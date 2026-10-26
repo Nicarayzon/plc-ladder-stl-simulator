@@ -737,7 +737,7 @@ pasos:
 ### E17 — Intermitente (1 s encendido / 1 s apagado) con dos temporizadores
 
 **Enunciado**: mientras E0.7 = 1, el piloto A4.5 parpadea.
-**Conceptos**: cada temporizador reinicia al otro. Alternativa: usar una marca de ciclo (§2.4 de la referencia).
+**Conceptos**: cada temporizador reinicia al otro. Alternativa: usar la marca de ciclo (§2.6 de la referencia).
 
 ```text
      E0.7     T7                 T6

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nemotécnica alemana e inglesa de AWL y glosario · Automatizacion</title>
+  <meta name="description" content="Tabla de equivalencias entre la nemotécnica alemana (U, E, A, SPB…) y la inglesa (A, I, Q, JC…) de AWL y STL, y glosario de los términos de KOP y AWL.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/mnemonics-and-glossary/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Nemotécnica alemana e inglesa de AWL y glosario">
+  <meta property="og:description" content="Tabla de equivalencias entre la nemotécnica alemana (U, E, A, SPB…) y la inglesa (A, I, Q, JC…) de AWL y STL, y glosario de los términos de KOP y AWL.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Nemotécnica alemana e inglesa de AWL y glosario","description":"Tabla de equivalencias entre la nemotécnica alemana (U, E, A, SPB…) y la inglesa (A, I, Q, JC…) de AWL y STL, y glosario de los términos de KOP y AWL.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué diferencia hay entre la nemotécnica alemana y la inglesa?","acceptedAnswer":{"@type":"Answer","text":"Son dos formas de escribir las mismas instrucciones. En alemán, U es Y, E una entrada y A una salida; en inglés, A es Y, I una entrada y Q una salida. El programa es el mismo."}},{"@type":"Question","name":"¿Cómo se escribe «SE T 1» en nemotécnica inglesa?","acceptedAnswer":{"@type":"Answer","text":"SD T 1, el retardo a la conexión. En inglés, SE es el impulso prolongado, que en alemán es SV."}},{"@type":"Question","name":"¿Qué significan KOP, FUP y AWL?","acceptedAnswer":{"@type":"Answer","text":"Son las siglas alemanas de los lenguajes: KOP, esquema de contactos (en inglés LAD); FUP, diagrama de funciones (FBD), y AWL, lista de instrucciones (STL)."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Nemotécnica y glosario","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/nemotecnica-y-glosario/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/mnemonics-and-glossary/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/mnemonik-und-glossar/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/" aria-current="page">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/" aria-current="page">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Nemotécnica y glosario</span></nav>
+      <h1>Nemotécnica alemana e inglesa de AWL y glosario</h1>
+      <p class="articulo-entradilla">Tabla de equivalencias entre la nemotécnica alemana (U, E, A, SPB…) y la inglesa (A, I, Q, JC…) de AWL y STL, y glosario de los términos de KOP y AWL.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="nemotecnica-aleman-ingles">Nemotécnica alemán ↔ inglés</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Alemán</th><th>Inglés (internacional)</th><th>Alemán</th><th>Inglés</th></tr></thead><tbody><tr><td><code>U</code></td><td><code>A</code></td><td><code>SPA</code></td><td><code>JU</code></td></tr><tr><td><code>UN</code></td><td><code>AN</code></td><td><code>SPB</code></td><td><code>JC</code></td></tr><tr><td><code>O</code> / <code>ON</code></td><td><code>O</code> / <code>ON</code></td><td><code>SPBN</code></td><td><code>JCN</code></td></tr><tr><td><code>X</code> / <code>XN</code></td><td><code>X</code> / <code>XN</code></td><td><code>SPBB</code> / <code>SPBNB</code></td><td><code>JCB</code> / <code>JNB</code></td></tr><tr><td><code>U(</code> / <code>UN(</code></td><td><code>A(</code> / <code>AN(</code></td><td><code>SPBI</code> / <code>SPBIN</code></td><td><code>JBI</code> / <code>JNBI</code></td></tr><tr><td><code>=</code>, <code>S</code>, <code>R</code>, <code>NOT</code>, <code>SET</code>, <code>CLR</code>, <code>SAVE</code></td><td>iguales</td><td><code>SPO</code> / <code>SPS</code></td><td><code>JO</code> / <code>JOS</code></td></tr><tr><td><code>FP</code> / <code>FN</code></td><td><code>FP</code> / <code>FN</code></td><td><code>SPZ</code> / <code>SPN</code></td><td><code>JZ</code> / <code>JN</code></td></tr><tr><td><code>SI</code></td><td><code>SP</code></td><td><code>SPP</code> / <code>SPM</code></td><td><code>JP</code> / <code>JM</code></td></tr><tr><td><code>SV</code></td><td><code>SE</code></td><td><code>SPPZ</code> / <code>SPMZ</code></td><td><code>JPZ</code> / <code>JMZ</code></td></tr><tr><td><code>SE</code></td><td><code>SD</code></td><td><code>SPU</code> / <code>SPL</code></td><td><code>JUO</code> / <code>JL</code></td></tr><tr><td><code>SS</code></td><td><code>SS</code></td><td><code>BE</code> / <code>BEB</code> / <code>BEA</code></td><td><code>BE</code> / <code>BEC</code> / <code>BEU</code></td></tr><tr><td><code>SA</code></td><td><code>SF</code></td><td><code>AUF</code></td><td><code>OPN</code></td></tr><tr><td><code>ZV</code> / <code>ZR</code></td><td><code>CU</code> / <code>CD</code></td><td><code>UW</code> / <code>UD</code></td><td><code>AW</code> / <code>AD</code></td></tr><tr><td><code>E</code> / <code>A</code> (operandos)</td><td><code>I</code> / <code>Q</code></td><td><code>BIE</code></td><td><code>BR</code></td></tr><tr><td><code>PE</code> / <code>PA</code></td><td><code>PI</code> / <code>PQ</code></td><td><code>Z</code> (contador)</td><td><code>C</code></td></tr><tr><td><code>S5T#</code>, <code>C#</code>, <code>L#</code>...</td><td>iguales</td><td><code>KOP</code> / <code>FUP</code> / <code>AWL</code></td><td><code>LAD</code> / <code>FBD</code> / <code>STL</code></td></tr></tbody></table></div>
+<p>Cuidado con las confusiones: <code>SE</code> en alemán es retardo a la conexión, pero en inglés es impulso prolongado. <code>A</code> en alemán es una salida, pero en inglés es la instrucción Y.</p></section>
+<section><h2 id="glosario">Glosario</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Término</th><th>Significado</th></tr></thead><tbody><tr><td>PAE / PAA</td><td>Imagen de proceso de entradas / de salidas</td></tr><tr><td>RLO (VKE)</td><td>Resultado lógico de la operación</td></tr><tr><td>/ER</td><td>Bit de primera consulta</td></tr><tr><td>STA</td><td>Bit de estado (valor del último operando consultado)</td></tr><tr><td>RB (BIE, BR)</td><td>Resultado binario (ENO, <code>SAVE</code>)</td></tr><tr><td>ACU1 / ACU2</td><td>Acumuladores</td></tr><tr><td>Segmento</td><td>Network: unidad de programa en KOP/AWL</td></tr><tr><td>Enclavamiento</td><td>Autorretención de una salida con su propio contacto</td></tr><tr><td>Flanco</td><td>Cambio 0→1 (positivo) o 1→0 (negativo)</td></tr><tr><td>Remanente</td><td>Que conserva su valor tras un corte de alimentación o un STOP→RUN</td></tr><tr><td>OB / FC / FB / DB</td><td>Bloque de organización / función / bloque de función / bloque de datos</td></tr><tr><td>BCD</td><td>Decimal codificado en binario</td></tr><tr><td>S5TIME</td><td>Formato de tiempo de los temporizadores (base + 3 cifras BCD)</td></tr></tbody></table></div></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Qué diferencia hay entre la nemotécnica alemana y la inglesa?</summary><div class="faq-respuesta"><p>Son dos formas de escribir las mismas instrucciones. En alemán, <code>U</code> es Y, <code>E</code> una entrada y <code>A</code> una salida; en inglés, <code>A</code> es Y, <code>I</code> una entrada y <code>Q</code> una salida. El programa es el mismo.</p></div></details>
+          <details><summary>¿Cómo se escribe «SE T 1» en nemotécnica inglesa?</summary><div class="faq-respuesta"><p><code>SD T 1</code>, el retardo a la conexión. En inglés, <code>SE</code> es el impulso prolongado, que en alemán es <code>SV</code>.</p></div></details>
+          <details><summary>¿Qué significan KOP, FUP y AWL?</summary><div class="faq-respuesta"><p>Son las siglas alemanas de los lenguajes: KOP, esquema de contactos (en inglés LAD); FUP, diagrama de funciones (FBD), y AWL, lista de instrucciones (STL).</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <a class="pag-ant" href="../ejercicios-resueltos/"><span>← Anterior</span><b>Ejercicios resueltos</b></a>
+        <span></span>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

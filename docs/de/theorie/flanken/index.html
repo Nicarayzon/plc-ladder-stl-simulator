@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Positive und negative Flanken in KOP und AWL (P, N, FP und FN) · Automatizacion</title>
+  <meta name="description" content="Was eine positive oder negative Flanke ist, wie sie in KOP mit (P) und (N) und in AWL mit FP und FN erkannt wird, warum jede Flanke einen eigenen Flankenmerker braucht und wie ein Stromstoßschalter funktioniert.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/flancos/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/edge-detection/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/flancos/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Positive und negative Flanken in KOP und AWL (P, N, FP und FN)">
+  <meta property="og:description" content="Was eine positive oder negative Flanke ist, wie sie in KOP mit (P) und (N) und in AWL mit FP und FN erkannt wird, warum jede Flanke einen eigenen Flankenmerker braucht und wie ein Stromstoßschalter funktioniert.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Positive und negative Flanken in KOP und AWL (P, N, FP und FN)","description":"Was eine positive oder negative Flanke ist, wie sie in KOP mit (P) und (N) und in AWL mit FP und FN erkannt wird, warum jede Flanke einen eigenen Flankenmerker braucht und wie ein Stromstoßschalter funktioniert.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist eine positive Flanke in einer SPS?","acceptedAnswer":{"@type":"Answer","text":"Der Wechsel eines Signals von 0 auf 1. Eine Flankenauswertung liefert nur in dem Zyklus eine 1, in dem dieser Wechsel stattfindet, auch wenn das Signal danach auf 1 bleibt. Die negative Flanke ist der Wechsel von 1 auf 0."}},{"@type":"Question","name":"Warum braucht jede Flanke einen eigenen Merker?","acceptedAnswer":{"@type":"Answer","text":"Weil der Flankenmerker den Zustand des vorherigen Zyklus speichert. Teilen sich zwei FP denselben Merker, überschreibt jede den gespeicherten Wert der anderen, und beide funktionieren nicht."}},{"@type":"Question","name":"Wie schalte ich mit einem einzigen Taster eine Leuchte ein und aus?","acceptedAnswer":{"@type":"Answer","text":"Mit einem Stromstoßschalter: eine positive Flanke des Tasters und eine Selbsthaltung, die bei jeder Flanke den Zustand des Ausgangs wechselt (Beispiel E11). Ohne Flanke würde der Ausgang bei gedrücktem Taster in jedem Zyklus wechseln."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Flanken","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/flancos/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/edge-detection/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/flanken/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/" aria-current="page">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/" aria-current="page">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Flanken</span></nav>
+      <h1>Positive und negative Flanken in KOP und AWL (P, N, FP und FN)</h1>
+      <p class="articulo-entradilla">Was eine positive oder negative Flanke ist, wie sie in KOP mit (P) und (N) und in AWL mit FP und FN erkannt wird, warum jede Flanke einen eigenen Flankenmerker braucht und wie ein Stromstoßschalter funktioniert.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="flanken-in-kop">Flanken in KOP</h2>
+<p><svg class="kop-ico" viewBox="0 0 41 20" width="41" height="20" role="img" aria-label="--(P)--"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">P</text><path d="M29.6 10h10"/></svg> trägt oben einen <strong>Flankenmerker</strong>, in dem das VKE des vorherigen Zyklus gespeichert wird. Sein Ausgang ist nur in dem Zyklus 1, in dem das VKE von 0 auf 1 wechselt.</p>
+<figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="M10.1 = Impuls für einen Zyklus beim Drücken von E0.0. M10.0 ist der Flankenmerker, in dem (P) das VKE des vorherigen Zyklus speichert."><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="129" y2="46" class="w"></line><line x1="151" y1="46" x2="182" y2="46" class="w"></line><path d="M 134 35 Q 127 46 134 57" class="sym-line" fill="none"></path><path d="M 146 35 Q 153 46 146 57" class="sym-line" fill="none"></path><text x="140" y="50" text-anchor="middle" class="boxtxt">P</text><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">M 10.0</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">M 10.1</text></g></g></svg></div></div><figcaption class="figura-pie">M10.1 = Impuls für einen Zyklus beim Drücken von E0.0. M10.0 ist der Flankenmerker, in dem (P) das VKE des vorherigen Zyklus speichert.</figcaption></figure>
+<p>Zeitdiagramm:</p>
+<figure class="crono"><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 130" width="720" height="130" role="img" aria-label="Jede Spalte ist ein Zyklus. (P) ist nur in dem Zyklus 1, in dem E 0.0 von 0 auf 1 wechselt, und (N) nur in dem Zyklus, in dem E 0.0 von 1 auf 0 wechselt."><path class="crono-rejilla" d="M64.0 10V124"/><path class="crono-rejilla" d="M93.2 10V124"/><path class="crono-rejilla" d="M122.4 10V124"/><path class="crono-rejilla" d="M151.5 10V124"/><path class="crono-rejilla" d="M180.7 10V124"/><path class="crono-rejilla" d="M209.9 10V124"/><path class="crono-rejilla" d="M239.1 10V124"/><path class="crono-rejilla" d="M268.3 10V124"/><path class="crono-rejilla" d="M297.5 10V124"/><path class="crono-rejilla" d="M326.6 10V124"/><path class="crono-rejilla" d="M355.8 10V124"/><path class="crono-rejilla" d="M385.0 10V124"/><path class="crono-rejilla" d="M414.2 10V124"/><path class="crono-rejilla" d="M443.4 10V124"/><path class="crono-rejilla" d="M472.5 10V124"/><path class="crono-rejilla" d="M501.7 10V124"/><path class="crono-rejilla" d="M530.9 10V124"/><path class="crono-rejilla" d="M560.1 10V124"/><path class="crono-rejilla" d="M589.3 10V124"/><path class="crono-rejilla" d="M618.5 10V124"/><path class="crono-rejilla" d="M647.6 10V124"/><path class="crono-rejilla" d="M676.8 10V124"/><path class="crono-rejilla" d="M706.0 10V124"/><text class="crono-nombre" x="52" y="33" text-anchor="end">E 0.0</text><rect class="crono-relleno" x="151.5" y="16" width="233.5" height="20"/><rect class="crono-relleno" x="501.7" y="16" width="116.8" height="20"/><path class="crono-linea" d="M64.0 36H151.5V16H385.0V36H501.7V16H618.5V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">(P)</text><rect class="crono-relleno q" x="151.5" y="56" width="29.2" height="20"/><rect class="crono-relleno q" x="501.7" y="56" width="29.2" height="20"/><path class="crono-linea q" d="M64.0 76H151.5V56H180.7V76H501.7V56H530.9V76H706.0"/><text class="crono-nombre" x="52" y="113" text-anchor="end">(N)</text><rect class="crono-relleno q" x="385.0" y="96" width="29.2" height="20"/><rect class="crono-relleno q" x="618.5" y="96" width="29.1" height="20"/><path class="crono-linea q" d="M64.0 116H385.0V96H414.2V116H618.5V96H647.6V116H706.0"/></svg></div><p class="crono-pie">Jede Spalte ist ein Zyklus. (P) ist nur in dem Zyklus 1, in dem E 0.0 von 0 auf 1 wechselt, und (N) nur in dem Zyklus, in dem E 0.0 von 1 auf 0 wechselt.</p></figure>
+<p>Typische Anwendungen: Tastendrücke zählen, der <strong>Stromstoßschalter</strong> (ein einziger Taster schaltet ein und aus) und eine Aktion nur einmal ausführen.</p></section>
+<section><h2 id="flanken-in-awl">Flanken in AWL</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Pseudocode</th></tr></thead><tbody><tr><td><code>FP m</code></td><td><code>alt := m; m := VKE; VKE := VKE ∧ ¬alt</code></td></tr><tr><td><code>FN m</code></td><td><code>alt := m; m := VKE; VKE := ¬VKE ∧ alt</code></td></tr></tbody></table></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">FP</span>    <span class="t-op">M 10.0</span>          <span class="t-com">// M10.0 = Flankenmerker (nur dafür)</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 10.1</span>          <span class="t-com">// M10.1 = 1 nur im Zyklus der Flanke</span></code></pre></section>
+<section><h2 id="geloste-beispiele">Gelöste Beispiele</h2>
+        <article class="ejemplo" id="e10">
+          <h3><span class="codigo">E10</span>Positive und negative Flanke</h3>
+          <p><strong>Aufgabe</strong>: M10.1 = Impuls für einen Zyklus beim Drücken von E0.0. M10.3 = Impuls für einen Zyklus beim Loslassen.</p>
+<p><strong>Konzepte</strong>: Jede Flanke braucht <strong>ihren eigenen</strong> Flankenmerker (M10.0 und M10.2).</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="129" y2="46" class="w"></line><line x1="151" y1="46" x2="182" y2="46" class="w"></line><path d="M 134 35 Q 127 46 134 57" class="sym-line" fill="none"></path><path d="M 146 35 Q 153 46 146 57" class="sym-line" fill="none"></path><text x="140" y="50" text-anchor="middle" class="boxtxt">P</text><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">M 10.0</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">M 10.1</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="129" y2="46" class="w"></line><line x1="151" y1="46" x2="182" y2="46" class="w"></line><path d="M 134 35 Q 127 46 134 57" class="sym-line" fill="none"></path><path d="M 146 35 Q 153 46 146 57" class="sym-line" fill="none"></path><text x="140" y="50" text-anchor="middle" class="boxtxt">N</text><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">M 10.2</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">M 10.3</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E10&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;M 10.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;M 10.3&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">FP</span>    <span class="t-op">M 10.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 10.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">FN</span>    <span class="t-op">M 10.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 10.3</span></code></pre>
+        </article>
+<article class="ejemplo" id="e11">
+          <h3><span class="codigo">E11</span>Stromstoßschalter (ein Taster schaltet ein und aus)</h3>
+          <p><strong>Aufgabe</strong>: Jeder Druck auf E0.0 ändert den Zustand der Leuchte A4.0.</p>
+<p><strong>Konzepte</strong>: Flanke + Selbsthaltung mit zwei Zweigen.</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="129" y2="46" class="w"></line><line x1="151" y1="46" x2="182" y2="46" class="w"></line><path d="M 134 35 Q 127 46 134 57" class="sym-line" fill="none"></path><path d="M 146 35 Q 153 46 146 57" class="sym-line" fill="none"></path><text x="140" y="50" text-anchor="middle" class="boxtxt">P</text><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">M 10.0</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">M 10.1</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">M 10.1</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">M 10.1</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">A 4.0</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E11&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">FP</span>    <span class="t-op">M 10.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 10.1</span>      <span class="t-com">// Impuls</span>
+      <span class="t-ins">U</span>     <span class="t-op">M 10.1</span>
+      <span class="t-ins">UN</span>    <span class="t-op">A 4.0</span>
+      <span class="t-ins">O</span>
+      <span class="t-ins">UN</span>    <span class="t-op">M 10.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">A 4.0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist eine positive Flanke in einer SPS?</summary><div class="faq-respuesta"><p>Der Wechsel eines Signals von 0 auf 1. Eine Flankenauswertung liefert nur in dem Zyklus eine 1, in dem dieser Wechsel stattfindet, auch wenn das Signal danach auf 1 bleibt. Die negative Flanke ist der Wechsel von 1 auf 0.</p></div></details>
+          <details><summary>Warum braucht jede Flanke einen eigenen Merker?</summary><div class="faq-respuesta"><p>Weil der Flankenmerker den Zustand des vorherigen Zyklus speichert. Teilen sich zwei <code>FP</code> denselben Merker, überschreibt jede den gespeicherten Wert der anderen, und beide funktionieren nicht.</p></div></details>
+          <details><summary>Wie schalte ich mit einem einzigen Taster eine Leuchte ein und aus?</summary><div class="faq-respuesta"><p>Mit einem Stromstoßschalter: eine positive Flanke des Tasters und eine Selbsthaltung, die bei jeder Flanke den Zustand des Ausgangs wechselt (Beispiel E11). Ohne Flanke würde der Ausgang bei gedrücktem Taster in jedem Zyklus wechseln.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../selbsthaltung-setzen-ruecksetzen/"><span>← Zurück</span><b>Selbsthaltung, Setzen, Rücksetzen</b></a>
+        <a class="pag-sig" href="../zeiten/"><span>Weiter →</span><b>Zeiten</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Ausprobieren","pista":"Klicke auf die Eingänge.","pistaMayus":"Mit Umschalt + Klick wirkt ein Eingang als Taster, solange du ihn gedrückt hältst.","reiniciar":"Neu starten","valorNoValido":"Ungültiger Wert"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

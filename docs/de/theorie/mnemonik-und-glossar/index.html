@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deutsche und englische AWL-Mnemonik und Glossar · Automatizacion</title>
+  <meta name="description" content="Tabelle der Entsprechungen zwischen der deutschen (U, E, A, SPB…) und der englischen AWL-Mnemonik (A, I, Q, JC…) und ein Glossar der Begriffe aus KOP und AWL.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/mnemonics-and-glossary/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Deutsche und englische AWL-Mnemonik und Glossar">
+  <meta property="og:description" content="Tabelle der Entsprechungen zwischen der deutschen (U, E, A, SPB…) und der englischen AWL-Mnemonik (A, I, Q, JC…) und ein Glossar der Begriffe aus KOP und AWL.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Deutsche und englische AWL-Mnemonik und Glossar","description":"Tabelle der Entsprechungen zwischen der deutschen (U, E, A, SPB…) und der englischen AWL-Mnemonik (A, I, Q, JC…) und ein Glossar der Begriffe aus KOP und AWL.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist der Unterschied zwischen der deutschen und der englischen Mnemonik?","acceptedAnswer":{"@type":"Answer","text":"Es sind zwei Schreibweisen für dieselben Anweisungen. Im Deutschen ist U das UND, E ein Eingang und A ein Ausgang; im Englischen ist A das UND, I ein Eingang und Q ein Ausgang. Das Programm ist dasselbe."}},{"@type":"Question","name":"Wie schreibt man „SE T 1“ in englischer Mnemonik?","acceptedAnswer":{"@type":"Answer","text":"SD T 1, die Einschaltverzögerung. Im Englischen ist SE der verlängerte Impuls, im Deutschen SV."}},{"@type":"Question","name":"Was bedeuten KOP, FUP und AWL?","acceptedAnswer":{"@type":"Answer","text":"Es sind die deutschen Abkürzungen der Sprachen: KOP, Kontaktplan (englisch LAD); FUP, Funktionsplan (FBD), und AWL, Anweisungsliste (STL)."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Mnemonik und Glossar","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/nemotecnica-y-glosario/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/mnemonics-and-glossary/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/mnemonik-und-glossar/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/" aria-current="page">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/" aria-current="page">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Mnemonik und Glossar</span></nav>
+      <h1>Deutsche und englische AWL-Mnemonik und Glossar</h1>
+      <p class="articulo-entradilla">Tabelle der Entsprechungen zwischen der deutschen (U, E, A, SPB…) und der englischen AWL-Mnemonik (A, I, Q, JC…) und ein Glossar der Begriffe aus KOP und AWL.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="mnemonik-deutsch-englisch">Mnemonik Deutsch ↔ Englisch</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Deutsch</th><th>Englisch (international)</th><th>Deutsch</th><th>Englisch</th></tr></thead><tbody><tr><td><code>U</code></td><td><code>A</code></td><td><code>SPA</code></td><td><code>JU</code></td></tr><tr><td><code>UN</code></td><td><code>AN</code></td><td><code>SPB</code></td><td><code>JC</code></td></tr><tr><td><code>O</code> / <code>ON</code></td><td><code>O</code> / <code>ON</code></td><td><code>SPBN</code></td><td><code>JCN</code></td></tr><tr><td><code>X</code> / <code>XN</code></td><td><code>X</code> / <code>XN</code></td><td><code>SPBB</code> / <code>SPBNB</code></td><td><code>JCB</code> / <code>JNB</code></td></tr><tr><td><code>U(</code> / <code>UN(</code></td><td><code>A(</code> / <code>AN(</code></td><td><code>SPBI</code> / <code>SPBIN</code></td><td><code>JBI</code> / <code>JNBI</code></td></tr><tr><td><code>=</code>, <code>S</code>, <code>R</code>, <code>NOT</code>, <code>SET</code>, <code>CLR</code>, <code>SAVE</code></td><td>gleich</td><td><code>SPO</code> / <code>SPS</code></td><td><code>JO</code> / <code>JOS</code></td></tr><tr><td><code>FP</code> / <code>FN</code></td><td><code>FP</code> / <code>FN</code></td><td><code>SPZ</code> / <code>SPN</code></td><td><code>JZ</code> / <code>JN</code></td></tr><tr><td><code>SI</code></td><td><code>SP</code></td><td><code>SPP</code> / <code>SPM</code></td><td><code>JP</code> / <code>JM</code></td></tr><tr><td><code>SV</code></td><td><code>SE</code></td><td><code>SPPZ</code> / <code>SPMZ</code></td><td><code>JPZ</code> / <code>JMZ</code></td></tr><tr><td><code>SE</code></td><td><code>SD</code></td><td><code>SPU</code> / <code>SPL</code></td><td><code>JUO</code> / <code>JL</code></td></tr><tr><td><code>SS</code></td><td><code>SS</code></td><td><code>BE</code> / <code>BEB</code> / <code>BEA</code></td><td><code>BE</code> / <code>BEC</code> / <code>BEU</code></td></tr><tr><td><code>SA</code></td><td><code>SF</code></td><td><code>AUF</code></td><td><code>OPN</code></td></tr><tr><td><code>ZV</code> / <code>ZR</code></td><td><code>CU</code> / <code>CD</code></td><td><code>UW</code> / <code>UD</code></td><td><code>AW</code> / <code>AD</code></td></tr><tr><td><code>E</code> / <code>A</code> (Operanden)</td><td><code>I</code> / <code>Q</code></td><td><code>BIE</code></td><td><code>BR</code></td></tr><tr><td><code>PE</code> / <code>PA</code></td><td><code>PI</code> / <code>PQ</code></td><td><code>Z</code> (Zähler)</td><td><code>C</code></td></tr><tr><td><code>S5T#</code>, <code>C#</code>, <code>L#</code>...</td><td>gleich</td><td><code>KOP</code> / <code>FUP</code> / <code>AWL</code></td><td><code>LAD</code> / <code>FBD</code> / <code>STL</code></td></tr></tbody></table></div>
+<p>Vorsicht vor Verwechslungen: <code>SE</code> ist im Deutschen die Einschaltverzögerung, im Englischen aber der verlängerte Impuls. <code>A</code> ist im Deutschen ein Ausgang, im Englischen aber die UND-Anweisung.</p></section>
+<section><h2 id="glossar">Glossar</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Begriff</th><th>Bedeutung</th></tr></thead><tbody><tr><td>PAE / PAA</td><td>Prozessabbild der Eingänge / der Ausgänge</td></tr><tr><td>VKE (RLO)</td><td>Verknüpfungsergebnis</td></tr><tr><td>/ER</td><td>Bit der Erstabfrage</td></tr><tr><td>STA</td><td>Statusbit (Wert des zuletzt abgefragten Operanden)</td></tr><tr><td>BIE (BR)</td><td>Binärergebnis (ENO, <code>SAVE</code>)</td></tr><tr><td>AKKU1 / AKKU2</td><td>Akkumulatoren</td></tr><tr><td>Netzwerk</td><td>Programmeinheit in KOP und AWL</td></tr><tr><td>Selbsthaltung</td><td>Ein Ausgang hält sich über seinen eigenen Kontakt</td></tr><tr><td>Flanke</td><td>Wechsel 0→1 (steigend) oder 1→0 (fallend)</td></tr><tr><td>Remanent</td><td>Behält seinen Wert nach einem Spannungsausfall oder einem STOP→RUN</td></tr><tr><td>OB / FC / FB / DB</td><td>Organisationsbaustein / Funktion / Funktionsbaustein / Datenbaustein</td></tr><tr><td>BCD</td><td>Binär codierte Dezimalzahl</td></tr><tr><td>S5TIME</td><td>Zeitformat der Zeiten (Zeitbasis + 3 BCD-Ziffern)</td></tr><tr><td>Taktmerker</td><td>Merkerbyte, dessen Bits die CPU mit festen Frequenzen ein- und ausschaltet</td></tr></tbody></table></div></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist der Unterschied zwischen der deutschen und der englischen Mnemonik?</summary><div class="faq-respuesta"><p>Es sind zwei Schreibweisen für dieselben Anweisungen. Im Deutschen ist <code>U</code> das UND, <code>E</code> ein Eingang und <code>A</code> ein Ausgang; im Englischen ist <code>A</code> das UND, <code>I</code> ein Eingang und <code>Q</code> ein Ausgang. Das Programm ist dasselbe.</p></div></details>
+          <details><summary>Wie schreibt man „SE T 1“ in englischer Mnemonik?</summary><div class="faq-respuesta"><p><code>SD T 1</code>, die Einschaltverzögerung. Im Englischen ist <code>SE</code> der verlängerte Impuls, im Deutschen <code>SV</code>.</p></div></details>
+          <details><summary>Was bedeuten KOP, FUP und AWL?</summary><div class="faq-respuesta"><p>Es sind die deutschen Abkürzungen der Sprachen: KOP, Kontaktplan (englisch LAD); FUP, Funktionsplan (FBD), und AWL, Anweisungsliste (STL).</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../geloeste-aufgaben/"><span>← Zurück</span><b>Gelöste Aufgaben</b></a>
+        <span></span>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

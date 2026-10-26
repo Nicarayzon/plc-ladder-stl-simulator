@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conversiones y lógica de palabras: BCD, INT, DINT y REAL · Automatizacion</title>
+  <meta name="description" content="Cómo convertir entre BCD, INT, DINT y REAL en AWL y en KOP, cómo redondear, cómo escalar una entrada analógica a porcentaje y cómo enmascarar y desplazar bits con la lógica de palabras.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/conversions-and-word-logic/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/umwandlung-und-wortverknuepfung/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Conversiones y lógica de palabras: BCD, INT, DINT y REAL">
+  <meta property="og:description" content="Cómo convertir entre BCD, INT, DINT y REAL en AWL y en KOP, cómo redondear, cómo escalar una entrada analógica a porcentaje y cómo enmascarar y desplazar bits con la lógica de palabras.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Conversiones y lógica de palabras: BCD, INT, DINT y REAL","description":"Cómo convertir entre BCD, INT, DINT y REAL en AWL y en KOP, cómo redondear, cómo escalar una entrada analógica a porcentaje y cómo enmascarar y desplazar bits con la lógica de palabras.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Cómo escalo una entrada analógica a porcentaje?","acceptedAnswer":{"@type":"Answer","text":"Convierte el valor a REAL (ITD y DTR), divide entre 27648 y multiplica por 100. Con 13824 en la entrada, el resultado es 50,0 %."}},{"@type":"Question","name":"¿Qué diferencia hay entre RND y TRUNC?","acceptedAnswer":{"@type":"Answer","text":"RND redondea al entero más próximo (3,6 → 4) y TRUNC corta la parte decimal hacia 0 (3,6 → 3). RND+ redondea hacia arriba y RND- hacia abajo."}},{"@type":"Question","name":"Con MW10 = −1, ¿por qué L MW 10 no deja −1 en el acumulador de 32 bits?","acceptedAnswer":{"@type":"Answer","text":"Porque L rellena con ceros la parte alta, sin extender el signo: ACU1 queda en DW#16#0000FFFF. Para tratarlo como DINT negativo hay que usar ITD."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Conversiones","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/conversiones-y-logica-de-palabras/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/conversions-and-word-logic/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/umwandlung-und-wortverknuepfung/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/" aria-current="page">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/" aria-current="page">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Conversiones</span></nav>
+      <h1>Conversiones y lógica de palabras: BCD, INT, DINT y REAL</h1>
+      <p class="articulo-entradilla">Cómo convertir entre BCD, INT, DINT y REAL en AWL y en KOP, cómo redondear, cómo escalar una entrada analógica a porcentaje y cómo enmascarar y desplazar bits con la lógica de palabras.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="conversion">Conversión</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>AWL</th><th>KOP</th><th>Conversión</th><th>Notas</th></tr></thead><tbody><tr><td><code>BTI</code></td><td><code>BCD_I</code></td><td>BCD de 3 cifras → INT (ACU1-L)</td><td>Cifra no válida → error BCD (OB121)</td></tr><tr><td><code>ITB</code></td><td><code>I_BCD</code></td><td>INT → BCD de 3 cifras</td><td>Fuera de ±999 → OV = OS = 1 y no convierte</td></tr><tr><td><code>BTD</code></td><td><code>BCD_DI</code></td><td>BCD de 7 cifras → DINT</td><td></td></tr><tr><td><code>DTB</code></td><td><code>DI_BCD</code></td><td>DINT → BCD de 7 cifras</td><td></td></tr><tr><td><code>ITD</code></td><td><code>I_DI</code></td><td>INT → DINT (extiende el signo)</td><td></td></tr><tr><td><code>DTR</code></td><td><code>DI_R</code></td><td>DINT → REAL</td><td>Por encima de 2²⁴ puede perder precisión</td></tr><tr><td><code>RND</code></td><td><code>ROUND</code></td><td>REAL → DINT, redondeando al más próximo</td><td>En el caso exacto de x,5 el manual de AWL indica redondeo al par</td></tr><tr><td><code>TRUNC</code></td><td><code>TRUNC</code></td><td>REAL → DINT truncando hacia 0</td><td>3,9 → 3 ; −3,9 → −3</td></tr><tr><td><code>RND+</code></td><td><code>CEIL</code></td><td>REAL → DINT hacia +∞</td><td>3,2 → 4 ; −3,2 → −3</td></tr><tr><td><code>RND-</code></td><td><code>FLOOR</code></td><td>REAL → DINT hacia −∞</td><td>3,2 → 3 ; −3,2 → −4</td></tr><tr><td><code>INVI</code> / <code>INVD</code></td><td><code>INV_I</code> / <code>INV_DI</code></td><td>Complemento a 1 (invierte los bits)</td><td></td></tr><tr><td><code>NEGI</code> / <code>NEGD</code></td><td><code>NEG_I</code> / <code>NEG_DI</code></td><td>Complemento a 2 (cambia el signo)</td><td></td></tr><tr><td><code>NEGR</code></td><td><code>NEG_R</code></td><td>Cambia el signo de un REAL</td><td></td></tr><tr><td><code>CAW</code></td><td>—</td><td>Intercambia los 2 bytes de ACU1-L</td><td></td></tr><tr><td><code>CAD</code></td><td>—</td><td>Invierte el orden de los 4 bytes de ACU1</td><td></td></tr></tbody></table></div>
+<p><strong>Escalado analógico típico</strong> (0..27648 → 0..100 %):</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">PEW 256</span>         <span class="t-com">// valor bruto (INT)</span>
+      <span class="t-ins">ITD</span>                   <span class="t-com">// INT → DINT</span>
+      <span class="t-ins">DTR</span>                   <span class="t-com">// DINT → REAL</span>
+      <span class="t-ins">L</span>     <span class="t-cte">2.764800e+004</span>
+      <span class="t-ins">/R</span>
+      <span class="t-ins">L</span>     <span class="t-cte">1.000000e+002</span>
+      <span class="t-ins">*R</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 60</span>           <span class="t-com">// % en REAL</span></code></pre></section>
+<section><h2 id="logica-de-palabras-y-desplazamientos">Lógica de palabras y desplazamientos</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Efecto</th></tr></thead><tbody><tr><td><code>UW</code>, <code>OW</code>, <code>XOW</code></td><td>ACU1-L := ACU1-L (Y / O / O-exclusiva) ACU2-L. Si llevan constante (<code>UW W#16#00FF</code>), operan con la constante</td></tr><tr><td><code>UD</code>, <code>OD</code>, <code>XOD</code></td><td>Lo mismo con 32 bits</td></tr><tr><td><code>SLW n</code> / <code>SRW n</code></td><td>Desplaza ACU1-L n bits a la izquierda / derecha, rellenando con 0</td></tr><tr><td><code>SSI n</code></td><td>Desplaza ACU1-L a la derecha manteniendo el signo</td></tr><tr><td><code>SLD n</code> / <code>SRD n</code> / <code>SSD n</code></td><td>Desplazamientos de 32 bits</td></tr><tr><td><code>RLD n</code> / <code>RRD n</code></td><td>Rota ACU1 n bits a la izquierda / derecha</td></tr><tr><td><code>RLDA</code> / <code>RRDA</code></td><td>Rota 1 bit pasando por A1</td></tr></tbody></table></div>
+<ul>
+<li>Sin operando, el número de posiciones se toma de ACU2-LL.</li>
+<li>Tras la lógica de palabras: A1 = (resultado ≠ 0), A0 = 0 y OV = 0.</li>
+<li>Tras un desplazamiento: A1 = último bit que ha salido.</li>
+</ul>
+<p>Ejemplo: aislar el byte bajo de una palabra con <code>L MW 10 / UW W#16#00FF / T MW 12</code>.</p></section>
+<section><h2 id="ejemplos-resueltos">Ejemplos resueltos</h2>
+        <article class="ejemplo" id="e23">
+          <h3><span class="codigo">E23</span>Escalado analógico a % (REAL)</h3>
+          <p><strong>Enunciado</strong>: PEW256 (0..27648) → MD100 = 0,0..100,0 %. A5.7 = alarma por encima del 80 %.</p>
+<p><strong>En KOP</strong> es una cadena de cuadros unidos ENO → EN, con resultados intermedios en marcas o temporales:</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><p class="kop-titulo">Segmento 1 · INT → DINT</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">I_DI</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">PEW 256</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 104</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 2 · DINT → REAL</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">DI_R</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 104</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 108</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 3 · Normalizar</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">DIV_R</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 108</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">2.764800e+004</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 112</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 4 · Escalar a %</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">MUL_R</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 112</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">1.000000e+002</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 100</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 5 · Alarma &gt; 80 %</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="164" height="124" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="24" y2="46" class="w"></line><line x1="172" y1="46" x2="182" y2="46" class="w"></line><rect x="24" y="32" width="148" height="94" rx="3" class="sym-box "></rect><text x="98" y="45" text-anchor="middle" class="boxtxt">CMP &gt;R</text><text x="30" y="66" class="pin">IN1</text><text x="30" y="116" class="pin">IN2</text><g class="op-hit"><rect x="56" y="54" width="90" height="16" fill="transparent"></rect><text x="58" y="66" text-anchor="start" class="op  ">MD 100</text></g><g class="op-hit"><rect x="56" y="104" width="90" height="16" fill="transparent"></rect><text x="58" y="116" text-anchor="start" class="op  ">8.000000e+001</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 5.7</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E23&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;PEW 256&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;13824&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 5.7&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MD 100&quot;,&quot;tipo&quot;:&quot;REAL&quot;,&quot;valor&quot;:&quot;50.0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">PEW 256</span>
+      <span class="t-ins">ITD</span>
+      <span class="t-ins">DTR</span>
+      <span class="t-ins">L</span>     <span class="t-cte">2.764800e+004</span>
+      <span class="t-ins">/R</span>
+      <span class="t-ins">L</span>     <span class="t-cte">1.000000e+002</span>
+      <span class="t-ins">*R</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">L</span>     <span class="t-cte">8.000000e+001</span>
+      <span class="t-ins">&gt;R</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 5.7</span></code></pre>
+        </article>
+<article class="ejemplo" id="e25">
+          <h3><span class="codigo">E25</span>REAL → DINT: RND, TRUNC, RND+ y RND−</h3>
+          <figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><p class="kop-titulo">Segmento 1 · Redondear</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">ROUND</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 100</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 104</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 2 · Truncar</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">TRUNC</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 100</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 108</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 3 · Hacia +∞</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">CEIL</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 100</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 112</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 4 · Hacia −∞</p><div class="kop-lienzo"><svg width="558" height="140" viewBox="0 0 558 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">FLOOR</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 100</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 116</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E25&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;MD 100&quot;,&quot;tipo&quot;:&quot;REAL&quot;,&quot;valor&quot;:&quot;2.7&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;MD 104&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;3&quot;},{&quot;op&quot;:&quot;MD 108&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;2&quot;},{&quot;op&quot;:&quot;MD 112&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;3&quot;},{&quot;op&quot;:&quot;MD 116&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;2&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">RND</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 104</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">TRUNC</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 108</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">RND+</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 112</span>
+      <span class="t-ins">L</span>     <span class="t-op">MD 100</span>
+      <span class="t-ins">RND-</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 116</span></code></pre>
+        </article></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Cómo escalo una entrada analógica a porcentaje?</summary><div class="faq-respuesta"><p>Convierte el valor a REAL (<code>ITD</code> y <code>DTR</code>), divide entre 27648 y multiplica por 100. Con 13824 en la entrada, el resultado es 50,0 %.</p></div></details>
+          <details><summary>¿Qué diferencia hay entre RND y TRUNC?</summary><div class="faq-respuesta"><p><code>RND</code> redondea al entero más próximo (3,6 → 4) y <code>TRUNC</code> corta la parte decimal hacia 0 (3,6 → 3). <code>RND+</code> redondea hacia arriba y <code>RND-</code> hacia abajo.</p></div></details>
+          <details><summary>Con MW10 = −1, ¿por qué <code>L MW 10</code> no deja −1 en el acumulador de 32 bits?</summary><div class="faq-respuesta"><p>Porque <code>L</code> rellena con ceros la parte alta, sin extender el signo: ACU1 queda en <code>DW#16#0000FFFF</code>. Para tratarlo como DINT negativo hay que usar <code>ITD</code>.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <a class="pag-ant" href="../comparacion-y-aritmetica/"><span>← Anterior</span><b>Comparación y aritmética</b></a>
+        <a class="pag-sig" href="../saltos-y-bucles/"><span>Siguiente →</span><b>Saltos y bucles</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Pruébalo","pista":"Haz clic en las entradas.","pistaMayus":"Con Mayús + clic, la entrada funciona como un pulsador mientras la mantienes.","reiniciar":"Reiniciar","valorNoValido":"Valor no válido"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

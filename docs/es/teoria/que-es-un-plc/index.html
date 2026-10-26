@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qué es un PLC: partes, lenguajes y por dónde empezar · Automatizacion</title>
+  <meta name="description" content="Introducción a los autómatas programables: qué es un PLC, de qué partes se compone, en qué se diferencia de los relés y de un Arduino, qué lenguajes de programación existen (KOP, FUP, AWL, texto estructurado y GRAFCET) y cuál conviene aprender primero.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/what-is-a-plc/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/was-ist-eine-sps/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Qué es un PLC: partes, lenguajes y por dónde empezar">
+  <meta property="og:description" content="Introducción a los autómatas programables: qué es un PLC, de qué partes se compone, en qué se diferencia de los relés y de un Arduino, qué lenguajes de programación existen (KOP, FUP, AWL, texto estructurado y GRAFCET) y cuál conviene aprender primero.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Qué es un PLC: partes, lenguajes y por dónde empezar","description":"Introducción a los autómatas programables: qué es un PLC, de qué partes se compone, en qué se diferencia de los relés y de un Arduino, qué lenguajes de programación existen (KOP, FUP, AWL, texto estructurado y GRAFCET) y cuál conviene aprender primero.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué es un PLC o autómata programable?","acceptedAnswer":{"@type":"Answer","text":"Es un ordenador industrial que gobierna máquinas e instalaciones: lee pulsadores y sensores por sus entradas, ejecuta un programa en un ciclo que se repite sin parar y activa motores, válvulas o pilotos por sus salidas. Sustituye a los automatismos cableados con relés."}},{"@type":"Question","name":"¿Qué diferencia hay entre un PLC y un Arduino?","acceptedAnswer":{"@type":"Answer","text":"El PLC está hecho para la industria: entradas y salidas de 24 V, resistencia al ruido eléctrico y a las vibraciones, ejecución cíclica predecible, lenguajes normalizados (IEC 61131-3) y repuestos durante muchos años. Un Arduino es una placa de microcontrolador pensada para aprender y hacer prototipos, y se programa en C++."}},{"@type":"Question","name":"¿Qué lenguaje de PLC conviene aprender primero?","acceptedAnswer":{"@type":"Answer","text":"KOP (esquema de contactos), porque se lee como un esquema eléctrico. Después, AWL para entender cómo trabaja la CPU por dentro, y más adelante texto estructurado (ST) para los cálculos y GRAFCET para las secuencias."}},{"@type":"Question","name":"¿Necesito un autómata real para aprender a programarlo?","acceptedAnswer":{"@type":"Answer","text":"No. Con un simulador puedes escribir programas en KOP y AWL, accionar las entradas y ver cómo responden las salidas, los temporizadores y los contadores. Cuando trabajes con un autómata real, llegarás con el programa ya probado."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Qué es un PLC","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/que-es-un-plc/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/what-is-a-plc/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/was-ist-eine-sps/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/" aria-current="page">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/" aria-current="page">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Qué es un PLC</span></nav>
+      <h1>Qué es un PLC: partes, lenguajes y por dónde empezar</h1>
+      <p class="articulo-entradilla">Introducción a los autómatas programables: qué es un PLC, de qué partes se compone, en qué se diferencia de los relés y de un Arduino, qué lenguajes de programación existen (KOP, FUP, AWL, texto estructurado y GRAFCET) y cuál conviene aprender primero.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="que-es-un-plc">¿Qué es un PLC?</h2>
+<p>Un <strong>PLC</strong> (controlador lógico programable) o <strong>autómata programable</strong> es un ordenador pensado para gobernar máquinas e instalaciones industriales. Hace siempre lo mismo, sin parar:</p>
+<ol>
+<li><strong>Lee las entradas</strong>: pulsadores, interruptores, finales de carrera, sensores de presencia, sondas de nivel o de temperatura.</li>
+<li><strong>Ejecuta el programa</strong>: decide qué hacer según el estado de las entradas, el tiempo transcurrido y lo que recuerda (marcas, temporizadores y contadores).</li>
+<li><strong>Escribe las salidas</strong>: arranca motores mediante contactores, abre válvulas, enciende pilotos o mueve cilindros.</li>
+</ol>
+<p>A esta repetición se le llama <strong>ciclo de scan</strong>, y suele durar pocos milisegundos (ver <a href="../ciclo-de-scan/#el-ciclo-de-scan">El ciclo de scan</a>).</p>
+<p>Antes de los PLC, la lógica de una máquina se construía <strong>cableando relés</strong>: para cambiar el funcionamiento había que recablear el armario. Con un PLC, el cableado de entradas y salidas se queda igual y lo que cambia es el <strong>programa</strong>.</p></section>
+<section><h2 id="partes-de-un-plc">Partes de un PLC</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Parte</th><th>Para qué sirve</th></tr></thead><tbody><tr><td><strong>Fuente de alimentación</strong></td><td>Convierte la tensión de la red en los 24 V DC que usan la CPU y los módulos</td></tr><tr><td><strong>CPU</strong></td><td>Ejecuta el programa y guarda los datos: imagen de proceso, marcas, temporizadores, contadores y bloques de datos (ver <a href="../areas-de-memoria/#resumen">Áreas de memoria: Resumen</a>)</td></tr><tr><td><strong>Entradas digitales</strong></td><td>Leen señales de todo o nada (0 o 1), normalmente de 24 V</td></tr><tr><td><strong>Salidas digitales</strong></td><td>Activan contactores, electroválvulas o pilotos, por transistor o por relé</td></tr><tr><td><strong>Entradas y salidas analógicas</strong></td><td>Leen o generan valores continuos, como 0..10 V o 4..20 mA, que la CPU ve como números de 0 a 27648 (ver <a href="../areas-de-memoria/#direcciones-de-e-s">Direcciones de E/S</a>)</td></tr><tr><td><strong>Comunicaciones</strong></td><td>Conectan con el ordenador de programación, con las pantallas táctiles (HMI) y con otros autómatas</td></tr></tbody></table></div>
+<p>En los <strong>PLC compactos</strong> todo va en una misma caja: la CPU con sus entradas y salidas integradas. En los <strong>modulares</strong>, cada parte es un módulo que se monta en un bastidor junto a la CPU, y se añaden los que hagan falta.</p></section>
+<section><h2 id="plc-reles-y-microcontroladores">PLC, relés y microcontroladores</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th></th><th>Lógica cableada (relés)</th><th>PLC</th><th>Microcontrolador (por ejemplo, Arduino)</th></tr></thead><tbody><tr><td>Cambiar el funcionamiento</td><td>Recablear</td><td>Cambiar el programa</td><td>Cambiar el programa</td></tr><tr><td>Entorno</td><td>Industrial</td><td>Industrial: resiste ruido eléctrico, vibraciones y temperatura</td><td>Laboratorio, prototipos y aprendizaje</td></tr><tr><td>Entradas y salidas</td><td>Contactos y bobinas</td><td>24 V, módulos normalizados</td><td>3,3 o 5 V: necesitan adaptación para la industria</td></tr><tr><td>Lenguajes</td><td>—</td><td>Normalizados (IEC 61131-3): KOP, FUP, AWL, texto estructurado, GRAFCET</td><td>C o C++</td></tr><tr><td>Ejecución</td><td>Inmediata</td><td>Cíclica y predecible (ciclo de scan)</td><td>La que programes</td></tr></tbody></table></div>
+<p>Un microcontrolador sirve para aprender electrónica y para prototipos. En una máquina industrial se usa un PLC porque está preparado para ese entorno, lo entiende cualquier técnico de mantenimiento y se puede sustituir y reparar durante muchos años.</p></section>
+<section><h2 id="lenguajes-de-programacion-de-los-plc">Lenguajes de programación de los PLC</h2>
+<p>La norma <strong>IEC 61131-3</strong> define los lenguajes de programación de los autómatas. Los nombres alemanes (KOP, FUP, AWL) son los más usados en la formación en español:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Lenguaje</th><th>También llamado</th><th>Cómo es</th><th>Para qué va bien</th></tr></thead><tbody><tr><td><strong>KOP</strong></td><td>Esquema de contactos, Ladder (LD, LAD)</td><td>Gráfico, como un esquema eléctrico de contactos y bobinas</td><td>Lógica de bits, enclavamientos y temporizadores. Lo entienden enseguida los electricistas</td></tr><tr><td><strong>FUP</strong></td><td>Diagrama de funciones (FBD)</td><td>Gráfico, con cuadros lógicos Y, O, biestables… como en electrónica digital</td><td>La misma lógica que KOP, dibujada con puertas lógicas</td></tr><tr><td><strong>AWL</strong></td><td>Lista de instrucciones (STL, IL)</td><td>Texto, una instrucción por línea, muy cerca de cómo trabaja la CPU</td><td>Entender la CPU por dentro, programas existentes, exámenes</td></tr><tr><td><strong>Texto estructurado</strong></td><td>ST</td><td>Texto parecido a Pascal, con <code>IF</code>, <code>FOR</code> y fórmulas</td><td>Cálculos, bucles y tratamiento de datos</td></tr><tr><td><strong>GRAFCET</strong></td><td>Diagrama funcional secuencial (SFC)</td><td>Gráfico, con etapas y transiciones</td><td>Secuencias de pasos (ver <a href="../secuencias-grafcet/#que-es-una-secuencia">Qué es una secuencia</a>)</td></tr></tbody></table></div>
+<p>Un mismo programa puede escribirse en KOP o en AWL: el editor traduce cada segmento KOP a AWL (ver <a href="../equivalencias-kop-awl/#elementos">Equivalencias KOP ↔ AWL: Elementos</a>). No todo el AWL tiene dibujo en KOP, pero todo el KOP tiene su AWL.</p></section>
+<section><h2 id="que-lenguaje-aprender">¿Qué lenguaje aprender?</h2>
+<ul>
+<li><strong>Empieza por KOP.</strong> Se lee como un esquema eléctrico y enseña lo esencial: contactos, bobinas, enclavamientos, flancos, temporizadores y contadores.</li>
+<li><strong>Aprende AWL para entender la CPU.</strong> Con AWL ves el RLO, los acumuladores y el orden en que se ejecuta cada instrucción, y entiendes por qué un programa hace lo que hace. La norma IEC 61131-3 lo dejó como obsoleto en su edición de 2013 y en los equipos nuevos se usa cada vez menos, pero sigue en muchísimas máquinas en funcionamiento y en los exámenes de formación profesional y de ingeniería.</li>
+<li><strong>Después, texto estructurado (ST)</strong>, para los cálculos y el tratamiento de datos, y <strong>GRAFCET</strong> para las secuencias.</li>
+</ul></section>
+<section><h2 id="ejemplos-resueltos">Ejemplos resueltos</h2>
+        <article class="ejemplo" id="intro-primero">
+          <h3>Tu primer programa: un interruptor enciende un piloto</h3>
+          <p><strong>Enunciado</strong>: el piloto A4.0 se enciende mientras el interruptor E0.0 está a 1. Es el programa más sencillo posible: un contacto NA y una bobina. Activa E0.0 y fíjate en cómo pasa la corriente por el esquema, de izquierda a derecha.</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;intro-primero&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;intro-primero.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;intro-primero.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;intro-primero.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;intro-primero.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// si el interruptor está a 1…</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// …se enciende el piloto</span></code></pre>
+        </article></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Qué es un PLC o autómata programable?</summary><div class="faq-respuesta"><p>Es un ordenador industrial que gobierna máquinas e instalaciones: lee pulsadores y sensores por sus entradas, ejecuta un programa en un ciclo que se repite sin parar y activa motores, válvulas o pilotos por sus salidas. Sustituye a los automatismos cableados con relés.</p></div></details>
+          <details><summary>¿Qué diferencia hay entre un PLC y un Arduino?</summary><div class="faq-respuesta"><p>El PLC está hecho para la industria: entradas y salidas de 24 V, resistencia al ruido eléctrico y a las vibraciones, ejecución cíclica predecible, lenguajes normalizados (IEC 61131-3) y repuestos durante muchos años. Un Arduino es una placa de microcontrolador pensada para aprender y hacer prototipos, y se programa en C++.</p></div></details>
+          <details><summary>¿Qué lenguaje de PLC conviene aprender primero?</summary><div class="faq-respuesta"><p>KOP (esquema de contactos), porque se lee como un esquema eléctrico. Después, AWL para entender cómo trabaja la CPU por dentro, y más adelante texto estructurado (ST) para los cálculos y GRAFCET para las secuencias.</p></div></details>
+          <details><summary>¿Necesito un autómata real para aprender a programarlo?</summary><div class="faq-respuesta"><p>No. Con un simulador puedes escribir programas en KOP y AWL, accionar las entradas y ver cómo responden las salidas, los temporizadores y los contadores. Cuando trabajes con un autómata real, llegarás con el programa ya probado.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <span></span>
+        <a class="pag-sig" href="../ciclo-de-scan/"><span>Siguiente →</span><b>El ciclo de scan</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Pruébalo","pista":"Haz clic en las entradas.","pistaMayus":"Con Mayús + clic, la entrada funciona como un pulsador mientras la mantienes.","reiniciar":"Reiniciar","valorNoValido":"Valor no válido"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

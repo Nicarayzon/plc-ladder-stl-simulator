@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laden, Vergleichen und Arithmetik in KOP und AWL · Automatizacion</title>
+  <meta name="description" content="Wie man in einer SPS mit Zahlen arbeitet: Laden und Transferieren mit L und T, Ganzzahlen und Gleitpunktzahlen vergleichen, addieren, subtrahieren, multiplizieren und dividieren und was bei einem Überlauf mit den Statusbits passiert.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/comparacion-y-aritmetica/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/compare-and-arithmetic/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/comparacion-y-aritmetica/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Laden, Vergleichen und Arithmetik in KOP und AWL">
+  <meta property="og:description" content="Wie man in einer SPS mit Zahlen arbeitet: Laden und Transferieren mit L und T, Ganzzahlen und Gleitpunktzahlen vergleichen, addieren, subtrahieren, multiplizieren und dividieren und was bei einem Überlauf mit den Statusbits passiert.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Laden, Vergleichen und Arithmetik in KOP und AWL","description":"Wie man in einer SPS mit Zahlen arbeitet: Laden und Transferieren mit L und T, Ganzzahlen und Gleitpunktzahlen vergleichen, addieren, subtrahieren, multiplizieren und dividieren und was bei einem Überlauf mit den Statusbits passiert.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was passiert, wenn eine INT-Addition den Wertebereich verlässt?","acceptedAnswer":{"@type":"Answer","text":"Das Ergebnis läuft über: 30000 + 10000 hinterlässt −25536 im Akku, und die Überlaufbits OV und OS werden gesetzt. Die CPU hält nicht an."}},{"@type":"Question","name":"Hängt die Anweisung T vom VKE ab?","acceptedAnswer":{"@type":"Answer","text":"Nein. L und T werden immer ausgeführt, egal welchen Wert das VKE hat. Um nur bei erfüllter Bedingung zu transferieren, muss man mit SPBN darüber springen."}},{"@type":"Question","name":"Was hinterlässt /I im Akku?","acceptedAnswer":{"@type":"Answer","text":"Den Quotienten im niederwertigen Teil (AKKU1-L) und den Rest im höherwertigen Teil (AKKU1-H). Zum Beispiel hinterlässt L 17 / L 5 / /I unten 3 und oben 2."}},{"@type":"Question","name":"Warum steht ein Vergleich in Reihe mit einem Kontakt in Klammern?","acceptedAnswer":{"@type":"Answer","text":"Weil der Vergleich das VKE ersetzt, statt sich damit zu verknüpfen. Innerhalb von U( … ) wird er getrennt berechnet und danach mit dem Kontakt verknüpft."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Vergleich und Arithmetik","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/comparacion-y-aritmetica/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/compare-and-arithmetic/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/vergleich-und-arithmetik/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/" aria-current="page">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/" aria-current="page">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Vergleich und Arithmetik</span></nav>
+      <h1>Laden, Vergleichen und Arithmetik in KOP und AWL</h1>
+      <p class="articulo-entradilla">Wie man in einer SPS mit Zahlen arbeitet: Laden und Transferieren mit L und T, Ganzzahlen und Gleitpunktzahlen vergleichen, addieren, subtrahieren, multiplizieren und dividieren und was bei einem Überlauf mit den Statusbits passiert.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="boxen-mit-en-eno-in-kop">Boxen mit EN/ENO in KOP</h2>
+<p><strong>Vergleicher</strong> (sie wirken wie ein Kontakt: Man schaltet sie in Reihe oder parallel):</p>
+<figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="474" height="140" viewBox="0 0 474 140" class="kop-svg" role="img" aria-label="Der Vergleicher steht in Reihe mit dem Kontakt, wie ein weiterer Kontakt: A5.6 = E2.0 ∧ (MW30 &gt; 500)."><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="266" y1="46" x2="350" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 2.0</text></g></g><g class="el"><rect x="100" y="8" width="164" height="124" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="108" y2="46" class="w"></line><line x1="256" y1="46" x2="266" y2="46" class="w"></line><rect x="108" y="32" width="148" height="94" rx="3" class="sym-box "></rect><text x="182" y="45" text-anchor="middle" class="boxtxt">CMP &gt;I</text><text x="114" y="66" class="pin">IN1</text><text x="114" y="116" class="pin">IN2</text><g class="op-hit"><rect x="140" y="54" width="90" height="16" fill="transparent"></rect><text x="142" y="66" text-anchor="start" class="op  ">MW 30</text></g><g class="op-hit"><rect x="140" y="104" width="90" height="16" fill="transparent"></rect><text x="142" y="116" text-anchor="start" class="op  ">500</text></g></g><g class="el"><rect x="352" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="350" y1="46" x2="380" y2="46" class="w"></line><path d="M 385 35 Q 378 46 385 57" class="sym-line " fill="none"></path><path d="M 399 35 Q 406 46 399 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="348" y="7" width="90" height="16" fill="transparent"></rect><text x="392" y="19" text-anchor="middle" class="op  ">A 5.6</text></g></g></svg></div></div><figcaption class="figura-pie">Der Vergleicher steht in Reihe mit dem Kontakt, wie ein weiterer Kontakt: A5.6 = E2.0 ∧ (MW30 &gt; 500).</figcaption></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Gruppe</th><th>Boxen</th></tr></thead><tbody><tr><td>INT vergleichen</td><td><code>CMP ==I</code>, <code>&lt;&gt;I</code>, <code>&gt;I</code>, <code>&lt;I</code>, <code>&gt;=I</code>, <code>&lt;=I</code></td></tr><tr><td>DINT / REAL vergleichen</td><td>ebenso mit <code>D</code> / <code>R</code></td></tr><tr><td>Übertragen</td><td><code>MOVE</code> (IN → OUT, mit 8, 16 oder 32 Bit)</td></tr><tr><td>INT-Arithmetik</td><td><code>ADD_I</code>, <code>SUB_I</code>, <code>MUL_I</code>, <code>DIV_I</code></td></tr><tr><td>DINT-Arithmetik</td><td><code>ADD_DI</code>, <code>SUB_DI</code>, <code>MUL_DI</code>, <code>DIV_DI</code>, <code>MOD_DI</code></td></tr><tr><td>REAL-Arithmetik</td><td><code>ADD_R</code>, <code>SUB_R</code>, <code>MUL_R</code>, <code>DIV_R</code>, <code>ABS</code>, <code>SQR</code>, <code>SQRT</code>, <code>EXP</code>, <code>LN</code>, <code>SIN</code>, <code>COS</code>, <code>TAN</code>, <code>ASIN</code>, <code>ACOS</code>, <code>ATAN</code></td></tr><tr><td>Umwandlung</td><td><code>BCD_I</code>, <code>I_BCD</code>, <code>BCD_DI</code>, <code>DI_BCD</code>, <code>I_DI</code>, <code>DI_R</code>, <code>ROUND</code>, <code>TRUNC</code>, <code>CEIL</code>, <code>FLOOR</code>, <code>INV_I</code>, <code>INV_DI</code>, <code>NEG_I</code>, <code>NEG_DI</code>, <code>NEG_R</code></td></tr><tr><td>Wortverknüpfung</td><td><code>WAND_W</code>, <code>WOR_W</code>, <code>WXOR_W</code>, <code>WAND_DW</code>, <code>WOR_DW</code>, <code>WXOR_DW</code></td></tr><tr><td>Schieben</td><td><code>SHL_W</code>, <code>SHR_W</code>, <code>SHR_I</code>, <code>SHL_DW</code>, <code>SHR_DW</code>, <code>SHR_DI</code>, <code>ROL_DW</code>, <code>ROR_DW</code></td></tr></tbody></table></div>
+<ul>
+<li><strong>ENO = 0</strong>, wenn EN = 0 ist oder ein Fehler aufgetreten ist. Zum Beispiel <code>ADD_I</code> mit Überlauf oder <code>I_BCD</code> außerhalb von ±999.</li>
+<li>Boxen lassen sich <strong>verketten</strong>: ENO der einen → EN der nächsten.</li>
+<li>Es gibt kein <code>I_R</code>: Um von INT nach REAL zu kommen, verwendet man <code>I_DI</code> und danach <code>DI_R</code>.</li>
+</ul></section>
+<section><h2 id="laden-und-transferieren">Laden und Transferieren</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>L op</code></td><td><strong>AKKU2 := AKKU1; AKKU1 := op</strong>. Ein Byte oder Wort wird in den niederwertigen Teil von AKKU1 geladen, der Rest wird mit <strong>Nullen</strong> aufgefüllt (ohne Vorzeichenerweiterung)</td></tr><tr><td><code>T op</code></td><td>op := niederwertiger Teil von AKKU1 (1, 2 oder 4 Bytes je nach Operand). <strong>Wird immer ausgeführt, unabhängig vom VKE</strong>. Ändert die Akkus nicht</td></tr><tr><td><code>LC T n</code> / <code>LC Z n</code></td><td>Lädt den Wert einer Zeit oder eines Zählers in BCD</td></tr><tr><td><code>L STW</code> / <code>T STW</code></td><td>Liest oder schreibt das Statuswort</td></tr><tr><td><code>L DBNO</code> / <code>L DBLG</code></td><td>Nummer / Länge des geöffneten DB</td></tr></tbody></table></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 10</span>           <span class="t-com">// AKKU1 = MW10             AKKU2 = (vorher)</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 12</span>           <span class="t-com">// AKKU1 = MW12             AKKU2 = MW10</span>
+      <span class="t-ins">+I</span>                    <span class="t-com">// AKKU1 = MW10 + MW12      AKKU2 = MW10 (bei 2 Akkus unverändert)</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 14</span>           <span class="t-com">// MW14 := AKKU1-L</span></code></pre>
+<blockquote>
+<p><strong>T ist unbedingt.</strong> Um nur bei erfüllter Bedingung zu transferieren, muss man darüber springen: <code>U E0.0 / SPBN NEIN / L 5 / T MW10 / NEIN: NOP 0</code>.</p>
+<p><strong>Nullen, kein Vorzeichen.</strong> <code>L MW 10</code> mit MW10 = −1 (W#16#FFFF) ergibt AKKU1 = DW#16#0000FFFF. Um den Wert als DINT zu behandeln, verwendet man <code>ITD</code>.</p>
+</blockquote></section>
+<section><h2 id="arithmetik">Arithmetik</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Operation</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>+I</code>, <code>-I</code></td><td>AKKU2-L ± AKKU1-L (INT)</td><td>AKKU1-L</td></tr><tr><td><code>*I</code></td><td>AKKU2-L × AKKU1-L</td><td><strong>Ganzer AKKU1, als DINT</strong> (OV = 1, wenn es nicht in INT passt)</td></tr><tr><td><code>/I</code></td><td>AKKU2-L ÷ AKKU1-L</td><td><strong>Quotient in AKKU1-L, Rest in AKKU1-H</strong></td></tr><tr><td><code>+D</code>, <code>-D</code>, <code>*D</code></td><td>DINT</td><td>AKKU1</td></tr><tr><td><code>/D</code></td><td>DINT, ganzzahliger Quotient</td><td>AKKU1 (der Rest geht verloren)</td></tr><tr><td><code>MOD</code></td><td>DINT-Rest</td><td>AKKU1. Das Vorzeichen des Rests ist das des Dividenden</td></tr><tr><td><code>+R</code>, <code>-R</code>, <code>*R</code>, <code>/R</code></td><td>REAL</td><td>AKKU1</td></tr><tr><td><code>ABS</code>, <code>SQR</code>, <code>SQRT</code>, <code>EXP</code>, <code>LN</code>, <code>SIN</code>, <code>COS</code>, <code>TAN</code>, <code>ASIN</code>, <code>ACOS</code>, <code>ATAN</code></td><td>REAL-Funktionen auf AKKU1 (Winkel im Bogenmaß)</td><td>AKKU1</td></tr><tr><td><code>+ Konst</code></td><td>AKKU1 + Konstante</td><td>AKKU1. <strong>Ändert das Statuswort nicht</strong></td></tr><tr><td><code>INC n</code> / <code>DEC n</code></td><td>Addiert oder subtrahiert n <strong>nur im niederwertigen Byte</strong> von AKKU1 (AKKU1-LL)</td><td>Ohne Übertrag und ohne Statusbits</td></tr></tbody></table></div>
+<ul>
+<li>Mit 2 Akkus <strong>ändert sich AKKU2</strong> nach der Operation <strong>nicht</strong>.</li>
+<li>Die Ganzzahldivision <strong>schneidet in Richtung 0 ab</strong>: <code>-17 /I 5</code> ergibt den Quotienten −3 und den Rest −2.</li>
+</ul>
+<p><strong>Statusbits nach <code>+I</code></strong> (die übrigen INT- und DINT-Operationen funktionieren genauso):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Mathematisches Ergebnis</th><th>Gespeicherter Wert</th><th>A1</th><th>A0</th><th>OV</th><th>OS</th></tr></thead><tbody><tr><td>= 0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>—</td></tr><tr><td>−32768 ≤ r &lt; 0</td><td>r</td><td>0</td><td>1</td><td>0</td><td>—</td></tr><tr><td>0 &lt; r ≤ 32767</td><td>r</td><td>1</td><td>0</td><td>0</td><td>—</td></tr><tr><td>r &gt; 32767 (positiver Überlauf)</td><td>r − 65536 (wird negativ)</td><td>0</td><td>1</td><td><strong>1</strong></td><td><strong>1</strong></td></tr><tr><td>r &lt; −32768 (negativer Überlauf)</td><td>r + 65536 (wird positiv)</td><td>1</td><td>0</td><td><strong>1</strong></td><td><strong>1</strong></td></tr><tr><td>r = −65536</td><td>0</td><td>0</td><td>0</td><td><strong>1</strong></td><td><strong>1</strong></td></tr></tbody></table></div>
+<p>Beispiel: 30000 + 10000 → gespeichert wird <strong>−25536</strong>, mit OV = 1 und OS = 1.</p>
+<ul>
+<li><strong>Division durch 0</strong>: A1 = A0 = 1, OV = OS = 1. Das Ergebnis ist ungültig.</li>
+<li><strong>REAL</strong>: Ein unendliches Ergebnis setzt OV und OS auf 1. Ein ungültiges Ergebnis (NaN) setzt zusätzlich A1 = A0 = 1.</li>
+</ul></section>
+<section><h2 id="vergleich">Vergleich</h2>
+<p><code>==I</code>, <code>&lt;&gt;I</code>, <code>&gt;I</code>, <code>&lt;I</code>, <code>&gt;=I</code>, <code>&lt;=I</code> vergleichen <strong>AKKU2 mit AKKU1</strong>: <code>L a / L b / &gt;I</code> bedeutet „a &gt; b“. Die Varianten <code>…D</code> vergleichen DINT und die Varianten <code>…R</code> vergleichen REAL.</p>
+<ul>
+<li>Das Ergebnis (1 oder 0) <strong>wird ins VKE geschrieben und ersetzt das bisherige</strong>: Es wird nicht damit verknüpft. Um es in Reihe mit Kontakten zu verwenden, muss es <strong>in Klammern</strong> stehen:</li>
+</ul>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 2.0</span>
+      <span class="t-ins">U(</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">500</span>
+      <span class="t-ins">&gt;I</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 5.6</span>           <span class="t-com">// A5.6 = E2.0 ∧ (MW30 &gt; 500)</span></code></pre>
+<ul>
+<li>Der Vergleich setzt außerdem A1/A0 (siehe <a href="../awl-vke-und-bitverknuepfung/#cpu-register">AWL: VKE und Bitlogik: CPU-Register</a>), setzt OV = 0 und lässt /ER = 1. Die Kette kann mit <code>U</code>, <code>O</code>... weiterlaufen.</li>
+</ul></section>
+<section><h2 id="akkumulatoroperationen">Akkumulatoroperationen</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Was sie macht</th></tr></thead><tbody><tr><td><code>TAK</code></td><td>Tauscht AKKU1 und AKKU2</td></tr><tr><td><code>PUSH</code></td><td>AKKU2 := AKKU1</td></tr><tr><td><code>POP</code></td><td>AKKU1 := AKKU2</td></tr><tr><td><code>ENT</code>, <code>LEAVE</code></td><td>Nur bei CPUs mit 4 Akkus</td></tr><tr><td><code>INC n</code>, <code>DEC n</code></td><td>Niederwertiges Byte von AKKU1 (0..255)</td></tr><tr><td><code>+ n</code></td><td>Addiert eine Konstante zu AKKU1</td></tr><tr><td><code>NOP 0</code>, <code>NOP 1</code></td><td>Tun nichts (werden als Sprungziel verwendet)</td></tr></tbody></table></div></section>
+<section><h2 id="geloste-beispiele">Gelöste Beispiele</h2>
+        <article class="ejemplo" id="e20">
+          <h3><span class="codigo">E20</span>Füllstandsvergleich</h3>
+          <p><strong>Aufgabe</strong>: MW30 = Füllstand in Litern.</p>
+<ul>
+<li>A5.4 = hoher Füllstand (&gt; 500).</li>
+<li>A5.5 = niedriger Füllstand (&lt; 100).</li>
+<li>A5.6 = Alarm hoher Füllstand, nur wenn E2.0 (Freigabe) = 1.</li>
+</ul>
+<p><strong>Konzepte</strong>: Der Vergleich <strong>ersetzt</strong> das VKE, deshalb steht er in Klammern, wenn er mit einem Kontakt verknüpft wird.</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="164" height="124" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="24" y2="46" class="w"></line><line x1="172" y1="46" x2="182" y2="46" class="w"></line><rect x="24" y="32" width="148" height="94" rx="3" class="sym-box "></rect><text x="98" y="45" text-anchor="middle" class="boxtxt">CMP &gt;I</text><text x="30" y="66" class="pin">IN1</text><text x="30" y="116" class="pin">IN2</text><g class="op-hit"><rect x="56" y="54" width="90" height="16" fill="transparent"></rect><text x="58" y="66" text-anchor="start" class="op  ">MW 30</text></g><g class="op-hit"><rect x="56" y="104" width="90" height="16" fill="transparent"></rect><text x="58" y="116" text-anchor="start" class="op  ">500</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 5.4</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="164" height="124" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="24" y2="46" class="w"></line><line x1="172" y1="46" x2="182" y2="46" class="w"></line><rect x="24" y="32" width="148" height="94" rx="3" class="sym-box "></rect><text x="98" y="45" text-anchor="middle" class="boxtxt">CMP &lt;I</text><text x="30" y="66" class="pin">IN1</text><text x="30" y="116" class="pin">IN2</text><g class="op-hit"><rect x="56" y="54" width="90" height="16" fill="transparent"></rect><text x="58" y="66" text-anchor="start" class="op  ">MW 30</text></g><g class="op-hit"><rect x="56" y="104" width="90" height="16" fill="transparent"></rect><text x="58" y="116" text-anchor="start" class="op  ">100</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 5.5</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 3</p><div class="kop-lienzo"><svg width="474" height="140" viewBox="0 0 474 140" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="266" y1="46" x2="350" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 2.0</text></g></g><g class="el"><rect x="100" y="8" width="164" height="124" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="108" y2="46" class="w"></line><line x1="256" y1="46" x2="266" y2="46" class="w"></line><rect x="108" y="32" width="148" height="94" rx="3" class="sym-box "></rect><text x="182" y="45" text-anchor="middle" class="boxtxt">CMP &gt;I</text><text x="114" y="66" class="pin">IN1</text><text x="114" y="116" class="pin">IN2</text><g class="op-hit"><rect x="140" y="54" width="90" height="16" fill="transparent"></rect><text x="142" y="66" text-anchor="start" class="op  ">MW 30</text></g><g class="op-hit"><rect x="140" y="104" width="90" height="16" fill="transparent"></rect><text x="142" y="116" text-anchor="start" class="op  ">500</text></g></g><g class="el"><rect x="352" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="350" y1="46" x2="380" y2="46" class="w"></line><path d="M 385 35 Q 378 46 385 57" class="sym-line " fill="none"></path><path d="M 399 35 Q 406 46 399 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="348" y="7" width="90" height="16" fill="transparent"></rect><text x="392" y="19" text-anchor="middle" class="op  ">A 5.6</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E20&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 2.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MW 30&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;600&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 5.4&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 5.5&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;A 5.6&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">500</span>
+      <span class="t-ins">&gt;I</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 5.4</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">100</span>
+      <span class="t-ins">&lt;I</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 5.5</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 2.0</span>
+      <span class="t-ins">U(</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 30</span>
+      <span class="t-ins">L</span>     <span class="t-cte">500</span>
+      <span class="t-ins">&gt;I</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 5.6</span></code></pre>
+        </article>
+<article class="ejemplo" id="e21">
+          <h3><span class="codigo">E21</span>Addition mit Überlauferkennung</h3>
+          <p><strong>Aufgabe</strong>: MW44 = MW40 + MW42. M1.0 = diese Addition ist übergelaufen. M1.1 = Überlaufspeicher (wird mit E0.0 gelöscht).</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">ADD_I</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MW 40</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">MW 42</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 44</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">OV</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">M 1.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 3</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">OS</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">S</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">M 1.1</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 4</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">R</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">M 1.1</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E21&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MW 40&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;1000&quot;},{&quot;op&quot;:&quot;MW 42&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;234&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;M 1.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;M 1.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MW 44&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;1234&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 42</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 44</span>
+      <span class="t-ins">U</span>     <span class="t-op">OV</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 1.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">OS</span>
+      <span class="t-ins">S</span>     <span class="t-op">M 1.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">R</span>     <span class="t-op">M 1.1</span></code></pre>
+        </article>
+<article class="ejemplo" id="e22">
+          <h3><span class="codigo">E22</span>Ganzzahlige Multiplikation und Division (Quotient und Rest)</h3>
+          <p><strong>Konzepte</strong>: <code>*I</code> hinterlässt ein DINT in AKKU1. <code>/I</code> hinterlässt den Quotienten in AKKU1-L und den Rest in AKKU1-H.</p>
+<figure class="kop" data-segmento="Netzwerk"><div class="kop-seg"><p class="kop-titulo">Netzwerk 1</p><div class="kop-lienzo"><svg width="558" height="268" viewBox="0 0 558 268" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="266" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="98" y1="174" x2="182" y2="174" class="w"></line><line x1="98" y1="46" x2="98" y2="174" class="w"></line><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="180" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">I_DI</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MW 50</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 200</text></g></g></g><g class="el"><rect x="180" y="124" width="172" height="134" rx="6" class="hit  "></rect><rect x="186" y="144" width="160" height="110" rx="3" class="sym-box box "></rect><text x="266" y="157" text-anchor="middle" class="boxtxt">I_DI</text><g><line x1="182" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">EN</text></g><g><line x1="178" y1="238" x2="186" y2="238" class="w"></line><text x="191" y="242" class="pin">IN</text><g class="op-hit"><rect x="88" y="230" width="90" height="16" fill="transparent"></rect><text x="176" y="242" text-anchor="end" class="op  ">MW 52</text></g></g><g><text x="341" y="178" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="174" x2="364" y2="174" class="w"></line><circle cx="366" cy="174" r="4" class="stub"></circle></g></g><g><text x="341" y="242" text-anchor="end" class="pin">OUT</text><line x1="346" y1="238" x2="354" y2="238" class="w"></line><g class="op-hit"><rect x="355" y="230" width="90" height="16" fill="transparent"></rect><text x="357" y="242" text-anchor="start" class="op  ">MD 204</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 2</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">MUL_DI</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 200</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">MD 204</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 54</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 3</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">DIV_I</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MW 50</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">MW 52</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 58</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div><div class="kop-seg"><p class="kop-titulo">Netzwerk 4</p><div class="kop-lienzo"><svg width="810" height="204" viewBox="0 0 810 204" class="kop-svg" role="img" aria-label="KOP-Netzwerk"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="14" y1="46" x2="98" y2="46" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="350" y1="46" x2="434" y2="46" class="w"></line><g class="el"><rect x="432" y="-4" width="172" height="134" rx="6" class="hit  "></rect><rect x="438" y="16" width="160" height="110" rx="3" class="sym-box box "></rect><text x="518" y="29" text-anchor="middle" class="boxtxt">MOVE</text><g><line x1="434" y1="46" x2="438" y2="46" class="w"></line><text x="443" y="50" class="pin">EN</text></g><g><line x1="430" y1="110" x2="438" y2="110" class="w"></line><text x="443" y="114" class="pin">IN</text><g class="op-hit"><rect x="340" y="102" width="90" height="16" fill="transparent"></rect><text x="428" y="114" text-anchor="end" class="op  ">MW 210</text></g></g><g><text x="593" y="50" text-anchor="end" class="pin">ENO</text><g class="pin-stub"><line x1="598" y1="46" x2="616" y2="46" class="w"></line><circle cx="618" cy="46" r="4" class="stub"></circle></g></g><g><text x="593" y="114" text-anchor="end" class="pin">OUT</text><line x1="598" y1="110" x2="606" y2="110" class="w"></line><g class="op-hit"><rect x="607" y="102" width="90" height="16" fill="transparent"></rect><text x="609" y="114" text-anchor="start" class="op  ">MW 60</text></g></g></g><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">MOD_DI</text><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">EN</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">IN1</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">MD 200</text></g></g><g><line x1="178" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">IN2</text><g class="op-hit"><rect x="88" y="166" width="90" height="16" fill="transparent"></rect><text x="176" y="178" text-anchor="end" class="op  ">MD 204</text></g></g><g><text x="341" y="50" text-anchor="end" class="pin">ENO</text><line x1="346" y1="46" x2="350" y2="46" class="w"></line></g><g><text x="341" y="114" text-anchor="end" class="pin">OUT</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MD 208</text></g></g></g><rect x="18" y="32" width="76" height="28" rx="5" class="slot "></rect></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E22&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;MW 50&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;17&quot;},{&quot;op&quot;:&quot;MW 52&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;5&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;MD 54&quot;,&quot;tipo&quot;:&quot;DINT&quot;,&quot;valor&quot;:&quot;85&quot;},{&quot;op&quot;:&quot;MW 58&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;3&quot;},{&quot;op&quot;:&quot;MW 60&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;2&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 50</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 52</span>
+      <span class="t-ins">*I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MD 54</span>       <span class="t-com">// vollständiges Produkt (32 Bit)</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 50</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 52</span>
+      <span class="t-ins">/I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 58</span>       <span class="t-com">// Quotient</span>
+      <span class="t-ins">SRD</span>   <span class="t-cte">16</span>          <span class="t-com">// holt den Rest (AKKU1-H) in den niederwertigen Teil</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 60</span>       <span class="t-com">// Rest</span></code></pre>
+        </article></section>
+<section><h2 id="teste-dein-wissen">Teste dein Wissen</h2><p class="nota">Überlege dir die Antwort, bevor du die Lösung aufklappst.</p>
+        <article class="pregunta" id="q03">
+          <h3><span class="codigo">Q03</span>Hängt T vom VKE ab?</h3>
+          <p>Mit E0.0 = 0: Welche Werte haben MW30 und A4.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">L</span>     <span class="t-cte">5</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 30</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Lösung</summary>
+<p><strong>MW30 = 5</strong> (T ist unbedingt) und <strong>A4.0 = 0</strong> (L und T ändern das VKE nicht).</p>
+</details>
+        </article></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was passiert, wenn eine INT-Addition den Wertebereich verlässt?</summary><div class="faq-respuesta"><p>Das Ergebnis läuft über: 30000 + 10000 hinterlässt −25536 im Akku, und die Überlaufbits OV und OS werden gesetzt. Die CPU hält nicht an.</p></div></details>
+          <details><summary>Hängt die Anweisung T vom VKE ab?</summary><div class="faq-respuesta"><p>Nein. <code>L</code> und <code>T</code> werden immer ausgeführt, egal welchen Wert das VKE hat. Um nur bei erfüllter Bedingung zu transferieren, muss man mit <code>SPBN</code> darüber springen.</p></div></details>
+          <details><summary>Was hinterlässt /I im Akku?</summary><div class="faq-respuesta"><p>Den Quotienten im niederwertigen Teil (AKKU1-L) und den Rest im höherwertigen Teil (AKKU1-H). Zum Beispiel hinterlässt <code>L 17 / L 5 / /I</code> unten 3 und oben 2.</p></div></details>
+          <details><summary>Warum steht ein Vergleich in Reihe mit einem Kontakt in Klammern?</summary><div class="faq-respuesta"><p>Weil der Vergleich das VKE ersetzt, statt sich damit zu verknüpfen. Innerhalb von <code>U( … )</code> wird er getrennt berechnet und danach mit dem Kontakt verknüpft.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../ablaufsteuerung-grafcet/"><span>← Zurück</span><b>Ablaufsteuerung und GRAFCET</b></a>
+        <a class="pag-sig" href="../umwandlung-und-wortverknuepfung/"><span>Weiter →</span><b>Umwandlungen</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Ausprobieren","pista":"Klicke auf die Eingänge.","pistaMayus":"Mit Umschalt + Klick wirkt ein Eingang als Taster, solange du ihn gedrückt hältst.","reiniciar":"Neu starten","valorNoValido":"Ungültiger Wert"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

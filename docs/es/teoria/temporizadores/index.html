@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Temporizadores en KOP y AWL: SI, SV, SE, SS y SA · Automatizacion</title>
+  <meta name="description" content="Los cinco temporizadores de KOP y AWL explicados con cronogramas: impulso (SI), impulso prolongado (SV), retardo a la conexión (SE), retardo con memoria (SS) y retardo a la desconexión (SA). Con ejemplos resueltos.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/timers/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zeiten/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="Temporizadores en KOP y AWL: SI, SV, SE, SS y SA">
+  <meta property="og:description" content="Los cinco temporizadores de KOP y AWL explicados con cronogramas: impulso (SI), impulso prolongado (SV), retardo a la conexión (SE), retardo con memoria (SS) y retardo a la desconexión (SA). Con ejemplos resueltos.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Temporizadores en KOP y AWL: SI, SV, SE, SS y SA","description":"Los cinco temporizadores de KOP y AWL explicados con cronogramas: impulso (SI), impulso prolongado (SV), retardo a la conexión (SE), retardo con memoria (SS) y retardo a la desconexión (SA). Con ejemplos resueltos.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué diferencia hay entre los temporizadores SE y SS?","acceptedAnswer":{"@type":"Answer","text":"Los dos son retardos a la conexión. SE solo activa Q si S sigue a 1 todo el tiempo; si S cae antes, se para. SS sigue contando aunque S caiga y, al terminar, mantiene Q a 1 hasta que se hace un reset."}},{"@type":"Question","name":"¿Qué temporizador mantiene Q a 1 todo el tiempo aunque S caiga antes?","acceptedAnswer":{"@type":"Answer","text":"SV, el impulso prolongado (S_VIMP). El impulso SI, en cambio, se corta si S cae antes de tiempo."}},{"@type":"Question","name":"¿Qué temporizador activa Q en cuanto S = 1 y lo mantiene un tiempo después de que S caiga?","acceptedAnswer":{"@type":"Answer","text":"SA, el retardo a la desconexión (S_AVERZ): el tiempo empieza a contar en el flanco negativo de S."}},{"@type":"Question","name":"¿Por qué mi temporizador no vuelve a arrancar después de un reset?","acceptedAnswer":{"@type":"Answer","text":"Porque necesita un flanco nuevo en S. Si la condición de arranque ya estaba a 1 cuando terminó el reset, tiene que volver a 0 y otra vez a 1."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Temporizadores","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/temporizadores/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/timers/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/zeiten/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/" aria-current="page">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/" aria-current="page">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Temporizadores</span></nav>
+      <h1>Temporizadores en KOP y AWL: SI, SV, SE, SS y SA</h1>
+      <p class="articulo-entradilla">Los cinco temporizadores de KOP y AWL explicados con cronogramas: impulso (SI), impulso prolongado (SV), retardo a la conexión (SE), retardo con memoria (SS) y retardo a la desconexión (SA). Con ejemplos resueltos.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="temporizadores-en-kop">Temporizadores en KOP</h2>
+<p><strong>Cuadros y patillas</strong> (nombres alemanes; los ingleses entre paréntesis):</p>
+<figure class="kop figura-kop"><div class="kop-seg"><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Retardo a la conexión T1 (S_EVERZ) con todas sus patillas: arranque S, valor TW, reset R, estado Q y tiempo restante en DUAL (binario) y DEZ (BCD)."><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="98" y1="174" x2="182" y2="174" class="w"></line><line x1="350" y1="46" x2="434" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="136" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="174" x2="49" y2="174" class="w"></line><line x1="63" y1="174" x2="98" y2="174" class="w"></line><line x1="49" y1="163" x2="49" y2="185" class="sym-line "></line><line x1="63" y1="163" x2="63" y2="185" class="sym-line "></line><g class="op-hit"><rect x="12" y="135" width="90" height="16" fill="transparent"></rect><text x="56" y="147" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="436" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="434" y1="46" x2="464" y2="46" class="w"></line><path d="M 469 35 Q 462 46 469 57" class="sym-line " fill="none"></path><path d="M 483 35 Q 490 46 483 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="432" y="7" width="90" height="16" fill="transparent"></rect><text x="476" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">S_EVERZ</text><g class="op-hit"><rect x="222" y="-2" width="90" height="16" fill="transparent"></rect><text x="266" y="10" text-anchor="middle" class="op  ">T 1</text></g><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">S</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">TW</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">S5T#5S</text></g></g><g><line x1="182" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">R</text></g><g><text x="341" y="50" text-anchor="end" class="pin">Q</text><line x1="346" y1="46" x2="350" y2="46" class="w"></line></g><g><text x="341" y="114" text-anchor="end" class="pin">DUAL</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 10</text></g></g><g><text x="341" y="178" text-anchor="end" class="pin">DEZ</text><line x1="346" y1="174" x2="354" y2="174" class="w"></line><g class="op-hit"><rect x="355" y="166" width="90" height="16" fill="transparent"></rect><text x="357" y="178" text-anchor="start" class="op  ">MW 12</text></g></g></g></svg></div></div><figcaption class="figura-pie">Retardo a la conexión T1 (S_EVERZ) con todas sus patillas: arranque S, valor TW, reset R, estado Q y tiempo restante en DUAL (binario) y DEZ (BCD).</figcaption></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Patilla</th><th>Significado</th></tr></thead><tbody><tr><td>S</td><td>Arranque. Según el tipo, arranca por <strong>flanco</strong> o actúa por nivel</td></tr><tr><td>TW (TV)</td><td>Valor de tiempo en formato S5TIME</td></tr><tr><td>R</td><td>Reset: pone el temporizador a 0 y Q = 0. Tiene <strong>prioridad</strong></td></tr><tr><td>Q</td><td>Estado del temporizador, igual que <code>U T1</code></td></tr><tr><td>DUAL (BI)</td><td>Tiempo restante en binario, sin la base</td></tr><tr><td>DEZ (BCD)</td><td>Tiempo restante en BCD con la base (formato S5TIME)</td></tr></tbody></table></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Cuadro</th><th>Bobina</th><th>AWL</th><th>Tipo</th><th>Comportamiento</th></tr></thead><tbody><tr><td>S_IMPULS (S_PULSE)</td><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="(SI)"><path d="M6 3Q1 10 6 17M21.2 3Q26.2 10 21.2 17"/><text x="13.6" y="13.5" text-anchor="middle" class="ki-txt">SI</text></svg></td><td><code>SI</code></td><td><strong>Impulso</strong></td><td>Q = 1 desde el flanco de S, como máximo el tiempo TW. <strong>Si S cae antes, Q = 0 inmediatamente</strong></td></tr><tr><td>S_VIMP (S_PEXT)</td><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="(SV)"><path d="M6 3Q1 10 6 17M21.2 3Q26.2 10 21.2 17"/><text x="13.6" y="13.5" text-anchor="middle" class="ki-txt">SV</text></svg></td><td><code>SV</code></td><td><strong>Impulso prolongado</strong></td><td>Q = 1 durante todo TW aunque S caiga. Un nuevo flanco de S lo <strong>reinicia</strong></td></tr><tr><td>S_EVERZ (S_ODT)</td><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="(SE)"><path d="M6 3Q1 10 6 17M21.2 3Q26.2 10 21.2 17"/><text x="13.6" y="13.5" text-anchor="middle" class="ki-txt">SE</text></svg></td><td><code>SE</code></td><td><strong>Retardo a la conexión</strong></td><td>Q = 1 cuando ha pasado TW <strong>y S sigue a 1</strong>. Si S cae, se para y Q = 0</td></tr><tr><td>S_SEVERZ (S_ODTS)</td><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="(SS)"><path d="M6 3Q1 10 6 17M21.2 3Q26.2 10 21.2 17"/><text x="13.6" y="13.5" text-anchor="middle" class="ki-txt">SS</text></svg></td><td><code>SS</code></td><td><strong>Retardo a la conexión con memoria</strong></td><td>Arranca con el flanco de S y sigue contando aunque S caiga. Q = 1 al terminar y <strong>se mantiene hasta un reset</strong></td></tr><tr><td>S_AVERZ (S_OFFDT)</td><td><svg class="kop-ico" viewBox="0 0 28 20" width="28" height="20" role="img" aria-label="(SA)"><path d="M6 3Q1 10 6 17M21.2 3Q26.2 10 21.2 17"/><text x="13.6" y="13.5" text-anchor="middle" class="ki-txt">SA</text></svg></td><td><code>SA</code></td><td><strong>Retardo a la desconexión</strong></td><td>Q = 1 en cuanto S = 1. Al <strong>caer</strong> S, cuenta TW y luego Q = 0. Si S vuelve a 1 mientras cuenta, se para y Q sigue a 1</td></tr></tbody></table></div>
+<p>Cronogramas (TW = t):</p>
+<p class="nota">Con TW = 1 s. Las señales salen de simular cada temporizador con el motor del simulador.</p><figure class="crono"><figcaption class="crono-titulo"><b>SI</b> Impulso <span>S_IMPULS</span></figcaption><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 138" width="720" height="138" role="img" aria-label="SI: Impulso"><path class="crono-guia" d="M122.4 10V94M239.1 10V94"/><text class="crono-nombre" x="52" y="33" text-anchor="end">S</text><rect class="crono-relleno" x="122.4" y="16" width="291.8" height="20"/><rect class="crono-relleno" x="507.6" y="16" width="58.3" height="20"/><path class="crono-linea" d="M64.0 36H122.4V16H414.2V36H507.6V16H565.9V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">Q</text><rect class="crono-relleno q" x="122.4" y="56" width="116.7" height="20"/><rect class="crono-relleno q" x="507.6" y="56" width="58.3" height="20"/><path class="crono-linea q" d="M64.0 76H122.4V56H239.1V76H507.6V56H565.9V76H706.0"/><path class="crono-cota" d="M122.4 89V99M239.1 89V99M122.4 94H171.75M189.75 94H239.1"/><text class="crono-cota-texto" x="180.75" y="98" text-anchor="middle">t</text><path class="crono-eje" d="M64 112H706"/><path class="crono-eje" d="M64.0 112v5"/><text class="crono-eje-texto" x="64.0" y="130" text-anchor="middle">0 s</text><path class="crono-eje" d="M180.7 112v5"/><text class="crono-eje-texto" x="180.7" y="130" text-anchor="middle">1 s</text><path class="crono-eje" d="M297.5 112v5"/><text class="crono-eje-texto" x="297.5" y="130" text-anchor="middle">2 s</text><path class="crono-eje" d="M414.2 112v5"/><text class="crono-eje-texto" x="414.2" y="130" text-anchor="middle">3 s</text><path class="crono-eje" d="M530.9 112v5"/><text class="crono-eje-texto" x="530.9" y="130" text-anchor="middle">4 s</text><path class="crono-eje" d="M647.6 112v5"/><text class="crono-eje-texto" x="647.6" y="130" text-anchor="middle">5 s</text></svg></div><p class="crono-pie">Q se activa con el flanco de S y dura t como máximo. Si S cae antes, Q cae con ella.</p></figure><figure class="crono"><figcaption class="crono-titulo"><b>SV</b> Impulso prolongado <span>S_VIMP</span></figcaption><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 138" width="720" height="138" role="img" aria-label="SV: Impulso prolongado"><path class="crono-guia" d="M204.1 10V94M320.8 10V94"/><path class="crono-guia" d="M472.5 10V94M589.3 10V94"/><text class="crono-nombre" x="52" y="33" text-anchor="end">S</text><rect class="crono-relleno" x="122.4" y="16" width="35.0" height="20"/><rect class="crono-relleno" x="204.1" y="16" width="23.3" height="20"/><rect class="crono-relleno" x="472.5" y="16" width="23.4" height="20"/><path class="crono-linea" d="M64.0 36H122.4V16H157.4V36H204.1V16H227.4V36H472.5V16H495.9V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">Q</text><rect class="crono-relleno q" x="122.4" y="56" width="198.4" height="20"/><rect class="crono-relleno q" x="472.5" y="56" width="116.8" height="20"/><path class="crono-linea q" d="M64.0 76H122.4V56H320.8V76H472.5V56H589.3V76H706.0"/><path class="crono-cota" d="M204.1 89V99M320.8 89V99M204.1 94H253.45M271.45 94H320.8"/><text class="crono-cota-texto" x="262.45" y="98" text-anchor="middle">t</text><path class="crono-cota" d="M472.5 89V99M589.3 89V99M472.5 94H521.9M539.9 94H589.3"/><text class="crono-cota-texto" x="530.9" y="98" text-anchor="middle">t</text><path class="crono-eje" d="M64 112H706"/><path class="crono-eje" d="M64.0 112v5"/><text class="crono-eje-texto" x="64.0" y="130" text-anchor="middle">0 s</text><path class="crono-eje" d="M180.7 112v5"/><text class="crono-eje-texto" x="180.7" y="130" text-anchor="middle">1 s</text><path class="crono-eje" d="M297.5 112v5"/><text class="crono-eje-texto" x="297.5" y="130" text-anchor="middle">2 s</text><path class="crono-eje" d="M414.2 112v5"/><text class="crono-eje-texto" x="414.2" y="130" text-anchor="middle">3 s</text><path class="crono-eje" d="M530.9 112v5"/><text class="crono-eje-texto" x="530.9" y="130" text-anchor="middle">4 s</text><path class="crono-eje" d="M647.6 112v5"/><text class="crono-eje-texto" x="647.6" y="130" text-anchor="middle">5 s</text></svg></div><p class="crono-pie">Q dura t aunque S caiga. Un nuevo flanco de S mientras cuenta lo vuelve a arrancar.</p></figure><figure class="crono"><figcaption class="crono-titulo"><b>SE</b> Retardo a la conexión <span>S_EVERZ</span></figcaption><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 138" width="720" height="138" role="img" aria-label="SE: Retardo a la conexión"><path class="crono-guia" d="M122.4 10V94M239.1 10V94"/><text class="crono-nombre" x="52" y="33" text-anchor="end">S</text><rect class="crono-relleno" x="122.4" y="16" width="291.8" height="20"/><rect class="crono-relleno" x="507.6" y="16" width="70.0" height="20"/><path class="crono-linea" d="M64.0 36H122.4V16H414.2V36H507.6V16H577.6V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">Q</text><rect class="crono-relleno q" x="239.1" y="56" width="175.1" height="20"/><path class="crono-linea q" d="M64.0 76H239.1V56H414.2V76H706.0"/><path class="crono-cota" d="M122.4 89V99M239.1 89V99M122.4 94H171.75M189.75 94H239.1"/><text class="crono-cota-texto" x="180.75" y="98" text-anchor="middle">t</text><path class="crono-eje" d="M64 112H706"/><path class="crono-eje" d="M64.0 112v5"/><text class="crono-eje-texto" x="64.0" y="130" text-anchor="middle">0 s</text><path class="crono-eje" d="M180.7 112v5"/><text class="crono-eje-texto" x="180.7" y="130" text-anchor="middle">1 s</text><path class="crono-eje" d="M297.5 112v5"/><text class="crono-eje-texto" x="297.5" y="130" text-anchor="middle">2 s</text><path class="crono-eje" d="M414.2 112v5"/><text class="crono-eje-texto" x="414.2" y="130" text-anchor="middle">3 s</text><path class="crono-eje" d="M530.9 112v5"/><text class="crono-eje-texto" x="530.9" y="130" text-anchor="middle">4 s</text><path class="crono-eje" d="M647.6 112v5"/><text class="crono-eje-texto" x="647.6" y="130" text-anchor="middle">5 s</text></svg></div><p class="crono-pie">Q se activa cuando S lleva t a 1. El segundo pulso es más corto que t, así que Q no llega a activarse.</p></figure><figure class="crono"><figcaption class="crono-titulo"><b>SS</b> Retardo a la conexión con memoria <span>S_SEVERZ</span></figcaption><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 178" width="720" height="178" role="img" aria-label="SS: Retardo a la conexión con memoria"><path class="crono-guia" d="M122.4 10V134M239.1 10V134"/><text class="crono-nombre" x="52" y="33" text-anchor="end">S</text><rect class="crono-relleno" x="122.4" y="16" width="35.0" height="20"/><path class="crono-linea" d="M64.0 36H122.4V16H157.4V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">R</text><rect class="crono-relleno" x="472.5" y="56" width="35.1" height="20"/><path class="crono-linea" d="M64.0 76H472.5V56H507.6V76H706.0"/><text class="crono-nombre" x="52" y="113" text-anchor="end">Q</text><rect class="crono-relleno q" x="239.1" y="96" width="233.4" height="20"/><path class="crono-linea q" d="M64.0 116H239.1V96H472.5V116H706.0"/><path class="crono-cota" d="M122.4 129V139M239.1 129V139M122.4 134H171.75M189.75 134H239.1"/><text class="crono-cota-texto" x="180.75" y="138" text-anchor="middle">t</text><path class="crono-eje" d="M64 152H706"/><path class="crono-eje" d="M64.0 152v5"/><text class="crono-eje-texto" x="64.0" y="170" text-anchor="middle">0 s</text><path class="crono-eje" d="M180.7 152v5"/><text class="crono-eje-texto" x="180.7" y="170" text-anchor="middle">1 s</text><path class="crono-eje" d="M297.5 152v5"/><text class="crono-eje-texto" x="297.5" y="170" text-anchor="middle">2 s</text><path class="crono-eje" d="M414.2 152v5"/><text class="crono-eje-texto" x="414.2" y="170" text-anchor="middle">3 s</text><path class="crono-eje" d="M530.9 152v5"/><text class="crono-eje-texto" x="530.9" y="170" text-anchor="middle">4 s</text><path class="crono-eje" d="M647.6 152v5"/><text class="crono-eje-texto" x="647.6" y="170" text-anchor="middle">5 s</text></svg></div><p class="crono-pie">Arranca con el flanco de S y sigue contando aunque S caiga. Q se queda a 1 hasta el reset R.</p></figure><figure class="crono"><figcaption class="crono-titulo"><b>SA</b> Retardo a la desconexión <span>S_AVERZ</span></figcaption><div class="crono-lienzo"><svg class="crono-svg" viewBox="0 0 720 138" width="720" height="138" role="img" aria-label="SA: Retardo a la desconexión"><path class="crono-guia" d="M414.2 10V94M530.9 10V94"/><text class="crono-nombre" x="52" y="33" text-anchor="end">S</text><rect class="crono-relleno" x="122.4" y="16" width="175.1" height="20"/><rect class="crono-relleno" x="355.8" y="16" width="58.4" height="20"/><path class="crono-linea" d="M64.0 36H122.4V16H297.5V36H355.8V16H414.2V36H706.0"/><text class="crono-nombre" x="52" y="73" text-anchor="end">Q</text><rect class="crono-relleno q" x="122.4" y="56" width="408.5" height="20"/><path class="crono-linea q" d="M64.0 76H122.4V56H530.9V76H706.0"/><path class="crono-cota" d="M414.2 89V99M530.9 89V99M414.2 94H463.54999999999995M481.54999999999995 94H530.9"/><text class="crono-cota-texto" x="472.54999999999995" y="98" text-anchor="middle">t</text><path class="crono-eje" d="M64 112H706"/><path class="crono-eje" d="M64.0 112v5"/><text class="crono-eje-texto" x="64.0" y="130" text-anchor="middle">0 s</text><path class="crono-eje" d="M180.7 112v5"/><text class="crono-eje-texto" x="180.7" y="130" text-anchor="middle">1 s</text><path class="crono-eje" d="M297.5 112v5"/><text class="crono-eje-texto" x="297.5" y="130" text-anchor="middle">2 s</text><path class="crono-eje" d="M414.2 112v5"/><text class="crono-eje-texto" x="414.2" y="130" text-anchor="middle">3 s</text><path class="crono-eje" d="M530.9 112v5"/><text class="crono-eje-texto" x="530.9" y="130" text-anchor="middle">4 s</text><path class="crono-eje" d="M647.6 112v5"/><text class="crono-eje-texto" x="647.6" y="130" text-anchor="middle">5 s</text></svg></div><p class="crono-pie">Q se activa en cuanto S = 1 y se desactiva t después de la última bajada de S.</p></figure>
+<p><strong>Bobinas de temporizador</strong>: <svg class="kop-ico" viewBox="0 0 56 20" width="56" height="20" role="img" aria-label="T1 --(SE)"><text x="1" y="13.5" class="ki-txt">T1</text><path d="M19.2 10h10"/><path d="M34.2 3Q29.2 10 34.2 17M49.4 3Q54.4 10 49.4 17"/><text x="41.8" y="13.5" text-anchor="middle" class="ki-txt">SE</text></svg> con el valor <code>S5T#5S</code> debajo. El reset se hace con una bobina <svg class="kop-ico" viewBox="0 0 31 20" width="31" height="20" role="img" aria-label="--(R)"><path d="M1 10h10"/><path d="M16 3Q11 10 16 17M24.6 3Q29.6 10 24.6 17"/><text x="20.3" y="13.5" text-anchor="middle" class="ki-txt">R</text></svg> sobre <code>T1</code>, y el estado se lee con un contacto <svg class="kop-ico" viewBox="0 0 55 20" width="55" height="20" role="img" aria-label="T1 --| |--"><text x="1" y="13.5" class="ki-txt">T1</text><path d="M19.2 10h10"/><path d="M31.2 3v14M41.2 3v14"/><path d="M43.2 10h10"/></svg>.</p>
+<p><strong>Notas</strong>:</p>
+<ul>
+<li>Cada temporizador (T1, T2...) se arranca <strong>en un solo sitio</strong> del programa.</li>
+<li>El valor TW se toma en el <strong>flanco de arranque</strong>.</li>
+<li>El tiempo baja de TW hasta 0. La precisión es la de la base.</li>
+<li>Si R = 1, el temporizador se queda parado aunque S = 1. Al soltar R, no vuelve a arrancar hasta que S tenga un <strong>nuevo flanco</strong>.</li>
+</ul></section>
+<section><h2 id="temporizadores-en-awl">Temporizadores en AWL</h2>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// condición de arranque (RLO)</span>
+      <span class="t-ins">L</span>     <span class="t-cte">S5T#5S</span>          <span class="t-com">// valor de tiempo → ACU1</span>
+      <span class="t-ins">SE</span>    <span class="t-op">T 1</span>             <span class="t-com">// retardo a la conexión (SI, SV, SE, SS o SA)</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">R</span>     <span class="t-op">T 1</span>             <span class="t-com">// reset</span>
+      <span class="t-ins">L</span>     <span class="t-op">T 1</span>             <span class="t-com">// tiempo restante en binario (sin base) → ACU1</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 10</span>
+      <span class="t-ins">LC</span>    <span class="t-op">T 1</span>             <span class="t-com">// tiempo restante en BCD con base (S5TIME) → ACU1</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 12</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 1</span>             <span class="t-com">// estado Q del temporizador</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Función</th></tr></thead><tbody><tr><td><code>SI T n</code></td><td>Arranca como impulso (S_IMPULS)</td></tr><tr><td><code>SV T n</code></td><td>Arranca como impulso prolongado (S_VIMP)</td></tr><tr><td><code>SE T n</code></td><td>Arranca como retardo a la conexión (S_EVERZ)</td></tr><tr><td><code>SS T n</code></td><td>Arranca como retardo a la conexión con memoria (S_SEVERZ)</td></tr><tr><td><code>SA T n</code></td><td>Arranca como retardo a la desconexión (S_AVERZ)</td></tr><tr><td><code>R T n</code></td><td>Reset si RLO = 1</td></tr><tr><td><code>FR T n</code></td><td>Habilitar: un flanco permite rearrancar sin flanco en la entrada de arranque (uso raro)</td></tr><tr><td><code>U T n</code> / <code>UN T n</code> / <code>O T n</code>...</td><td>Consulta el estado Q del temporizador</td></tr><tr><td><code>L T n</code> / <code>LC T n</code></td><td>Carga el tiempo restante en binario / en BCD</td></tr></tbody></table></div>
+<p>La instrucción de arranque <strong>usa el valor de ACU1</strong> en el momento del flanco. Por eso el <code>L S5T#…</code> va justo antes.</p></section>
+<section><h2 id="ejemplos-resueltos">Ejemplos resueltos</h2>
+        <article class="ejemplo" id="e12">
+          <h3><span class="codigo">E12</span>Retardo a la conexión (SE / S_EVERZ)</h3>
+          <p><strong>Enunciado</strong>: A4.0 se enciende 5 s después de activar E0.0, y solo si E0.0 sigue a 1. E0.1 hace reset. MW10 guarda el tiempo restante en binario y MW12 en BCD.</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="98" y1="174" x2="182" y2="174" class="w"></line><line x1="350" y1="46" x2="434" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="136" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="174" x2="49" y2="174" class="w"></line><line x1="63" y1="174" x2="98" y2="174" class="w"></line><line x1="49" y1="163" x2="49" y2="185" class="sym-line "></line><line x1="63" y1="163" x2="63" y2="185" class="sym-line "></line><g class="op-hit"><rect x="12" y="135" width="90" height="16" fill="transparent"></rect><text x="56" y="147" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="436" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="434" y1="46" x2="464" y2="46" class="w"></line><path d="M 469 35 Q 462 46 469 57" class="sym-line " fill="none"></path><path d="M 483 35 Q 490 46 483 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="432" y="7" width="90" height="16" fill="transparent"></rect><text x="476" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">S_EVERZ</text><g class="op-hit"><rect x="222" y="-2" width="90" height="16" fill="transparent"></rect><text x="266" y="10" text-anchor="middle" class="op  ">T 1</text></g><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">S</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">TW</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">S5T#5S</text></g></g><g><line x1="182" y1="174" x2="186" y2="174" class="w"></line><text x="191" y="178" class="pin">R</text></g><g><text x="341" y="50" text-anchor="end" class="pin">Q</text><line x1="346" y1="46" x2="350" y2="46" class="w"></line></g><g><text x="341" y="114" text-anchor="end" class="pin">DUAL</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op  ">MW 10</text></g></g><g><text x="341" y="178" text-anchor="end" class="pin">DEZ</text><line x1="346" y1="174" x2="354" y2="174" class="w"></line><g class="op-hit"><rect x="355" y="166" width="90" height="16" fill="transparent"></rect><text x="357" y="178" text-anchor="start" class="op  ">MW 12</text></g></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E12&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;MW 10&quot;,&quot;tipo&quot;:&quot;INT&quot;,&quot;valor&quot;:&quot;500&quot;},{&quot;op&quot;:&quot;MW 12&quot;,&quot;tipo&quot;:&quot;WORD&quot;,&quot;valor&quot;:&quot;W#16#0500&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">L</span>     <span class="t-cte">S5T#5S</span>
+      <span class="t-ins">SE</span>    <span class="t-op">T 1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">R</span>     <span class="t-op">T 1</span>
+      <span class="t-ins">L</span>     <span class="t-op">T 1</span>         <span class="t-com">// tiempo restante (binario, en unidades de 10 ms)</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 10</span>
+      <span class="t-ins">LC</span>    <span class="t-op">T 1</span>         <span class="t-com">// tiempo restante en BCD con base</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 12</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+        </article>
+<article class="ejemplo" id="e13">
+          <h3><span class="codigo">E13</span>Retardo a la desconexión (SA / S_AVERZ)</h3>
+          <p><strong>Enunciado</strong>: el ventilador A4.1 funciona mientras E0.2 = 1 y sigue 3 s más después de apagarlo.</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><line x1="350" y1="46" x2="434" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="436" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="434" y1="46" x2="464" y2="46" class="w"></line><path d="M 469 35 Q 462 46 469 57" class="sym-line " fill="none"></path><path d="M 483 35 Q 490 46 483 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="432" y="7" width="90" height="16" fill="transparent"></rect><text x="476" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">S_AVERZ</text><g class="op-hit"><rect x="222" y="-2" width="90" height="16" fill="transparent"></rect><text x="266" y="10" text-anchor="middle" class="op  ">T 2</text></g><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">S</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">TW</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">S5T#3S</text></g></g><g><g class="pin-stub"><line x1="168" y1="174" x2="186" y2="174" class="w"></line><circle cx="166" cy="174" r="4" class="stub"></circle></g><text x="191" y="178" class="pin">R</text></g><g><text x="341" y="50" text-anchor="end" class="pin">Q</text><line x1="346" y1="46" x2="350" y2="46" class="w"></line></g><g><text x="341" y="114" text-anchor="end" class="pin">DUAL</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op optional ">…</text></g></g><g><text x="341" y="178" text-anchor="end" class="pin">DEZ</text><line x1="346" y1="174" x2="354" y2="174" class="w"></line><g class="op-hit"><rect x="355" y="166" width="90" height="16" fill="transparent"></rect><text x="357" y="178" text-anchor="start" class="op optional ">…</text></g></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E13&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">L</span>     <span class="t-cte">S5T#3S</span>
+      <span class="t-ins">SA</span>    <span class="t-op">T 2</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span></code></pre>
+        </article>
+<article class="ejemplo" id="e17">
+          <h3><span class="codigo">E17</span>Intermitente (1 s encendido / 1 s apagado) con dos temporizadores</h3>
+          <p><strong>Enunciado</strong>: mientras E0.7 = 1, el piloto A4.5 parpadea.</p>
+<p><strong>Conceptos</strong>: cada temporizador reinicia al otro. Alternativa: usar la marca de ciclo (ver <a href="../marca-de-ciclo/#marca-de-ciclo">Marca de ciclo</a>).</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><p class="kop-titulo">Segmento 1 · Tiempo apagado</p><div class="kop-lienzo"><svg width="642" height="204" viewBox="0 0 642 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.7</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">T 7</text></g></g><g class="el"><rect x="264" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="270" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="350" y="29" text-anchor="middle" class="boxtxt">S_EVERZ</text><g class="op-hit"><rect x="306" y="-2" width="90" height="16" fill="transparent"></rect><text x="350" y="10" text-anchor="middle" class="op  ">T 6</text></g><g><line x1="266" y1="46" x2="270" y2="46" class="w"></line><text x="275" y="50" class="pin">S</text></g><g><line x1="262" y1="110" x2="270" y2="110" class="w"></line><text x="275" y="114" class="pin">TW</text><g class="op-hit"><rect x="172" y="102" width="90" height="16" fill="transparent"></rect><text x="260" y="114" text-anchor="end" class="op  ">S5T#1S</text></g></g><g><g class="pin-stub"><line x1="252" y1="174" x2="270" y2="174" class="w"></line><circle cx="250" cy="174" r="4" class="stub"></circle></g><text x="275" y="178" class="pin">R</text></g><g><text x="425" y="50" text-anchor="end" class="pin">Q</text><g class="pin-stub"><line x1="430" y1="46" x2="448" y2="46" class="w"></line><circle cx="450" cy="46" r="4" class="stub"></circle></g></g><g><text x="425" y="114" text-anchor="end" class="pin">DUAL</text><line x1="430" y1="110" x2="438" y2="110" class="w"></line><g class="op-hit"><rect x="439" y="102" width="90" height="16" fill="transparent"></rect><text x="441" y="114" text-anchor="start" class="op optional ">…</text></g></g><g><text x="425" y="178" text-anchor="end" class="pin">DEZ</text><line x1="430" y1="174" x2="438" y2="174" class="w"></line><g class="op-hit"><rect x="439" y="166" width="90" height="16" fill="transparent"></rect><text x="441" y="178" text-anchor="start" class="op optional ">…</text></g></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 2 · Tiempo encendido</p><div class="kop-lienzo"><svg width="558" height="204" viewBox="0 0 558 204" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="202" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">T 6</text></g></g><g class="el"><rect x="180" y="-4" width="172" height="198" rx="6" class="hit  "></rect><rect x="186" y="16" width="160" height="174" rx="3" class="sym-box box "></rect><text x="266" y="29" text-anchor="middle" class="boxtxt">S_EVERZ</text><g class="op-hit"><rect x="222" y="-2" width="90" height="16" fill="transparent"></rect><text x="266" y="10" text-anchor="middle" class="op  ">T 7</text></g><g><line x1="182" y1="46" x2="186" y2="46" class="w"></line><text x="191" y="50" class="pin">S</text></g><g><line x1="178" y1="110" x2="186" y2="110" class="w"></line><text x="191" y="114" class="pin">TW</text><g class="op-hit"><rect x="88" y="102" width="90" height="16" fill="transparent"></rect><text x="176" y="114" text-anchor="end" class="op  ">S5T#1S</text></g></g><g><g class="pin-stub"><line x1="168" y1="174" x2="186" y2="174" class="w"></line><circle cx="166" cy="174" r="4" class="stub"></circle></g><text x="191" y="178" class="pin">R</text></g><g><text x="341" y="50" text-anchor="end" class="pin">Q</text><g class="pin-stub"><line x1="346" y1="46" x2="364" y2="46" class="w"></line><circle cx="366" cy="46" r="4" class="stub"></circle></g></g><g><text x="341" y="114" text-anchor="end" class="pin">DUAL</text><line x1="346" y1="110" x2="354" y2="110" class="w"></line><g class="op-hit"><rect x="355" y="102" width="90" height="16" fill="transparent"></rect><text x="357" y="114" text-anchor="start" class="op optional ">…</text></g></g><g><text x="341" y="178" text-anchor="end" class="pin">DEZ</text><line x1="346" y1="174" x2="354" y2="174" class="w"></line><g class="op-hit"><rect x="355" y="166" width="90" height="16" fill="transparent"></rect><text x="357" y="178" text-anchor="start" class="op optional ">…</text></g></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 3 · Salida intermitente</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">T 6</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.5</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E17&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.7&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.5&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.7</span>
+      <span class="t-ins">UN</span>    <span class="t-op">T 7</span>
+      <span class="t-ins">L</span>     <span class="t-cte">S5T#1S</span>
+      <span class="t-ins">SE</span>    <span class="t-op">T 6</span>         <span class="t-com">// tiempo apagado</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 6</span>
+      <span class="t-ins">L</span>     <span class="t-cte">S5T#1S</span>
+      <span class="t-ins">SE</span>    <span class="t-op">T 7</span>         <span class="t-com">// tiempo encendido</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 6</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.5</span></code></pre>
+        </article></section>
+<section><h2 id="ponte-a-prueba">Ponte a prueba</h2><p class="nota">Piensa la respuesta antes de abrir la solución.</p>
+        <article class="pregunta" id="q10">
+          <h3><span class="codigo">Q10</span>Valor de tiempo mal cargado</h3>
+          <p>¿Qué pasa al activar E0.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">L</span>     <span class="t-cte">500</span>
+      <span class="t-ins">SE</span>    <span class="t-op">T 1</span>
+      <span class="t-ins">U</span>     <span class="t-op">T 1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Solución</summary>
+<p>La CPU pasa a <strong>STOP</strong>. 500 = W#16#01F4 no es un S5TIME válido (la cifra F no es BCD), así que hay un error de programación (OB121). Mientras E0.0 = 0 no ocurre nada, porque el valor solo se evalúa al arrancar el temporizador.</p>
+</details>
+        </article></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Qué diferencia hay entre los temporizadores SE y SS?</summary><div class="faq-respuesta"><p>Los dos son retardos a la conexión. SE solo activa Q si S sigue a 1 todo el tiempo; si S cae antes, se para. SS sigue contando aunque S caiga y, al terminar, mantiene Q a 1 hasta que se hace un reset.</p></div></details>
+          <details><summary>¿Qué temporizador mantiene Q a 1 todo el tiempo aunque S caiga antes?</summary><div class="faq-respuesta"><p>SV, el impulso prolongado (S_VIMP). El impulso SI, en cambio, se corta si S cae antes de tiempo.</p></div></details>
+          <details><summary>¿Qué temporizador activa Q en cuanto S = 1 y lo mantiene un tiempo después de que S caiga?</summary><div class="faq-respuesta"><p>SA, el retardo a la desconexión (S_AVERZ): el tiempo empieza a contar en el flanco negativo de S.</p></div></details>
+          <details><summary>¿Por qué mi temporizador no vuelve a arrancar después de un reset?</summary><div class="faq-respuesta"><p>Porque necesita un flanco nuevo en S. Si la condición de arranque ya estaba a 1 cuando terminó el reset, tiene que volver a 0 y otra vez a 1.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <a class="pag-ant" href="../flancos/"><span>← Anterior</span><b>Flancos</b></a>
+        <a class="pag-sig" href="../contadores/"><span>Siguiente →</span><b>Contadores</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Pruébalo","pista":"Haz clic en las entradas.","pistaMayus":"Con Mayús + clic, la entrada funciona como un pulsador mientras la mantienes.","reiniciar":"Reiniciar","valorNoValido":"Valor no válido"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

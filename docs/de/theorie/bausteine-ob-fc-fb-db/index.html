@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bausteine: OB, FC, FB und DB · Automatizacion</title>
+  <meta name="description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/blocks-ob-fc-fb-db/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Bausteine: OB, FC, FB und DB">
+  <meta property="og:description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Bausteine: OB, FC, FB und DB","description":"Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist der Unterschied zwischen einer FC und einem FB?","acceptedAnswer":{"@type":"Answer","text":"Der FB hat ein eigenes Gedächtnis: einen Instanz-DB, in dem er seine statischen Variablen (STAT) speichert, die ihren Wert zwischen zwei Aufrufen behalten. Eine FC hat nur temporäre Variablen, die am Ende verloren gehen."}},{"@type":"Question","name":"Welcher OB bearbeitet das Hauptprogramm?","acceptedAnswer":{"@type":"Answer","text":"Der OB1, den die CPU zyklisch bearbeitet. Der OB100 ist der Anlauf, der OB35 der Weckalarm und der OB80 der Zeitfehler."}},{"@type":"Question","name":"Was passiert, wenn ein Fehler auftritt und sein OB nicht programmiert ist?","acceptedAnswer":{"@type":"Answer","text":"Die CPU geht in STOP. Ein ungültiges BCD ruft zum Beispiel den OB121 auf: Ist der OB121 nicht geladen, hält die CPU an."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Bausteine OB, FC, FB, DB","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Theorie">
+        <a href="../../../">Simulator</a>
+        <a href="../../../de/theorie/" class="activo">Theorie</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../../../es/teoria/bloques-ob-fc-fb-db/" hreflang="es" lang="es" title="Español">ES</a><a href="../../../en/theory/blocks-ob-fc-fb-db/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/bausteine-ob-fc-fb-db/" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Herunterladen</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Inhalt der Theorie">
+      <p class="lateral-titulo"><a href="../">Theorie</a></p>
+      <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/" aria-current="page">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Inhalt der Theorie</summary>
+        <ol><li><a href="../was-ist-eine-sps/">Was ist eine SPS</a></li><li><a href="../sps-zyklus/">Der SPS-Zyklus</a></li><li><a href="../speicherbereiche/">Speicherbereiche</a></li><li><a href="../datentypen/">Datentypen</a></li><li><a href="../bausteine-ob-fc-fb-db/" aria-current="page">Bausteine OB, FC, FB, DB</a></li><li><a href="../kop-kontakte-und-spulen/">KOP: Kontakte und Spulen</a></li><li><a href="../awl-vke-und-bitverknuepfung/">AWL: VKE und Bitlogik</a></li><li><a href="../selbsthaltung-setzen-ruecksetzen/">Selbsthaltung, Setzen, Rücksetzen</a></li><li><a href="../flanken/">Flanken</a></li><li><a href="../zeiten/">Zeiten</a></li><li><a href="../zaehler/">Zähler</a></li><li><a href="../taktmerker/">Taktmerker</a></li><li><a href="../ablaufsteuerung-grafcet/">Ablaufsteuerung und GRAFCET</a></li><li><a href="../vergleich-und-arithmetik/">Vergleich und Arithmetik</a></li><li><a href="../umwandlung-und-wortverknuepfung/">Umwandlungen</a></li><li><a href="../spruenge-und-schleifen/">Sprünge und Schleifen</a></li><li><a href="../indirekte-adressierung-und-mcr/">Indirekte Adressierung</a></li><li><a href="../kop-awl-entsprechungen/">KOP ↔ AWL</a></li><li><a href="../geloeste-aufgaben/">Gelöste Aufgaben</a></li><li><a href="../mnemonik-und-glossar/">Mnemonik und Glossar</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Bausteine OB, FC, FB, DB</span></nav>
+      <h1>Bausteine: OB, FC, FB und DB</h1>
+      <p class="articulo-entradilla">Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="bausteinarten">Bausteinarten</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Baustein</th><th>Was er ist</th><th>Eigener Speicher</th></tr></thead><tbody><tr><td><strong>OB</strong></td><td>Organisationsbaustein. Wird vom Betriebssystem aufgerufen: Zyklus, Anlauf, Alarme oder Fehler</td><td>Temporäre Daten (L)</td></tr><tr><td><strong>FC</strong></td><td>Funktion. Code mit Parametern</td><td>Nein: nur temporäre Daten</td></tr><tr><td><strong>FB</strong></td><td>Funktionsbaustein. Code mit Parametern <strong>und Gedächtnis</strong></td><td>Ja: ein <strong>Instanz-DB</strong> für jeden Aufruf</td></tr><tr><td><strong>DB</strong></td><td>Datenbaustein (global oder Instanz)</td><td>Er ist selbst Daten, immer remanent</td></tr><tr><td><strong>SFC / SFB</strong></td><td>Systemfunktionen und Systemfunktionsbausteine, die in der CPU enthalten sind</td><td>—</td></tr><tr><td><strong>UDT</strong></td><td>Anwenderdefinierter Datentyp</td><td>—</td></tr></tbody></table></div></section>
+<section><h2 id="wichtige-obs">Wichtige OBs</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>OB</th><th>Wann er bearbeitet wird</th></tr></thead><tbody><tr><td>OB1</td><td>Zyklisch (Hauptprogramm)</td></tr><tr><td>OB10</td><td>Uhrzeitalarm (Datum und Uhrzeit)</td></tr><tr><td>OB20</td><td>Verzögerungsalarm</td></tr><tr><td>OB35</td><td>Weckalarm (standardmäßig alle 100 ms)</td></tr><tr><td>OB40</td><td>Prozessalarm (Flanke an einer alarmfähigen Baugruppe)</td></tr><tr><td>OB80</td><td>Zeitfehler (Zykluszeit überschritten)</td></tr><tr><td>OB82</td><td>Diagnosealarm einer Baugruppe</td></tr><tr><td>OB85 / OB86 / OB87</td><td>Programmablauffehler / Ausfall eines Baugruppenträgers oder der dezentralen Peripherie / Kommunikationsfehler</td></tr><tr><td>OB100</td><td>Anlauf (Neustart)</td></tr><tr><td>OB121</td><td>Programmierfehler (zum Beispiel ungültiges BCD, nicht vorhandener Baustein)</td></tr><tr><td>OB122</td><td>Peripheriezugriffsfehler</td></tr></tbody></table></div>
+<blockquote>
+<p>Tritt ein Fehler auf und ist der zugehörige Fehler-OB <strong>nicht geladen</strong>, geht die CPU in <strong>STOP</strong>.</p>
+</blockquote></section>
+<section><h2 id="variablendeklaration-eines-bausteins">Variablendeklaration eines Bausteins</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Abschnitt</th><th>FC</th><th>FB</th><th>Wofür</th></tr></thead><tbody><tr><td>IN</td><td>✓</td><td>✓</td><td>Eingangsparameter</td></tr><tr><td>OUT</td><td>✓</td><td>✓</td><td>Ausgangsparameter</td></tr><tr><td>IN_OUT</td><td>✓</td><td>✓</td><td>Parameter, die gelesen und geschrieben werden</td></tr><tr><td>STAT</td><td>—</td><td>✓</td><td>Statische Variablen: Sie werden im Instanz-DB gespeichert und behalten ihren Wert zwischen zwei Aufrufen</td></tr><tr><td>TEMP</td><td>✓</td><td>✓</td><td>Temporäre Daten: zu Beginn undefiniert</td></tr></tbody></table></div></section>
+<section><h2 id="aufrufe">Aufrufe</h2>
+<pre class="esquema"><code>// FC mit Parametern (AWL)
+      CALL  FC     1
+       Ein  :=E0.0
+       Halt :=E0.1
+       Motor:=A4.0
+
+// FB mit seinem Instanz-DB
+      CALL  FB     1 , DB     1
+       Eingang:=E0.2
+       Ausgang:=A4.1
+
+// FC ohne Parameter
+      UC    FC     2              // unbedingter Aufruf
+      U     E      0.3
+      CC    FC     3              // bedingter Aufruf: nur wenn VKE = 1</code></pre>
+<p>So sieht eine allgemeine FC in einer <strong>AWL-Quelle</strong> aus (eine Textdatei mit den Bausteinen; die Anweisungen enden mit <code>;</code>):</p>
+<pre class="esquema"><code>FUNCTION FC 1 : VOID
+TITLE = Allgemeines Ein/Aus
+VAR_INPUT
+  Ein : BOOL ;
+  Halt : BOOL ;
+END_VAR
+VAR_IN_OUT
+  Motor : BOOL ;
+END_VAR
+BEGIN
+NETWORK
+TITLE = Selbsthaltung
+      U(    ;
+      O     #Ein;
+      O     #Motor;
+      )     ;
+      U     #Halt;
+      =     #Motor;
+END_FUNCTION</code></pre>
+<p>In KOP ist ein Aufruf eine <strong>Box</strong> mit EN/ENO, und die Parameter sind ihre Anschlüsse.</p></section>
+<section><h2 id="bausteinende-und-aufrufe">Bausteinende und Aufrufe</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>BE</code></td><td>Bausteinende</td></tr><tr><td><code>BEA</code></td><td>Unbedingtes Bausteinende</td></tr><tr><td><code>BEB</code></td><td>Bausteinende, wenn VKE = 1. Bei VKE = 0 geht es weiter, mit VKE := 1 und /ER := 0</td></tr><tr><td><code>CALL</code></td><td>Aufruf mit Parametern (siehe <a href="#aufrufe">Aufrufe</a>)</td></tr><tr><td><code>UC</code> / <code>CC</code></td><td>Unbedingter / bedingter Aufruf, ohne Parameter</td></tr></tbody></table></div></section>
+<section><h2 id="datenbausteine">Datenbausteine</h2>
+<pre class="codigo-awl"><code>      <span class="t-ins">AUF</span>   <span class="t-op">DB 1</span>            <span class="t-com">// öffnet DB1 als globalen DB</span>
+      <span class="t-ins">L</span>     <span class="t-op">DBW 0</span>           <span class="t-com">// DB1.DBW0</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 10</span>
+      <span class="t-ins">U</span>     <span class="t-op">DB1.DBX 2.0</span>     <span class="t-com">// vollständige Adresse (öffnet ebenfalls DB1)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre></section>
+<section><h2 id="haufige-fragen">Häufige Fragen</h2>
+        <div class="preguntas faq">
+          <details><summary>Was ist der Unterschied zwischen einer FC und einem FB?</summary><div class="faq-respuesta"><p>Der FB hat ein eigenes Gedächtnis: einen Instanz-DB, in dem er seine statischen Variablen (STAT) speichert, die ihren Wert zwischen zwei Aufrufen behalten. Eine FC hat nur temporäre Variablen, die am Ende verloren gehen.</p></div></details>
+          <details><summary>Welcher OB bearbeitet das Hauptprogramm?</summary><div class="faq-respuesta"><p>Der OB1, den die CPU zyklisch bearbeitet. Der OB100 ist der Anlauf, der OB35 der Weckalarm und der OB80 der Zeitfehler.</p></div></details>
+          <details><summary>Was passiert, wenn ein Fehler auftritt und sein OB nicht programmiert ist?</summary><div class="faq-respuesta"><p>Die CPU geht in STOP. Ein ungültiges BCD ruft zum Beispiel den OB121 auf: Ist der OB121 nicht geladen, hält die CPU an.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Mit dem Simulator üben</h2>
+        <p>Alle Beispiele dieser Seite sind in Automatizacion enthalten, einem kostenlosen SPS-Simulator für Windows, macOS und Linux: Öffne sie, ändere die Eingänge und beobachte Zyklus für Zyklus, wie das Programm reagiert. Hinweis: Die Oberfläche der App ist auf Spanisch.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Simulator herunterladen</a>
+    </aside>
+      <nav class="paginacion" aria-label="Inhalt der Theorie">
+        <a class="pag-ant" href="../datentypen/"><span>← Zurück</span><b>Datentypen</b></a>
+        <a class="pag-sig" href="../kop-kontakte-und-spulen/"><span>Weiter →</span><b>KOP: Kontakte und Spulen</b></a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Bildungsprojekt ohne Verbindung zu einem SPS-Hersteller.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

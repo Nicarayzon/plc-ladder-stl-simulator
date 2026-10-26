@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWL (STL) paso a paso: U, UN, O, ON, X y el RLO · Automatizacion</title>
+  <meta name="description" content="Las instrucciones lógicas de AWL (STL) explicadas una a una: U, UN, O, ON, X, XN, =, S, R y NOT, cómo se calcula el RLO, cómo se agrupa con paréntesis y cómo resolver un ejercicio a mano, con ejemplos que puedes probar aquí mismo.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/stl-rlo-and-bit-logic/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="AWL (STL) paso a paso: U, UN, O, ON, X y el RLO">
+  <meta property="og:description" content="Las instrucciones lógicas de AWL (STL) explicadas una a una: U, UN, O, ON, X, XN, =, S, R y NOT, cómo se calcula el RLO, cómo se agrupa con paréntesis y cómo resolver un ejercicio a mano, con ejemplos que puedes probar aquí mismo.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"AWL (STL) paso a paso: U, UN, O, ON, X y el RLO","description":"Las instrucciones lógicas de AWL (STL) explicadas una a una: U, UN, O, ON, X, XN, =, S, R y NOT, cómo se calcula el RLO, cómo se agrupa con paréntesis y cómo resolver un ejercicio a mano, con ejemplos que puedes probar aquí mismo.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué es el RLO en AWL?","acceptedAnswer":{"@type":"Answer","text":"El resultado lógico de la operación: el bit de la palabra de estado donde se va acumulando el resultado de las instrucciones lógicas (U, O, X…). Las asignaciones =, S y R lo escriben en un operando."}},{"@type":"Question","name":"¿Para qué sirve el bit /ER (primera consulta)?","acceptedAnswer":{"@type":"Answer","text":"Indica si la siguiente instrucción lógica empieza una cadena nueva. Con /ER = 0, la siguiente U, O o X copia el operando en el RLO en lugar de combinarlo con él."}},{"@type":"Question","name":"¿Por qué U a / O b / U c no calcula «a o (b y c)»?","acceptedAnswer":{"@type":"Answer","text":"Porque AWL evalúa de forma secuencial: calcula (a ∨ b) ∧ c. Para obtener a ∨ (b ∧ c) hay que usar O sin operando o paréntesis."}},{"@type":"Question","name":"¿Cuántos paréntesis anidados admite AWL?","acceptedAnswer":{"@type":"Answer","text":"Siete niveles. Si se superan, hay un error y la CPU pasa a STOP."}},{"@type":"Question","name":"¿Qué hace la instrucción SET en AWL?","acceptedAnswer":{"@type":"Answer","text":"Pone el RLO a 1 y cierra la cadena lógica (/ER = 0). No pone a 1 ningún operando: para eso está S."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"AWL: RLO y lógica de bits","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/"}]}]
+  </script>
+  <link rel="stylesheet" href="../../../estilos.css">
+  <link rel="stylesheet" href="../../../teoria.css">
+  <script>
+    // tema elegido antes de pintar, para que no parpadee
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../../teoria.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="../../../" aria-label="Automatizacion">
+        <img src="../../../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu" aria-label="Teoría">
+        <a href="../../../">Simulador</a>
+        <a href="../../../es/teoria/" class="activo">Teoría</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Idioma"><a href="../../../es/teoria/awl-rlo-y-logica-de-bits/" hreflang="es" lang="es" title="Español" aria-current="page">ES</a><a href="../../../en/theory/stl-rlo-and-bit-logic/" hreflang="en" lang="en" title="English">EN</a><a href="../../../de/theorie/awl-vke-und-bitverknuepfung/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Código en GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="../../../#descargar">Descargar</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor teoria">
+    <nav class="lateral" aria-label="Índice de la teoría">
+      <p class="lateral-titulo"><a href="../">Teoría</a></p>
+      <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/" aria-current="page">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+    </nav>
+    <main class="articulo">
+      <details class="indice-movil">
+        <summary>Índice de la teoría</summary>
+        <ol><li><a href="../que-es-un-plc/">Qué es un PLC</a></li><li><a href="../ciclo-de-scan/">El ciclo de scan</a></li><li><a href="../areas-de-memoria/">Áreas de memoria</a></li><li><a href="../tipos-de-datos/">Tipos de datos</a></li><li><a href="../bloques-ob-fc-fb-db/">Bloques OB, FC, FB y DB</a></li><li><a href="../kop-contactos-y-bobinas/">KOP: contactos y bobinas</a></li><li><a href="../awl-rlo-y-logica-de-bits/" aria-current="page">AWL: RLO y lógica de bits</a></li><li><a href="../enclavamiento-set-reset/">Enclavamiento, Set y Reset</a></li><li><a href="../flancos/">Flancos</a></li><li><a href="../temporizadores/">Temporizadores</a></li><li><a href="../contadores/">Contadores</a></li><li><a href="../marca-de-ciclo/">Marca de ciclo</a></li><li><a href="../secuencias-grafcet/">Secuencias y GRAFCET</a></li><li><a href="../comparacion-y-aritmetica/">Comparación y aritmética</a></li><li><a href="../conversiones-y-logica-de-palabras/">Conversiones</a></li><li><a href="../saltos-y-bucles/">Saltos y bucles</a></li><li><a href="../direccionamiento-indirecto-y-mcr/">Direccionamiento indirecto</a></li><li><a href="../equivalencias-kop-awl/">Equivalencias KOP ↔ AWL</a></li><li><a href="../ejercicios-resueltos/">Ejercicios resueltos</a></li><li><a href="../nemotecnica-y-glosario/">Nemotécnica y glosario</a></li></ol>
+      </details>
+      <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>AWL: RLO y lógica de bits</span></nav>
+      <h1>AWL (STL) paso a paso: U, UN, O, ON, X y el RLO</h1>
+      <p class="articulo-entradilla">Las instrucciones lógicas de AWL (STL) explicadas una a una: U, UN, O, ON, X, XN, =, S, R y NOT, cómo se calcula el RLO, cómo se agrupa con paréntesis y cómo resolver un ejercicio a mano, con ejemplos que puedes probar aquí mismo.</p>
+      <div class="articulo-cuerpo">
+<section><h2 id="como-se-lee-un-programa-awl">Cómo se lee un programa AWL</h2>
+<p>En AWL el programa se escribe <strong>en texto</strong>, con una instrucción por línea. Cada línea tiene una <strong>operación</strong> y, casi siempre, un <strong>operando</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Línea</th><th>Operación</th><th>Operando</th><th>Se lee</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td><code>U</code> (Y)</td><td><code>E 0.0</code></td><td>«y la entrada 0.0»</td></tr><tr><td><code>UN E 0.1</code></td><td><code>UN</code> (Y no)</td><td><code>E 0.1</code></td><td>«y no la entrada 0.1»</td></tr><tr><td><code>= A 4.0</code></td><td><code>=</code> (asignar)</td><td><code>A 4.0</code></td><td>«el resultado, a la salida 4.0»</td></tr></tbody></table></div>
+<p>La CPU ejecuta las líneas <strong>de arriba abajo</strong>. Las instrucciones lógicas van calculando un resultado, el <strong>RLO</strong> (resultado lógico), que es lo mismo que la «corriente» de KOP: cada instrucción combina el RLO con su operando, y al final <code>=</code> lo escribe en una salida.</p>
+<p>Ejemplo, línea a línea, con E 0.0 = 1 y E 0.1 = 0:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Qué hace</th><th>RLO después</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td>Primera instrucción de la cadena: copia E 0.0</td><td>1</td></tr><tr><td><code>U E 0.1</code></td><td>1 Y 0</td><td>0</td></tr><tr><td><code>= A 4.0</code></td><td>Escribe el RLO en A 4.0</td><td>A 4.0 = 0</td></tr></tbody></table></div>
+<p>La <strong>primera</strong> instrucción lógica después de una asignación no combina nada: <strong>copia</strong> su operando en el RLO. Es la «primera consulta» (ver <a href="#logica-de-bits-rlo-primera-consulta-y-sta">Lógica de bits: RLO, primera consulta y STA</a>).</p></section>
+<section><h2 id="u-y-and">U: Y (AND)</h2>
+<p><code>U</code> significa <strong>«y además este bit vale 1»</strong>. Combina el RLO con el operando mediante una <strong>Y</strong>: el resultado solo sigue a 1 si el operando vale 1.</p>
+<ul>
+<li>En KOP equivale a un <strong>contacto NA en serie</strong>.</li>
+<li>Varias <code>U</code> seguidas: el resultado es 1 solo si <strong>todas</strong> se cumplen.</li>
+</ul>
+<div class="ejemplo mini" id="probar-y"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// y además E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ E0.1</span></code></pre></div></section>
+<section><h2 id="un-y-negada-and-not">UN: Y negada (AND NOT)</h2>
+<p><code>UN</code> significa <strong>«y además este bit vale 0»</strong>. Es una Y con el operando invertido: RLO := RLO ∧ ¬operando.</p>
+<ul>
+<li>En KOP equivale a un <strong>contacto NC en serie</strong>.</li>
+<li>Es la forma de escribir condiciones como «marcha <strong>y no</strong> hay alarma»:</li>
+</ul>
+<div class="ejemplo mini" id="probar-y-no"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="76" viewBox="0 0 390 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-y-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-y-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-y-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-y-no.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-y-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-y-no.s1.4&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// marcha</span>
+      <span class="t-ins">UN</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// y no hay alarma</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∧ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="o-o-or">O: O (OR)</h2>
+<p><code>O</code> significa <strong>«o este bit vale 1»</strong>. Combina el RLO con el operando mediante una <strong>O</strong>: el resultado es 1 si se cumple alguna de las condiciones.</p>
+<ul>
+<li>En KOP equivale a un <strong>contacto NA en paralelo</strong>.</li>
+<li>Para un paralelo de contactos sueltos se escribe <code>O</code> también en la primera línea (<code>O E 0.0 / O E 0.1</code>), aunque <code>U E 0.0 / O E 0.1</code> daría lo mismo: la primera instrucción solo copia el operando.</li>
+</ul>
+<div class="ejemplo mini" id="probar-o"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// o E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ E0.1</span></code></pre></div></section>
+<section><h2 id="on-o-negada-or-not">ON: O negada (OR NOT)</h2>
+<p><code>ON</code> significa <strong>«o este bit vale 0»</strong>: RLO := RLO ∨ ¬operando. En KOP equivale a un <strong>contacto NC en paralelo</strong>.</p>
+<div class="ejemplo mini" id="probar-o-no"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><div class="kop-lienzo"><svg width="306" height="140" viewBox="0 0 306 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="98" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-o-no&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-o-no.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-o-no.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-o-no.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-o-no.s1.3&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-o-no.s1.4&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-o-no.s1.5&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">O</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">ON</span>    <span class="t-op">E 0.1</span>           <span class="t-com">// o E0.1 vale 0</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// A4.0 = E0.0 ∨ ¬E0.1</span></code></pre></div></section>
+<section><h2 id="x-y-xn-o-exclusiva">X y XN: O-exclusiva</h2>
+<p><code>X</code> es la <strong>O-exclusiva</strong>: el resultado es 1 si <strong>solo uno</strong> de los dos vale 1, y 0 si valen lo mismo. <code>XN</code> es lo contrario: 1 cuando los dos valen lo mismo.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>E 0.0</th><th>E 0.1</th><th><code>X E 0.0 / X E 0.1</code></th><th><code>X E 0.0 / XN E 0.1</code></th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table></div>
+<p>Un uso típico es la <strong>luz conmutada</strong> de un pasillo: dos interruptores, uno en cada extremo, y cualquiera de los dos cambia el estado de la luz. En KOP no hay contacto de O-exclusiva: se dibuja con dos ramas (ver <a href="../kop-contactos-y-bobinas/#funciones-logicas-con-contactos">Funciones lógicas con contactos</a>), como en este esquema.</p>
+<div class="ejemplo mini" id="probar-xor"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><line x1="131" y1="55" x2="149" y2="37" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><line x1="47" y1="119" x2="65" y2="101" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-xor&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-xor.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;PAR&quot;,&quot;id&quot;:&quot;mini-xor.s1.2&quot;,&quot;ramas&quot;:[{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.3&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-xor.s1.4&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-xor.s1.5&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-xor.s1.6&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NC&quot;,&quot;id&quot;:&quot;mini-xor.s1.7&quot;,&quot;op&quot;:&quot;E 0.0&quot;},{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-xor.s1.8&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]}]}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;BOB&quot;,&quot;id&quot;:&quot;mini-xor.s1.9&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">X</span>     <span class="t-op">E 0.0</span>           <span class="t-com">// interruptor de un extremo del pasillo</span>
+      <span class="t-ins">X</span>     <span class="t-op">E 0.1</span>           <span class="t-com">// interruptor del otro extremo</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// la luz cambia con cualquiera de los dos</span></code></pre></div></section>
+<section><h2 id="s-y-r-escribir-el-resultado">=, S y R: escribir el resultado</h2>
+<p>Cuando la lógica está calculada, hay que escribir el RLO en algún sitio:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Qué hace</th><th>En KOP</th></tr></thead><tbody><tr><td><code>= A 4.0</code></td><td>A 4.0 := RLO, siempre (1 o 0)</td><td>Bobina <svg class="kop-ico" viewBox="0 0 18 20" width="18" height="20" role="img" aria-label="( )"><path d="M6 3Q1 10 6 17M12 3Q17 10 12 17"/></svg></td></tr><tr><td><code>S A 4.0</code></td><td>Si RLO = 1, A 4.0 := 1. Si RLO = 0, no hace nada</td><td>Bobina <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(S)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">S</text></svg></td></tr><tr><td><code>R A 4.0</code></td><td>Si RLO = 1, A 4.0 := 0. Si RLO = 0, no hace nada</td><td>Bobina <svg class="kop-ico" viewBox="0 0 21 20" width="21" height="20" role="img" aria-label="(R)"><path d="M6 3Q1 10 6 17M14.600000000000001 3Q19.6 10 14.600000000000001 17"/><text x="10.3" y="13.5" text-anchor="middle" class="ki-txt">R</text></svg></td></tr></tbody></table></div>
+<ul>
+<li>Después de <code>=</code>, <code>S</code> o <code>R</code>, la cadena se cierra: la siguiente <code>U</code> u <code>O</code> empieza una lógica nueva.</li>
+<li>Se pueden escribir varias <code>=</code> seguidas para asignar el mismo resultado a varias salidas.</li>
+<li>Con <code>S</code> y <code>R</code> el bit «recuerda» su valor. Pruébalo: un impulso en E 0.0 enciende A 4.0, que sigue encendida al soltar E 0.0, hasta que E 0.1 la apaga.</li>
+</ul>
+<div class="ejemplo mini" id="probar-set-reset"><figure class="kop" data-segmento="Segmento"><div class="kop-seg"><p class="kop-titulo">Segmento 1</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">S</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div><div class="kop-seg"><p class="kop-titulo">Segmento 2</p><div class="kop-lienzo"><svg width="306" height="76" viewBox="0 0 306 76" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="74" class="rail "></line><line x1="98" y1="46" x2="182" y2="46" class="w"></line><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="184" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="182" y1="46" x2="212" y2="46" class="w"></line><path d="M 217 35 Q 210 46 217 57" class="sym-line " fill="none"></path><path d="M 231 35 Q 238 46 231 57" class="sym-line " fill="none"></path><text x="224" y="50" text-anchor="middle" class="boxtxt">R</text><g class="op-hit"><rect x="180" y="7" width="90" height="16" fill="transparent"></rect><text x="224" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;mini-set-reset&quot;,&quot;kop&quot;:true,&quot;segmentos&quot;:[{&quot;id&quot;:&quot;mini-sr.s1&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-sr.s1.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-sr.s1.2&quot;,&quot;op&quot;:&quot;E 0.0&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;S&quot;,&quot;id&quot;:&quot;mini-sr.s1.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]},{&quot;id&quot;:&quot;mini-sr.s2&quot;,&quot;entrada&quot;:{&quot;k&quot;:&quot;SER&quot;,&quot;id&quot;:&quot;mini-sr.s2.1&quot;,&quot;items&quot;:[{&quot;k&quot;:&quot;NA&quot;,&quot;id&quot;:&quot;mini-sr.s2.2&quot;,&quot;op&quot;:&quot;E 0.1&quot;}]},&quot;salidas&quot;:[{&quot;salida&quot;:{&quot;k&quot;:&quot;R&quot;,&quot;id&quot;:&quot;mini-sr.s2.3&quot;,&quot;op&quot;:&quot;A 4.0&quot;}}]}],&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[]}"></div><pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">S</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// si E0.0 = 1, A4.0 se pone a 1 y se queda</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">R</span>     <span class="t-op">A 4.0</span>           <span class="t-com">// si E0.1 = 1, A4.0 vuelve a 0</span></code></pre></div></section>
+<section><h2 id="not-set-y-clr">NOT, SET y CLR</h2>
+<p>Estas tres instrucciones no tienen operando y actúan <strong>directamente sobre el RLO</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Qué hace</th><th>Ejemplo de uso</th></tr></thead><tbody><tr><td><code>NOT</code></td><td>Invierte el RLO</td><td><code>U E 0.0 / U E 0.1 / NOT / = A 4.0</code> es una NAND</td></tr><tr><td><code>SET</code></td><td>Pone el RLO a 1</td><td>Escribir un 1 fijo: <code>SET / = M 0.0</code></td></tr><tr><td><code>CLR</code></td><td>Pone el RLO a 0</td><td>Escribir un 0 fijo: <code>CLR / = M 0.0</code></td></tr></tbody></table></div>
+<blockquote>
+<p><strong>Cuidado con <code>SET</code></strong>: no pone a 1 ningún operando, solo el RLO. Para activar un bit se usa <code>S</code>.</p>
+</blockquote></section>
+<section><h2 id="formato">Formato</h2>
+<figure class="figura-tabla"><div class="tabla"><table class="linea-awl">
+    <tr><th>Meta (opcional)</th><th>Operación</th><th>Operando</th><th>Comentario</th></tr>
+    <tr><td><code class="codigo-celda"><span class="t-meta">FIN:</span></code></td><td><code class="codigo-celda"><span class="t-ins">U</span></code></td><td><code class="codigo-celda">E 0.0</code></td><td><code class="codigo-celda"><span class="t-com">// Y con la entrada 0.0</span></code></td></tr>
+  </table></div></figure>
+<ul>
+<li>Una instrucción por línea. El código se divide en <strong>segmentos</strong>, igual que en KOP.</li>
+<li><strong>Metas (etiquetas)</strong>: hasta 4 caracteres, empiezan por letra y terminan en <code>:</code>.</li>
+<li>Comentarios con <code>//</code>. En las fuentes AWL cada instrucción termina en <code>;</code>.</li>
+<li>Los espacios entre área y dirección no importan: <code>E 0.0</code> es lo mismo que <code>E0.0</code>.</li>
+</ul></section>
+<section><h2 id="registros-de-la-cpu">Registros de la CPU</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Registro</th><th>Tamaño</th><th>Uso</th></tr></thead><tbody><tr><td><strong>ACU1</strong>, <strong>ACU2</strong></td><td>32 bits</td><td>Acumuladores. <code>L</code> carga en ACU1 y lo anterior pasa a ACU2. Las operaciones trabajan con ACU2 (op) ACU1. Las CPU de 4 acumuladores tienen también ACU3 y ACU4</td></tr><tr><td><strong>AR1</strong>, <strong>AR2</strong></td><td>32 bits</td><td>Registros de direcciones (direccionamiento indirecto)</td></tr><tr><td><strong>DB / DI</strong></td><td>16 bits</td><td>Número del DB global y del DB de instancia abiertos</td></tr><tr><td><strong>Palabra de estado</strong></td><td>16 bits (se usan 9)</td><td>Ver tabla</td></tr></tbody></table></div>
+<p><strong>Palabra de estado</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bit</th><th>Nombre (es / de)</th><th>Inglés</th><th>Significado</th></tr></thead><tbody><tr><td>0</td><td><strong>/ER</strong></td><td>/FC</td><td><strong>Primera consulta</strong>. 0 = la siguiente operación lógica empieza una cadena nueva. 1 = cadena en curso</td></tr><tr><td>1</td><td><strong>RLO</strong> (VKE)</td><td>RLO</td><td><strong>Resultado lógico</strong> de la cadena</td></tr><tr><td>2</td><td><strong>STA</strong></td><td>STA</td><td><strong>Estado</strong> del último bit consultado (su valor real, antes de invertir)</td></tr><tr><td>3</td><td><strong>OR</strong></td><td>OR</td><td>Memoria para &quot;Y antes de O&quot; (ver <a href="#y-antes-de-o-o-sin-operando-y-parentesis">&quot;Y antes de O&quot;: <code>O</code> sin operando y paréntesis</a>)</td></tr><tr><td>4</td><td><strong>OS</strong></td><td>OS</td><td>Desbordamiento <strong>memorizado</strong>. Se pone a 0 con <code>SPS</code>, al llamar a un bloque y al terminar un bloque</td></tr><tr><td>5</td><td><strong>OV</strong></td><td>OV</td><td>Desbordamiento en la <strong>última</strong> operación aritmética</td></tr><tr><td>6</td><td><strong>A0</strong></td><td>CC0</td><td>Código de condición 0</td></tr><tr><td>7</td><td><strong>A1</strong></td><td>CC1</td><td>Código de condición 1</td></tr><tr><td>8</td><td><strong>RB</strong> (BIE)</td><td>BR</td><td>Resultado binario. Se usa para ENO y <code>SAVE</code></td></tr></tbody></table></div>
+<p><strong>Significado de A1/A0 (CC1/CC0)</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>A1</th><th>A0</th><th>Tras aritmética</th><th>Tras comparación (ACU2 frente a ACU1)</th><th>Tras desplazamiento</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>resultado = 0</td><td>ACU2 = ACU1</td><td>último bit desplazado = 0</td></tr><tr><td>0</td><td>1</td><td>resultado &lt; 0</td><td>ACU2 &lt; ACU1</td><td>—</td></tr><tr><td>1</td><td>0</td><td>resultado &gt; 0</td><td>ACU2 &gt; ACU1</td><td>último bit desplazado = 1</td></tr><tr><td>1</td><td>1</td><td>división por 0 / REAL no válido</td><td>no ordenable (REAL no válido)</td><td>—</td></tr></tbody></table></div></section>
+<section><h2 id="logica-de-bits-rlo-primera-consulta-y-sta">Lógica de bits: RLO, primera consulta y STA</h2>
+<p>Cada instrucción lógica combina <strong>el RLO actual</strong> con <strong>el bit del operando</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Si /ER = 0 (primera consulta)</th><th>Si /ER = 1 (cadena en curso)</th></tr></thead><tbody><tr><td><code>U op</code> (Y)</td><td>RLO := op</td><td>RLO := RLO ∧ op</td></tr><tr><td><code>UN op</code> (Y-No)</td><td>RLO := ¬op</td><td>RLO := RLO ∧ ¬op</td></tr><tr><td><code>O op</code> (O)</td><td>RLO := op</td><td>RLO := RLO ∨ op</td></tr><tr><td><code>ON op</code> (O-No)</td><td>RLO := ¬op</td><td>RLO := RLO ∨ ¬op</td></tr><tr><td><code>X op</code> (O-exclusiva)</td><td>RLO := op</td><td>RLO := RLO ⊕ op</td></tr><tr><td><code>XN op</code> (O-exclusiva-No)</td><td>RLO := ¬op</td><td>RLO := RLO ⊕ ¬op</td></tr></tbody></table></div>
+<p>Después de cualquiera de ellas: <strong>/ER := 1</strong> y <strong>STA := valor del operando</strong>.</p>
+<p><strong>Instrucciones que cierran la cadena (/ER := 0)</strong> sin cambiar el RLO:</p>
+<ul>
+<li><code>=</code>, <code>S</code> y <code>R</code>.</li>
+<li>Las de temporizadores (<code>SI</code>, <code>SV</code>, <code>SE</code>, <code>SS</code>, <code>SA</code>, <code>R T</code>, <code>FR T</code>).</li>
+<li>Las de contadores (<code>ZV</code>, <code>ZR</code>, <code>S Z</code>, <code>R Z</code>).</li>
+</ul>
+<p>Por eso <strong>se pueden encadenar varias asignaciones</strong> con el mismo RLO:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>      <span class="t-com">// A4.0 := E0.0 ∧ E0.1</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>      <span class="t-com">// A4.1 recibe el mismo RLO</span>
+      <span class="t-ins">S</span>     <span class="t-op">M 0.0</span>      <span class="t-com">// y también activa M0.0 si es 1</span></code></pre>
+<p><strong>Instrucciones que NO tocan el RLO ni /ER</strong>: <code>L</code>, <code>T</code>, la aritmética, la conversión, <code>TAK</code>, <code>INC</code>, <code>DEC</code>... Una cadena lógica puede continuar &quot;por encima&quot; de ellas:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 10</span>      <span class="t-com">// no afecta al RLO</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 12</span>      <span class="t-com">// se ejecuta SIEMPRE (T no depende del RLO)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>      <span class="t-com">// A4.0 := E0.0</span></code></pre>
+<p><strong>Operaciones directas sobre el RLO</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Efecto</th></tr></thead><tbody><tr><td><code>NOT</code></td><td>RLO := ¬RLO</td></tr><tr><td><code>SET</code></td><td>RLO := 1 (y /ER := 0)</td></tr><tr><td><code>CLR</code></td><td>RLO := 0 (y /ER := 0)</td></tr><tr><td><code>SAVE</code></td><td>RB := RLO</td></tr></tbody></table></div></section>
+<section><h2 id="y-antes-de-o-o-sin-operando-y-parentesis">&quot;Y antes de O&quot;: <code>O</code> sin operando y paréntesis</h2>
+<p>AWL evalúa <strong>de forma secuencial</strong>: <code>U E0.0 / O E0.1 / U E0.2</code> calcula <strong>(E0.0 ∨ E0.1) ∧ E0.2</strong>, no E0.0 ∨ (E0.1 ∧ E0.2). Para agrupar hay dos herramientas.</p>
+<p><strong>a) <code>O</code> sin operando</strong> separa grupos Y que se combinan con O:</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>                 <span class="t-com">// (E0.0 ∧ E0.1)  ∨ ...</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.3</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span>       <span class="t-com">// A4.0 = (E0.0 ∧ E0.1) ∨ (E0.2 ∧ E0.3)</span></code></pre>
+<p>Funcionamiento interno: <code>O</code> guarda el resultado del primer grupo en el bit <strong>OR</strong> y pone /ER = 0. Mientras OR = 1, las siguientes <code>U</code> y <code>UN</code> dejan el RLO a 1, porque el resultado ya está decidido. <code>=</code> pone OR := 0.</p>
+<p><strong>b) Paréntesis</strong>: <code>U(</code>, <code>UN(</code>, <code>O(</code>, <code>ON(</code>, <code>X(</code>, <code>XN(</code> ... <code>)</code>.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U(</span>                <span class="t-com">// E0.0 ∧ ( ... )</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span>       <span class="t-com">// A4.1 = E0.0 ∧ (E0.1 ∨ E0.2)</span></code></pre>
+<ul>
+<li>Al abrir el paréntesis se guardan en la <strong>pila de anidamiento</strong> el RLO, el bit OR y la operación pendiente, y se empieza una cadena nueva (/ER = 0).</li>
+<li>Al cerrar con <code>)</code> se recupera lo guardado y se combina con el RLO del interior.</li>
+<li>Se admiten <strong>hasta 7 niveles</strong> de anidamiento.</li>
+</ul></section>
+<section><h2 id="bits-de-estado-como-operandos">Bits de estado como operandos</h2>
+<p><code>U OV</code>, <code>U OS</code>, <code>U BIE</code> (RB), <code>U ==0</code>, <code>U &lt;&gt;0</code>, <code>U &gt;0</code>, <code>U &lt;0</code>, <code>U &gt;=0</code>, <code>U &lt;=0</code> y <code>U UO</code> (no ordenable). También funcionan con <code>UN</code>, <code>O</code>, <code>ON</code>, <code>X</code> y <code>XN</code>.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">L</span>     <span class="t-op">MW 40</span>
+      <span class="t-ins">L</span>     <span class="t-op">MW 42</span>
+      <span class="t-ins">+I</span>
+      <span class="t-ins">T</span>     <span class="t-op">MW 44</span>
+      <span class="t-ins">U</span>     <span class="t-op">OV</span>              <span class="t-com">// ¿desbordó esta suma?</span>
+      <span class="t-ins">=</span>     <span class="t-op">M 1.0</span></code></pre></section>
+<section><h2 id="metodo-de-traza-para-resolver-ejercicios-a-mano">Método de traza (para resolver ejercicios a mano)</h2>
+<p>Se anota, línea a línea, el estado de /ER, RLO, STA y OR. Ejemplo con E0.0 = 1, E0.1 = 0, E0.2 = 1 y E0.3 = 1:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>/ER antes</th><th>STA</th><th>RLO después</th><th>OR</th><th>Comentario</th></tr></thead><tbody><tr><td><code>U E 0.0</code></td><td>0</td><td>1</td><td>1</td><td>0</td><td>Primera consulta: RLO := 1</td></tr><tr><td><code>U E 0.1</code></td><td>1</td><td>0</td><td>0</td><td>0</td><td>1 ∧ 0</td></tr><tr><td><code>O</code></td><td>1</td><td>1</td><td>0</td><td>0</td><td>OR := RLO (0); /ER := 0</td></tr><tr><td><code>U E 0.2</code></td><td>0</td><td>1</td><td>1</td><td>0</td><td>Primera consulta del 2.º grupo</td></tr><tr><td><code>U E 0.3</code></td><td>1</td><td>1</td><td>1</td><td>0</td><td>1 ∧ 1</td></tr><tr><td><code>= A 4.0</code></td><td>1</td><td>1</td><td>1</td><td>0</td><td><strong>A4.0 = 1</strong>; /ER := 0 (STA = valor escrito)</td></tr></tbody></table></div>
+<p>Con E0.0 = E0.1 = 1 y E0.2 = E0.3 = 0: tras <code>O</code>, el bit OR = 1. Las dos <code>U</code> siguientes dejan el RLO a 1, así que A4.0 = 1.</p></section>
+<section><h2 id="ejemplos-resueltos">Ejemplos resueltos</h2>
+        <article class="ejemplo" id="e04">
+          <h3><span class="codigo">E04</span>&quot;Y antes de O&quot; con <code>O</code> sin operando</h3>
+          <p><strong>Enunciado</strong>: A4.0 = (E0.0 ∧ E0.1) ∨ (E0.2 ∧ E0.3).</p>
+<p><strong>Conceptos</strong>: el bit OR y la primera consulta (ver <a href="#y-antes-de-o-o-sin-operando-y-parentesis">&quot;Y antes de O&quot;: <code>O</code> sin operando y paréntesis</a>).</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="14" y1="46" x2="14" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="14" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="16" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="110" x2="49" y2="110" class="w"></line><line x1="63" y1="110" x2="98" y2="110" class="w"></line><line x1="49" y1="99" x2="49" y2="121" class="sym-line "></line><line x1="63" y1="99" x2="63" y2="121" class="sym-line "></line><g class="op-hit"><rect x="12" y="71" width="90" height="16" fill="transparent"></rect><text x="56" y="83" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.3</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.0</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E04&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.3&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.3</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+        </article>
+<article class="ejemplo" id="e05">
+          <h3><span class="codigo">E05</span>Paréntesis: Y con un grupo O</h3>
+          <p><strong>Enunciado</strong>: A4.1 = E0.0 ∧ (E0.1 ∨ E0.2).</p>
+<figure class="kop" data-segmento="Segmento" data-titulos="1"><div class="kop-seg"><div class="kop-lienzo"><svg width="390" height="140" viewBox="0 0 390 140" class="kop-svg" role="img" aria-label="Esquema KOP"><line x1="14" y1="2" x2="14" y2="138" class="rail "></line><line x1="98" y1="46" x2="98" y2="110" class="w"></line><line x1="182" y1="46" x2="182" y2="110" class="w"></line><line x1="182" y1="46" x2="266" y2="46" class="w"></line><circle cx="98" cy="46" r="3" class="dot w"></circle><circle cx="182" cy="46" r="3" class="dot w"></circle><g class="el"><rect x="16" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="14" y1="46" x2="49" y2="46" class="w"></line><line x1="63" y1="46" x2="98" y2="46" class="w"></line><line x1="49" y1="35" x2="49" y2="57" class="sym-line "></line><line x1="63" y1="35" x2="63" y2="57" class="sym-line "></line><g class="op-hit"><rect x="12" y="7" width="90" height="16" fill="transparent"></rect><text x="56" y="19" text-anchor="middle" class="op  ">E 0.0</text></g></g><g class="el"><rect x="100" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="46" x2="133" y2="46" class="w"></line><line x1="147" y1="46" x2="182" y2="46" class="w"></line><line x1="133" y1="35" x2="133" y2="57" class="sym-line "></line><line x1="147" y1="35" x2="147" y2="57" class="sym-line "></line><g class="op-hit"><rect x="96" y="7" width="90" height="16" fill="transparent"></rect><text x="140" y="19" text-anchor="middle" class="op  ">E 0.1</text></g></g><g class="el"><rect x="100" y="72" width="80" height="60" rx="6" class="hit  "></rect><line x1="98" y1="110" x2="133" y2="110" class="w"></line><line x1="147" y1="110" x2="182" y2="110" class="w"></line><line x1="133" y1="99" x2="133" y2="121" class="sym-line "></line><line x1="147" y1="99" x2="147" y2="121" class="sym-line "></line><g class="op-hit"><rect x="96" y="71" width="90" height="16" fill="transparent"></rect><text x="140" y="83" text-anchor="middle" class="op  ">E 0.2</text></g></g><g class="el"><rect x="268" y="8" width="80" height="60" rx="6" class="hit  "></rect><line x1="266" y1="46" x2="296" y2="46" class="w"></line><path d="M 301 35 Q 294 46 301 57" class="sym-line " fill="none"></path><path d="M 315 35 Q 322 46 315 57" class="sym-line " fill="none"></path><g class="op-hit"><rect x="264" y="7" width="90" height="16" fill="transparent"></rect><text x="308" y="19" text-anchor="middle" class="op  ">A 4.1</text></g></g></svg></div></div></figure><div class="vivo" data-vivo="{&quot;id&quot;:&quot;E05&quot;,&quot;kop&quot;:true,&quot;nemotecnia&quot;:&quot;de&quot;,&quot;entradas&quot;:[{&quot;op&quot;:&quot;E 0.0&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;},{&quot;op&quot;:&quot;E 0.2&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}],&quot;salidas&quot;:[{&quot;op&quot;:&quot;A 4.1&quot;,&quot;tipo&quot;:&quot;BOOL&quot;,&quot;valor&quot;:&quot;0&quot;}]}"></div>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">U(</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">)</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.1</span></code></pre>
+        </article></section>
+<section><h2 id="ponte-a-prueba">Ponte a prueba</h2><p class="nota">Piensa la respuesta antes de abrir la solución.</p>
+        <article class="pregunta" id="q01">
+          <h3><span class="codigo">Q01</span>AWL se evalúa de forma secuencial</h3>
+          <p>Con E0.0 = 1, E0.1 = 0 y E0.2 = 0, ¿cuánto vale A4.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Solución</summary>
+<p><strong>A4.0 = 0</strong>. Se calcula (E0.0 ∨ E0.1) ∧ E0.2 = (1 ∨ 0) ∧ 0 = 0, no 1 ∨ (0 ∧ 0).</p>
+</details>
+        </article>
+<article class="pregunta" id="q02">
+          <h3><span class="codigo">Q02</span><code>O</code> sin operando</h3>
+          <p>Mismas entradas que en Q01. ¿Cuánto vale A4.0?</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>
+      <span class="t-ins">O</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.1</span>
+      <span class="t-ins">U</span>     <span class="t-op">E 0.2</span>
+      <span class="t-ins">=</span>     <span class="t-op">A 4.0</span></code></pre>
+<details><summary>Solución</summary>
+<p><strong>A4.0 = 1</strong>. Se calcula E0.0 ∨ (E0.1 ∧ E0.2).</p>
+</details>
+        </article></section>
+<section><h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
+        <div class="preguntas faq">
+          <details><summary>¿Qué es el RLO en AWL?</summary><div class="faq-respuesta"><p>El resultado lógico de la operación: el bit de la palabra de estado donde se va acumulando el resultado de las instrucciones lógicas (<code>U</code>, <code>O</code>, <code>X</code>…). Las asignaciones <code>=</code>, <code>S</code> y <code>R</code> lo escriben en un operando.</p></div></details>
+          <details><summary>¿Para qué sirve el bit /ER (primera consulta)?</summary><div class="faq-respuesta"><p>Indica si la siguiente instrucción lógica empieza una cadena nueva. Con /ER = 0, la siguiente <code>U</code>, <code>O</code> o <code>X</code> copia el operando en el RLO en lugar de combinarlo con él.</p></div></details>
+          <details><summary>¿Por qué <code>U a / O b / U c</code> no calcula «a o (b y c)»?</summary><div class="faq-respuesta"><p>Porque AWL evalúa de forma secuencial: calcula (a ∨ b) ∧ c. Para obtener a ∨ (b ∧ c) hay que usar <code>O</code> sin operando o paréntesis.</p></div></details>
+          <details><summary>¿Cuántos paréntesis anidados admite AWL?</summary><div class="faq-respuesta"><p>Siete niveles. Si se superan, hay un error y la CPU pasa a STOP.</p></div></details>
+          <details><summary>¿Qué hace la instrucción SET en AWL?</summary><div class="faq-respuesta"><p>Pone el RLO a 1 y cierra la cadena lógica (/ER = 0). No pone a 1 ningún operando: para eso está <code>S</code>.</p></div></details>
+        </div></section>
+      </div>
+      <aside class="practica">
+      <div>
+        <h2>Practica con el simulador</h2>
+        <p>Todos los ejemplos de esta página vienen en Automatizacion, un simulador de PLC gratuito para Windows, macOS y Linux: ábrelos, cambia las entradas y mira cómo responde el programa ciclo a ciclo.</p>
+      </div>
+      <a class="btn btn-primario" href="../../../#descargar"><svg class="icono"><use href="#i-descarga" /></svg>Descargar el simulador</a>
+    </aside>
+      <nav class="paginacion" aria-label="Índice de la teoría">
+        <a class="pag-ant" href="../kop-contactos-y-bobinas/"><span>← Anterior</span><b>KOP: contactos y bobinas</b></a>
+        <a class="pag-sig" href="../enclavamiento-set-reset/"><span>Siguiente →</span><b>Enclavamiento, Set y Reset</b></a>
+      </nav>
+    </main>
+  </div>
+  <script type="application/json" id="vivo-textos">{"pruebalo":"Pruébalo","pista":"Haz clic en las entradas.","pistaMayus":"Con Mayús + clic, la entrada funciona como un pulsador mientras la mantienes.","reiniciar":"Reiniciar","valorNoValido":"Valor no válido"}</script>
+  <script type="module" src="../../../vivo.js"></script>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../../../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Simulador de PLC gratuito para aprender KOP y AWL. © 2026 Arzath · Licencia MIT · Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

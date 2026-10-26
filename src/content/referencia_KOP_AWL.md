@@ -158,20 +158,41 @@ Las marcas son la "memoria RAM de bits" del programador. Se usan como:
 
 **Marcas remanentes**: conservan su valor tras un corte de alimentación o un paso STOP→RUN. Se configuran en *Propiedades de la CPU → Remanencia*. En muchas CPU vienen por defecto **MB0..MB15**.
 
-**Marcas de ciclo**: en *Propiedades de la CPU → Ciclo/marca de ciclo* se elige un byte, por ejemplo MB100. Sus bits oscilan solos:
-
-| Bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-|---|---|---|---|---|---|---|---|---|
-| Periodo (s) | 2,0 | 1,6 | 1,0 | 0,8 | 0,5 | 0,4 | 0,2 | 0,1 |
-| Frecuencia (Hz) | 0,5 | 0,625 | 1 | 1,25 | 2 | 2,5 | 5 | 10 |
-
-Ejemplo: con MB100 como marca de ciclo, `M 100.5` parpadea a 1 Hz (0,5 s encendido y 0,5 s apagado).
+**Marca de ciclo**: un byte de marcas cuyos bits cambian solos, cada uno a una frecuencia fija. Sirve para hacer parpadear pilotos sin temporizadores (§2.6).
 
 ### 2.5 Datos locales (L) y bloques de datos (DB)
 
 - **L (temporales)**: existen solo mientras se ejecuta el bloque. **Al empezar el bloque su valor es indefinido**, así que hay que escribirlos antes de leerlos. En el OB1, los 20 primeros bytes (LB0..LB19) contienen la información de arranque del OB, por lo que las temporales del usuario empiezan en LB20.
 - **DB globales**: se accede con la dirección completa (`DB1.DBW 0`) o abriendo antes el DB (`AUF DB 1`) y usando después `DBW 0`, `DBX 2.0`, etc.
 - **DB de instancia (DI)**: es la memoria propia de cada llamada a un FB. Ahí se guardan sus parámetros y sus variables estáticas (STAT).
+
+### 2.6 Marca de ciclo
+
+La **marca de ciclo** es un byte de marcas que escribe la propia CPU: cada uno de sus 8 bits oscila a una frecuencia fija y pasa la mitad del periodo a 0 y la otra mitad a 1. Sirve para hacer parpadear pilotos y para repetir una acción a intervalos regulares sin programar temporizadores.
+
+**Cómo se activa**:
+- En la CPU real: *Propiedades de la CPU → Ciclo/marca de ciclo*. Se marca la casilla, se elige el byte (por ejemplo, MB100) y se carga la configuración del hardware.
+- En el simulador: botón **Hardware** → CPU → *Ciclo / marca de ciclo*. Por defecto usa MB0, pero se puede elegir cualquier byte.
+
+| Bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+|---|---|---|---|---|---|---|---|---|
+| Periodo (s) | 2,0 | 1,6 | 1,0 | 0,8 | 0,5 | 0,4 | 0,2 | 0,1 |
+| Frecuencia (Hz) | 0,5 | 0,625 | 1 | 1,25 | 2 | 2,5 | 5 | 10 |
+
+<!-- cronograma -->
+
+Con MB100 como marca de ciclo, `M 100.5` tiene un periodo de 1 s: 0,5 s a 0 y 0,5 s a 1. Es decir, parpadea a 1 Hz.
+
+**Usos típicos**:
+- **Piloto intermitente**: la marca de ciclo va en serie con la condición. `U E 0.0 / U M 100.5 / = A 4.0` hace parpadear A4.0 a 1 Hz mientras E0.0 = 1.
+- **Dos ritmos con el mismo piloto**: despacio con `M 100.7` (0,5 Hz) para un aviso y deprisa con `M 100.3` (2 Hz) para una alarma.
+- **Acción periódica**: `M 100.5` da un flanco positivo por segundo. Con un contador (`ZV`) se cuentan segundos, y con `FP` se ejecuta algo una vez por segundo.
+
+**Cuidado**:
+- **El programa solo debe leer ese byte.** La CPU lo sobrescribe en cada ciclo, así que lo que escriba el programa se pierde. El simulador avisa si el programa escribe en él.
+- El byte tiene que quedar libre: no lo uses para otra cosa, tampoco dentro de una palabra (`MW 99` y `MW 100` incluyen `MB 100`).
+- No sirve para medir tiempos con precisión: cuando se cumple la condición, el bit puede estar a mitad de su periodo, así que el primer parpadeo puede ser más corto. Para retardos exactos se usan los temporizadores (§6.6).
+- En el simulador, el byte se actualiza al empezar cada ciclo, antes de leer las entradas. Si se desactiva la marca de ciclo o se cambia de byte, el byte anterior se pone a 0.
 
 ---
 
@@ -361,9 +382,9 @@ En KOP una llamada es un **cuadro** con EN/ENO y los parámetros como patillas.
 
 | Símbolo KOP | Nombre | Función | AWL |
 |---|---|---|---|
-| `--| |--` | Contacto NA | Conduce si el operando = 1 | `U op` |
-| `--|/|--` | Contacto NC | Conduce si el operando = 0 | `UN op` |
-| `--|NOT|--` | Invertir | Invierte el flujo de corriente (RLO) | `NOT` |
+| `--\| \|--` | Contacto NA | Conduce si el operando = 1 | `U op` |
+| `--\|/\|--` | Contacto NC | Conduce si el operando = 0 | `UN op` |
+| `--\|NOT\|--` | Invertir | Invierte el flujo de corriente (RLO) | `NOT` |
 | `--( )` | Bobina | Operando := RLO | `= op` |
 | `--(#)--` | Conector | Guarda el RLO intermedio en un bit y sigue | `= op` (en medio) |
 | `--(S)` | Activar | Si RLO = 1 → operando := 1 | `S op` |
