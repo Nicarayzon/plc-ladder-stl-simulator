@@ -8,6 +8,7 @@ import { parseOperand } from '../core/operands';
 import { AnalyzerBuffer } from './analyzer';
 import { makeReader, readRaw, writeRaw, type Reader } from './readers';
 import { getSettings } from '../store/settings';
+import { T } from '../i18n';
 
 export type InputTipo = 'INT' | 'NA' | 'NC' | 'SENSOR';
 
@@ -209,7 +210,7 @@ export class SimController {
     if (run) {
       if (this.cpu.state === 'STOP') {
         if (this.hasErrors) {
-          this.message = 'El programa tiene errores: corrígelos antes de pasar a RUN';
+          this.message = T.motor.corrigeAntes;
           this.bump();
           return;
         }
@@ -234,7 +235,7 @@ export class SimController {
     this.analyzer.clear();
     this.trace = [];
     this.lastStop = null;
-    this.message = 'Borrado total (MRES): se ha borrado toda la memoria';
+    this.message = T.motor.mresHecho;
     this.bump();
   }
 
@@ -340,13 +341,13 @@ export class SimController {
         this.playing = false;
         this.autoPlay = false;
         this.cpu.tracing = false;
-        this.message = 'Punto de parada';
+        this.message = T.motor.puntoParada;
       }
       if (this.triggerHit) {
         this.triggerHit = false;
         this.playing = false;
         this.autoPlay = false;
-        this.message = 'Disparo del analizador';
+        this.message = T.motor.disparoAnalizador;
       }
     }
     this.limited = limited;
@@ -565,7 +566,7 @@ export class SimController {
 
   force(text: string, raw: number, display: string) {
     const r = makeReader(text, this.compiled.symbols);
-    if (r.kind !== 'bit' && r.kind !== 'mem') throw new Error('Solo se pueden forzar bits, bytes, palabras y dobles palabras');
+    if (r.kind !== 'bit' && r.kind !== 'mem') throw new Error(T.motor.soloForzar);
     this.forces.set(r.op.text, { text, reader: r, raw, display });
     this.syncForces();
     writeRaw(this.cpu, r, raw);

@@ -4,6 +4,7 @@ import type { Programa } from '../../core/program';
 import type { WbState } from './types';
 import { useSettings } from '../../store/settings';
 import { analyzeUsage, inputBits, outputBits } from '../../core/usage';
+import { displayOperand } from '../../core/translate';
 
 /** Crea un simulador para `key` y restaura entradas y señales guardadas. */
 export function useWorkbenchSim(key: string, programa: Programa, wb: WbState, opts: { inputs?: Map<string, InputTipo>; autoRun?: boolean; defaultSignals?: boolean } = {}) {
@@ -19,7 +20,8 @@ export function useWorkbenchSim(key: string, programa: Programa, wb: WbState, op
       const u = analyzeUsage(s.compiled.cp);
       const list = [...inputBits(u).slice(0, 4), ...outputBits(u).slice(0, 4)];
       for (const k of list) {
-        try { s.analyzer.add(k.replace(/^([EA])/, '$1 ')); } catch { /* */ }
+        // con la nemotecnia del programa: «E 124.0» o, con la inglesa, «I 124.0»
+        try { s.analyzer.add(displayOperand(k.replace(/^([EA])/, '$1 '), programa.nemotecnia)); } catch { /* */ }
       }
     }
     if (opts.autoRun !== false) {

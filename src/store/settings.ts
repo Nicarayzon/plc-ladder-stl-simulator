@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { idioma } from '../i18n';
 
 export type Theme = 'system' | 'dark' | 'light';
 
@@ -28,7 +29,8 @@ export const useSettings = create<Settings>()(
   persist(
     (set) => ({
       theme: 'system',
-      nemotecnia: 'de',
+      // sin ajustes guardados (instalación nueva): la nemotecnia del idioma de la app; quien ya tenía ajustes conserva la suya
+      nemotecnia: idioma === 'en' ? 'en' : 'de',
       cycleMs: 10,
       retentiveMBytes: 16,
       retentiveCounters: 8,

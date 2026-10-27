@@ -14,6 +14,9 @@ import { normAddr } from './symbols';
 import { formatoPorDefecto, formatoValido, lectorDe, normalizarOperando, textoValor, valorForzado } from './vatFormatos';
 import { operandosDe } from './vat';
 import type { VatFila } from './types';
+import { T } from '../../i18n';
+import { Rico } from '../common/Rico';
+import { displayOperand } from '../../core/translate';
 
 const MAC = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
 const MOD = MAC ? '⌘' : 'Ctrl+';
@@ -144,9 +147,9 @@ export function VatFlotante({ nombre, ses, z, onFrente, onAcoplar, onCerrar, chi
       <div className="vatf-head" onMouseDown={(e) => arrastrar(e, 'mover')} onDoubleClick={() => poner({ ...ses.flot, min: !ses.flot.min })}>
         <Icon name="table" size={14} />
         <span className="tit">Var - {nombre}</span>
-        {boton('Acoplar abajo, junto a las señales', 'down', onAcoplar)}
-        {boton(g.min ? 'Mostrar la tabla' : 'Minimizar', g.min ? 'up' : 'minus', () => poner({ ...ses.flot, min: !ses.flot.min }))}
-        {boton('Cerrar la tabla de variables', 'x', onCerrar)}
+        {boton(T.vatv.acoplar, 'down', onAcoplar)}
+        {boton(g.min ? T.vatv.mostrarTabla : T.vatv.minimizar, g.min ? 'up' : 'minus', () => poner({ ...ses.flot, min: !ses.flot.min }))}
+        {boton(T.vatv.cerrarTabla, 'x', onCerrar)}
       </div>
       {!g.min && <div className="vatf-body">{children}</div>}
       {!g.min && <div className="vatf-tam" onMouseDown={(e) => arrastrar(e, 'tamano')} aria-hidden />}
@@ -250,10 +253,14 @@ interface VatProps {
   onCerrar: () => void;
   /** Pasar a la ventana flotante (desde abajo) */
   onFlotante?: () => void;
+  /** Nemotecnia del programa: con la inglesa, los operandos se enseñan como I, Q, C (se guardan como E, A, Z) */
+  lang?: 'de' | 'en';
 }
 
 /** La tabla: completa en la ventana flotante (menús, barras, área gris con la subventana y barra de estado) o compacta abajo (una barra y la tabla) */
-export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, symbols, symByAddr, onCerrar, onFlotante }: VatProps) {
+export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, symbols, symByAddr, onCerrar, onFlotante, lang = 'de' }: VatProps) {
+  /** El operando de una fila tal como se enseña y se edita */
+  const verOp = (t: string) => (t ? displayOperand(t, lang) : t);
   const aviso = useCallback((m: string) => toast(m), []);
   const [, repintar] = useReducer((x: number) => x + 1, 0);
   /** El estado que dura con la tabla abierta vive en la sesión: se cambia y se vuelve a pintar */
@@ -370,13 +377,13 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     setEdit(null);
   };
   const lentes = () => {
-    if (!online) { aviso('No hay enlace con la CPU'); return; }
+    if (!online) { aviso(T.vatv.sinEnlace); return; }
     if (tablaVisible && observando) { setObservando(false); return; }
     if (modo === 'flotante') abrirSub();
     if (disparo.cond === 'una' && disparo.punto !== 'stop') {
       tomarValores();
       repintar();
-      setEstadoTexto('Valores leídos una vez (disparo: una vez)');
+      setEstadoTexto(T.vatv.leidosUnaVez);
       return;
     }
     setObservando(true);
@@ -389,14 +396,14 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   const forzar = () => {
     if (!online || !tablaVisible) return;
     if (forzando) { quitarForzado(); setForzando(false); return; }
-    if (!escribirForzado(true)) { aviso('No hay valores de forzado válidos'); return; }
+    if (!escribirForzado(true)) { aviso(T.vatv.sinForzadoValido); return; }
     setForzando(true);
   };
   const activarForzado = () => {
     if (!online || !tablaVisible) return;
     const n = escribirForzado(false);
-    if (!n) aviso('No hay valores de forzado válidos');
-    else setEstadoTexto(`${n} ${n === 1 ? 'valor escrito' : 'valores escritos'} una vez`);
+    if (!n) aviso(T.vatv.sinForzadoValido);
+    else setEstadoTexto(T.vatv.escritosUnaVez(n));
   };
   const enlazar = (si: boolean) => {
     setOnline(si);
@@ -434,7 +441,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     const t = texto.trim();
     const fila = filas[f] ?? filaVacia();
     if (c === 'op') {
-      if (t === fila.text) return;
+      if (t === fila.text || t === verOp(fila.text)) return;
       if (!t) { if (f < filas.length) conFila(f, (x) => ({ ...x, text: '' })); return; }
       try {
         const { texto: norm, reader } = normalizarOperando(t, symbols);
@@ -446,7 +453,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
       const nombreSim = t.replace(/^"+|"+$/g, '');
       if (!nombreSim) return;
       const dir = symbols.get(nombreSim);
-      if (dir === undefined) { aviso(`Símbolo no definido: «${nombreSim}»`); return; }
+      if (dir === undefined) { aviso(T.vatv.simboloNoDefinido(nombreSim)); return; }
       try {
         const { texto: norm, reader } = normalizarOperando(dir, symbols);
         conFila(f, (x) => ({ ...x, text: norm, fmt: formatoPorDefecto(reader) }));
@@ -468,7 +475,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   const empezarEdicion = (f: number, c: Col, texto?: string) => {
     if (c !== 'op' && c !== 'sim' && c !== 'forz') return;
     const fila = filas[f];
-    const actual = c === 'op' ? fila?.text ?? '' : c === 'forz' ? fila?.forzado ?? '' : '';
+    const actual = c === 'op' ? verOp(fila?.text ?? '') : c === 'forz' ? fila?.forzado ?? '' : '';
     setSel({ f, c });
     setEdit({ f, c, texto: texto ?? actual });
   };
@@ -478,7 +485,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     return FORMATOS.map((fmt) => ({ label: fmt, checked: filas[f].fmt === fmt, disabled: !formatoValido(r, fmt), onClick: () => ponerFormato(f, fmt) }));
   };
   const abrirFormatos = (f: number, el: HTMLElement) => {
-    if (!lectorEn(f)) { aviso('Escribe antes un operando válido'); return; }
+    if (!lectorEn(f)) { aviso(T.vatv.escribeOperando); return; }
     const r = el.getBoundingClientRect();
     setMenu({ x: r.left, y: r.bottom + 2, encima: r.top, items: opcionesFormato(f) });
   };
@@ -578,7 +585,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
         e.preventDefault();
         e.stopPropagation();
         const el = (e.target as HTMLElement | null)?.closest<HTMLElement>('[title], [aria-label]');
-        setEstadoTexto(el?.title || el?.getAttribute('aria-label') || 'Sin ayuda para este elemento');
+        setEstadoTexto(el?.title || el?.getAttribute('aria-label') || T.vatv.sinAyuda);
       }
       setAyudaCtx(false);
     };
@@ -621,7 +628,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     try {
       const d = JSON.parse(txt) as { filas?: unknown } | unknown[];
       const lista = (Array.isArray(d) ? d : (d as { filas?: unknown }).filas) as unknown;
-      if (!Array.isArray(lista)) throw new Error('El fichero no tiene filas');
+      if (!Array.isArray(lista)) throw new Error(T.vatv.sinFilas);
       const nuevas: VatFila[] = lista.map((x) => {
         const o = x as Partial<VatFila>;
         return { text: String(o.text ?? ''), fmt: FORMATOS.includes(o.fmt as Formato) ? (o.fmt as Formato) : 'HEX', ...(o.forzado ? { forzado: String(o.forzado) } : {}) };
@@ -629,7 +636,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
       cambiar(nuevas);
       abrirSub();
     } catch (e) {
-      aviso(`No se ha podido abrir: ${(e as Error).message}`);
+      aviso(T.vatv.noSeAbre((e as Error).message));
     }
   };
 
@@ -645,7 +652,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   };
 
   const nueva = () => {
-    if (!window.confirm(`¿Vaciar la tabla ${nombre}?`)) return;
+    if (!window.confirm(T.vatv.vaciar(nombre))) return;
     cambiar([]);
     abrirSub();
   };
@@ -655,61 +662,61 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   const conSel = sel !== null;
   const subAbierta = !!sub;
   const menus: { t: string; items: () => MenuItem[] }[] = [
-    { t: 'Tabla', items: () => [
-      { label: 'Nueva', onClick: nueva },
-      { label: 'Abrir…', onClick: () => void abrirFichero() },
-      { label: 'Cerrar', disabled: !subAbierta, onClick: cerrarSub },
+    { t: T.vatv.menus.tabla, items: () => [
+      { label: T.vatv.nueva, onClick: nueva },
+      { label: T.vatv.abrirPuntos, onClick: () => void abrirFichero() },
+      { label: T.vatv.cerrar, disabled: !subAbierta, onClick: cerrarSub },
       { sep: true, label: '' },
-      { label: 'Guardar', onClick: guardar },
-      { label: 'Guardar como…', onClick: guardar },
+      { label: T.vatv.guardar, onClick: guardar },
+      { label: T.vatv.guardarComo, onClick: guardar },
       { sep: true, label: '' },
-      { label: 'Imprimir…', onClick: imprimir },
+      { label: T.vatv.imprimirPuntos, onClick: imprimir },
       { sep: true, label: '' },
-      { label: 'Salir', onClick: onCerrar },
+      { label: T.vatv.salir, onClick: onCerrar },
     ] },
-    { t: 'Edición', items: () => [
-      { label: 'Deshacer', hint: `${MOD}Z`, disabled: !ses.hist.antes.length, onClick: deshacer },
-      { label: 'Rehacer', hint: MAC ? '⇧⌘Z' : 'Ctrl+Y', disabled: !ses.hist.despues.length, onClick: rehacer },
+    { t: T.vatv.menus.edicion, items: () => [
+      { label: T.vatv.deshacer, hint: `${MOD}Z`, disabled: !ses.hist.antes.length, onClick: deshacer },
+      { label: T.vatv.rehacer, hint: MAC ? '⇧⌘Z' : 'Ctrl+Y', disabled: !ses.hist.despues.length, onClick: rehacer },
       { sep: true, label: '' },
-      { label: 'Cortar', hint: `${MOD}X`, disabled: !conSel, onClick: () => selF !== undefined && cortar(selF) },
-      { label: 'Copiar', hint: `${MOD}C`, disabled: !conSel, onClick: () => selF !== undefined && copiar(selF) },
-      { label: 'Pegar', hint: `${MOD}V`, disabled: !conSel || !portapapeles, onClick: () => selF !== undefined && pegar(selF) },
-      { label: 'Borrar', hint: 'Supr', disabled: !conSel, onClick: () => selF !== undefined && borrar(selF) },
+      { label: T.vatv.cortar, hint: `${MOD}X`, disabled: !conSel, onClick: () => selF !== undefined && cortar(selF) },
+      { label: T.vatv.copiar, hint: `${MOD}C`, disabled: !conSel, onClick: () => selF !== undefined && copiar(selF) },
+      { label: T.vatv.pegar, hint: `${MOD}V`, disabled: !conSel || !portapapeles, onClick: () => selF !== undefined && pegar(selF) },
+      { label: T.vatv.borrar, hint: T.vatv.supr, disabled: !conSel, onClick: () => selF !== undefined && borrar(selF) },
       { sep: true, label: '' },
-      { label: 'Seleccionar todo', disabled: true },
+      { label: T.vatv.seleccionarTodo, disabled: true },
     ] },
-    { t: 'Insertar', items: () => [{ label: 'Fila', disabled: !tablaVisible, onClick: () => insertarFila(selF ?? filas.length) }] },
-    { t: 'Sistema de destino', items: () => [
-      { label: 'Establecer enlace con', items: [{ label: 'CPU configurada', checked: online, onClick: () => enlazar(true) }] },
-      { label: 'Deshacer enlace', disabled: !online, onClick: () => enlazar(false) },
+    { t: T.vatv.menus.insertar, items: () => [{ label: T.vatv.fila, disabled: !tablaVisible, onClick: () => insertarFila(selF ?? filas.length) }] },
+    { t: T.vatv.menus.sistema, items: () => [
+      { label: T.vatv.enlaceCon, items: [{ label: T.vatv.cpuConfigurada, checked: online, onClick: () => enlazar(true) }] },
+      { label: T.vatv.deshacerEnlace, disabled: !online, onClick: () => enlazar(false) },
       { sep: true, label: '' },
-      { label: 'Estado operativo…', onClick: () => setDialogo('estado') },
+      { label: T.vatv.estadoOperativoPuntos, onClick: () => setDialogo('estado') },
     ] },
-    { t: 'Variable', items: () => [
-      { label: 'Observar', hint: 'Ctrl+F7', checked: observando, disabled: !online, onClick: lentes },
-      { label: 'Forzar', hint: 'Ctrl+F9', checked: forzando, disabled: !online || !subAbierta, onClick: forzar },
+    { t: T.vatv.menus.variable, items: () => [
+      { label: T.vatv.observar, hint: 'Ctrl+F7', checked: observando, disabled: !online, onClick: lentes },
+      { label: T.vatv.forzar, hint: 'Ctrl+F9', checked: forzando, disabled: !online || !subAbierta, onClick: forzar },
       { sep: true, label: '' },
-      { label: 'Actualizar valores de estado', disabled: !online || !subAbierta, onClick: actualizar },
-      { label: 'Activar valores de forzado', disabled: !online || !subAbierta, onClick: activarForzado },
+      { label: T.vatv.actualizarEstado, disabled: !online || !subAbierta, onClick: actualizar },
+      { label: T.vatv.activarForzado, disabled: !online || !subAbierta, onClick: activarForzado },
       { sep: true, label: '' },
-      { label: 'Disparo…', onClick: () => setDialogo('disparo') },
+      { label: T.vatv.disparoPuntos, onClick: () => setDialogo('disparo') },
     ] },
-    { t: 'Ver', items: () => [
-      { label: 'Barra de herramientas', checked: barras, onClick: () => setBarras(!barras) },
-      { label: 'Barra de estado', checked: barraEstado, onClick: () => setBarraEstado(!barraEstado) },
+    { t: T.vatv.menus.ver, items: () => [
+      { label: T.vatv.barraHerramientas, checked: barras, onClick: () => setBarras(!barras) },
+      { label: T.vatv.barraEstado, checked: barraEstado, onClick: () => setBarraEstado(!barraEstado) },
       { sep: true, label: '' },
-      { label: 'Formato de visualización', disabled: selF === undefined || !lectorEn(selF), items: selF !== undefined ? opcionesFormato(selF) : [] },
+      { label: T.vatv.formatoVis, disabled: selF === undefined || !lectorEn(selF), items: selF !== undefined ? opcionesFormato(selF) : [] },
     ] },
-    { t: 'Herramientas', items: () => [{ label: 'Ajustes…', disabled: true }] },
-    { t: 'Ventana', items: () => [
-      { label: 'Cascada', disabled: !subAbierta, onClick: cascada },
-      { label: 'Mosaico', disabled: !subAbierta, onClick: mosaico },
+    { t: T.vatv.menus.herramientas, items: () => [{ label: T.vatv.ajustesPuntos, disabled: true }] },
+    { t: T.vatv.menus.ventana, items: () => [
+      { label: T.vatv.cascada, disabled: !subAbierta, onClick: cascada },
+      { label: T.vatv.mosaico, disabled: !subAbierta, onClick: mosaico },
       { sep: true, label: '' },
       { label: `1 ${nombre}`, checked: subAbierta, onClick: () => { abrirSub(); setSub((s) => (s && s.modo === 'min' ? { ...s, modo: 'normal' } : s)); } },
     ] },
-    { t: 'Ayuda', items: () => [
-      { label: 'Temas de ayuda', onClick: () => setDialogo('ayuda') },
-      { label: 'Acerca de…', onClick: () => setDialogo('acerca') },
+    { t: T.vatv.menus.ayuda, items: () => [
+      { label: T.vatv.temasAyuda, onClick: () => setDialogo('ayuda') },
+      { label: T.vatv.acercaDePuntos, onClick: () => setDialogo('acerca') },
     ] },
   ];
   const cerrarMenuBarra = useCallback(() => setMenuBarra(null), []);
@@ -721,13 +728,13 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   const menuFila = (f: number, x: number, y: number) => {
     setSel({ f, c: sel?.c ?? 'op' });
     setMenu({ x, y, items: [
-      { label: 'Cortar', hint: `${MOD}X`, disabled: f >= filas.length, onClick: () => cortar(f) },
-      { label: 'Copiar', hint: `${MOD}C`, disabled: f >= filas.length, onClick: () => copiar(f) },
-      { label: 'Pegar', hint: `${MOD}V`, disabled: !portapapeles, onClick: () => pegar(f) },
-      { label: 'Borrar', hint: 'Supr', disabled: f >= filas.length, onClick: () => borrar(f) },
-      { label: 'Insertar fila', onClick: () => insertarFila(f) },
+      { label: T.vatv.cortar, hint: `${MOD}X`, disabled: f >= filas.length, onClick: () => cortar(f) },
+      { label: T.vatv.copiar, hint: `${MOD}C`, disabled: f >= filas.length, onClick: () => copiar(f) },
+      { label: T.vatv.pegar, hint: `${MOD}V`, disabled: !portapapeles, onClick: () => pegar(f) },
+      { label: T.vatv.borrar, hint: T.vatv.supr, disabled: f >= filas.length, onClick: () => borrar(f) },
+      { label: T.vatv.insertarFila, onClick: () => insertarFila(f) },
       { sep: true, label: '' },
-      { label: 'Formato de visualización', disabled: !lectorEn(f), items: opcionesFormato(f) },
+      { label: T.vatv.formatoVis, disabled: !lectorEn(f), items: opcionesFormato(f) },
     ] });
   };
 
@@ -739,38 +746,38 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
 
   const botones1 = (
     <>
-          <B icono="enchufe" titulo="Conexión (sin función en esta versión)" />
+          <B icono="enchufe" titulo={T.vatv.b.conexion} />
           <span className="sep" />
-          <B icono="nuevo" titulo="Nueva (vacía la tabla)" onClick={nueva} />
-          <B icono="abrir" titulo="Abrir" onClick={() => void abrirFichero()} />
-          <B icono="save" titulo="Guardar (descarga la tabla en .json; con el proyecto ya se guarda sola)" onClick={guardar} />
+          <B icono="nuevo" titulo={T.vatv.b.nueva} onClick={nueva} />
+          <B icono="abrir" titulo={T.vatv.b.abrir} onClick={() => void abrirFichero()} />
+          <B icono="save" titulo={T.vatv.b.guardar} onClick={guardar} />
           <span className="sep" />
-          <B icono="imprimir" titulo="Imprimir" onClick={imprimir} />
+          <B icono="imprimir" titulo={T.vatv.b.imprimir} onClick={imprimir} />
           <span className="sep" />
-          <B icono="cortar" titulo="Cortar" onClick={conSel ? () => cortar(selF!) : undefined} />
-          <B icono="copy" titulo="Copiar" onClick={conSel ? () => copiar(selF!) : undefined} />
-          <B icono="pegar" titulo="Pegar" onClick={conSel && portapapeles ? () => pegar(selF!) : undefined} />
-          <B icono="deshacer" titulo="Deshacer" onClick={ses.hist.antes.length ? deshacer : undefined} />
-          <B icono="rehacer" titulo="Rehacer" onClick={ses.hist.despues.length ? rehacer : undefined} />
+          <B icono="cortar" titulo={T.vatv.cortar} onClick={conSel ? () => cortar(selF!) : undefined} />
+          <B icono="copy" titulo={T.vatv.copiar} onClick={conSel ? () => copiar(selF!) : undefined} />
+          <B icono="pegar" titulo={T.vatv.pegar} onClick={conSel && portapapeles ? () => pegar(selF!) : undefined} />
+          <B icono="deshacer" titulo={T.vatv.deshacer} onClick={ses.hist.antes.length ? deshacer : undefined} />
+          <B icono="rehacer" titulo={T.vatv.rehacer} onClick={ses.hist.despues.length ? rehacer : undefined} />
           <span className="sep" />
-          <B icono="x" titulo="Borrar (vacía la fila seleccionada)" onClick={conSel ? () => borrar(selF!) : undefined} />
+          <B icono="x" titulo={T.vatv.b.borrar} onClick={conSel ? () => borrar(selF!) : undefined} />
           <span className="sep" />
-          <B icono="enlace" titulo="Establecer enlace con la CPU configurada" activo={online} onClick={() => enlazar(true)} />
-          <B icono="desenlace" titulo="Deshacer enlace" onClick={online ? () => enlazar(false) : undefined} />
+          <B icono="enlace" titulo={T.vatv.b.enlazar} activo={online} onClick={() => enlazar(true)} />
+          <B icono="desenlace" titulo={T.vatv.deshacerEnlace} onClick={online ? () => enlazar(false) : undefined} />
           <span className="sep" />
-          <B icono="ayudaCtx" titulo="Ayuda contextual: el siguiente clic explica un elemento" activo={ayudaCtx} onClick={() => setAyudaCtx(!ayudaCtx)} />
+          <B icono="ayudaCtx" titulo={T.vatv.b.ayudaCtx} activo={ayudaCtx} onClick={() => setAyudaCtx(!ayudaCtx)} />
     </>
   );
   const botones2 = (
     <>
-          <B icono="disparo" titulo="Disparo…" onClick={() => setDialogo('disparo')} />
-          <B icono="gafas" titulo="Observar variable" activo={observando} apagado={!online} onClick={lentes} />
-          <B icono="rayo" titulo="Forzar variable (mientras está pulsado, los valores de forzado se aplican en cada ciclo)" activo={forzando} onClick={sinEnlaceOSub ? undefined : forzar} />
+          <B icono="disparo" titulo={T.vatv.disparoPuntos} onClick={() => setDialogo('disparo')} />
+          <B icono="gafas" titulo={T.vatv.b.observar} activo={observando} apagado={!online} onClick={lentes} />
+          <B icono="rayo" titulo={T.vatv.b.forzar} activo={forzando} onClick={sinEnlaceOSub ? undefined : forzar} />
           <span className="sep" />
-          <B icono="gafas1" titulo="Actualizar valores de estado (una lectura)" onClick={sinEnlaceOSub ? undefined : actualizar} />
-          <B icono="rayo1" titulo="Activar valores de forzado (una escritura)" onClick={sinEnlaceOSub ? undefined : activarForzado} />
+          <B icono="gafas1" titulo={T.vatv.b.actualizar} onClick={sinEnlaceOSub ? undefined : actualizar} />
+          <B icono="rayo1" titulo={T.vatv.b.activar} onClick={sinEnlaceOSub ? undefined : activarForzado} />
           <span className="sep" />
-          <B icono="forzado" titulo="Forzado permanente (no disponible en esta versión)" />
+          <B icono="forzado" titulo={T.vatv.b.permanente} />
     </>
   );
 
@@ -801,8 +808,8 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
         <thead>
           <tr>
             <th />
-            <th title="Forzado activo en la fila"><Icon name="flag" size={12} /></th>
-            <th>Operando</th><th>Símbolo</th><th>Formato de visualización</th><th>Valor de estado</th><th>Valor de forzado</th>
+            <th title={T.vatv.forzadoActivo}><Icon name="flag" size={12} /></th>
+            <th>{T.vatv.col.operando}</th><th>{T.vatv.col.simbolo}</th><th>{T.vatv.col.formato}</th><th>{T.vatv.col.estado}</th><th>{T.vatv.col.forzado}</th>
           </tr>
         </thead>
         <tbody>
@@ -817,21 +824,21 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
             let forzErr = false;
             if (ok && fila?.forzado?.trim()) { try { valorForzado(fila.forzado, ok, fila.fmt); } catch { forzErr = true; } }
             const editor = (c: Col) => edit?.f === f && edit.c === c && (
-              <input autoFocus value={edit.texto} aria-label="Editar celda" spellCheck={false} list={c === 'op' && sugerencias.length ? listaId : undefined}
+              <input autoFocus value={edit.texto} aria-label={T.vatv.editarCelda} spellCheck={false} list={c === 'op' && sugerencias.length ? listaId : undefined}
                 onChange={(e) => setEdit({ ...edit, texto: e.target.value })} onKeyDown={teclaEdicion}
                 onBlur={() => { const v = editVivo.current; if (v) { editVivo.current = null; confirmar(v.f, v.c, v.texto); setEdit(null); } }} />
             );
             return (
               <tr key={f} onContextMenu={(e) => { e.preventDefault(); menuFila(f, e.clientX, e.clientY); }}>
                 <td className="n">{f + 1}</td>
-                <td className="ind">{forzada && <span className="vatw-f" title="Forzado">F</span>}</td>
+                <td className="ind">{forzada && <span className="vatw-f" title={T.vatv.forzado}>F</span>}</td>
                 <td {...celda(f, 'op')} title={err?.message}>
-                  <span className={err ? 'err-text' : undefined}>{fila?.text}</span>{editor('op')}
+                  <span className={err ? 'err-text' : undefined}>{verOp(fila?.text ?? '')}</span>{editor('op')}
                 </td>
                 <td {...celda(f, 'sim')}>{sym}{editor('sim')}</td>
                 <td {...celda(f, 'fmt')}>{fila?.text.trim() ? fila.fmt : ''}{sel?.f === f && sel.c === 'fmt' && ok && <Icon name="down" size={11} className="vatw-fmt-ab" />}</td>
                 <td {...celda(f, 'val')}>{ok && raw !== undefined ? textoValor(raw, ok, fila.fmt) : ''}</td>
-                <td {...celda(f, 'forz')} title={forzErr ? 'No encaja con el formato de la fila: no se envía' : undefined}>
+                <td {...celda(f, 'forz')} title={forzErr ? T.vatv.noEncaja : undefined}>
                   <span className={forzErr ? 'err-text' : undefined}>{fila?.forzado}</span>{editor('forz')}
                 </td>
               </tr>
@@ -853,14 +860,14 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     {dialogo === 'disparo' && <DialogoDisparo valor={disparo} onCambiar={setDisparo} onCerrar={() => setDialogo(null)} />}
     {dialogo === 'estado' && <DialogoEstado sim={sim} onCerrar={() => setDialogo(null)} />}
     {dialogo === 'ayuda' && (
-      <Modal title="Tabla de variables" onClose={() => setDialogo(null)} width={520}>
+      <Modal title={T.vatv.tablaDeVariables} onClose={() => setDialogo(null)} width={520}>
         <Ayuda />
       </Modal>
     )}
     {dialogo === 'acerca' && (
-      <Modal title="Acerca de" onClose={() => setDialogo(null)} width={380}>
-        <p style={{ margin: 0 }}>Tabla de variables de <b>Automatizacion</b> v{APP_VERSION}.</p>
-        <p className="faint" style={{ marginBottom: 0 }}>© 2026 Arzath — Práctica de autómatas en KOP y AWL.</p>
+      <Modal title={T.vatv.acercaDe} onClose={() => setDialogo(null)} width={380}>
+        <p style={{ margin: 0 }}><Rico t={T.vatv.acercaTexto(APP_VERSION)} /></p>
+        <p className="faint" style={{ marginBottom: 0 }}>{T.vatv.copyright}</p>
       </Modal>
     )}
     </>
@@ -871,15 +878,15 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   if (modo === 'abajo') {
     return (
       <div ref={raiz} className={`vatw abajo${ayudaCtx ? ' ayuda' : ''}`} onKeyDown={teclaRaiz}>
-        <div className="vatw-tools" role="toolbar" aria-label="Tabla de variables">
+        <div className="vatw-tools" role="toolbar" aria-label={T.vatv.tablaDeVariables}>
           {botones1}
           <span className="sep" />
           {botones2}
-          <span className="vatw-status-txt grow faint">{estadoTexto ?? (online ? '' : 'Sin enlace con la CPU')}</span>
+          <span className="vatw-status-txt grow faint">{estadoTexto ?? (online ? '' : T.vatv.sinEnlaceCpu)}</span>
           <span className="vatw-status">{cpu}</span>
           <span className="sep" />
-          <button type="button" className="btn small ghost icon" title="Abrir como ventana (flotante, encima de la app)" aria-label="Abrir como ventana" onClick={onFlotante}><Icon name="popout" size={14} /></button>
-          <button type="button" className="btn small ghost icon" title="Cerrar la tabla de variables" aria-label="Cerrar la tabla de variables" onClick={onCerrar}><Icon name="x" size={14} /></button>
+          <button type="button" className="btn small ghost icon" title={T.vatv.abrirVentanaTitulo} aria-label={T.vatv.abrirVentana} onClick={onFlotante}><Icon name="popout" size={14} /></button>
+          <button type="button" className="btn small ghost icon" title={T.vatv.cerrarTabla} aria-label={T.vatv.cerrarTabla} onClick={onCerrar}><Icon name="x" size={14} /></button>
         </div>
         {tabla('vatw-abajo-body')}
         {menu && <ContextMenu x={menu.x} y={menu.y} encima={menu.encima} items={menu.items} onClose={cerrarMenu} />}
@@ -904,8 +911,8 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
 
       {barras && (
         <>
-          <div className="vatw-tools" role="toolbar" aria-label="Tabla y edición">{botones1}</div>
-          <div className="vatw-tools" role="toolbar" aria-label="Observar y forzar">{botones2}</div>
+          <div className="vatw-tools" role="toolbar" aria-label={T.vatv.tablaEdicion}>{botones1}</div>
+          <div className="vatw-tools" role="toolbar" aria-label={T.vatv.observarForzar}>{botones2}</div>
         </>
       )}
 
@@ -913,7 +920,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
         {!sub && (
           <div className="vatw-mdi-vacia">
             <Icon name="gafas" size={26} stroke={1.4} />
-            {online ? <>Pulsa las lentes (<b>Observar variable</b>, Ctrl+F7) para abrir {nombre}</> : <>Sin enlace con la CPU: pulsa <b>Establecer enlace</b> para observar</>}
+            <span><Rico t={online ? T.vatv.vaciaOnline(nombre) : T.vatv.vaciaOffline} /></span>
           </div>
         )}
         {sub && (
@@ -921,11 +928,11 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
             <div className="vatw-sub-head" onMouseDown={(e) => arrastrar(e, 'mover')} onDoubleClick={() => modoSub('max')}>
               <Icon name="table" size={14} />
               <span className="tit">{titulo}</span>
-              <button type="button" className="btn small ghost icon" title="Minimizar" aria-label="Minimizar" onMouseDown={(e) => e.stopPropagation()} onClick={() => modoSub('min')}><Icon name="minus" size={13} /></button>
-              <button type="button" className="btn small ghost icon" title={sub.modo === 'max' ? 'Restaurar' : 'Maximizar'} aria-label={sub.modo === 'max' ? 'Restaurar' : 'Maximizar'} onMouseDown={(e) => e.stopPropagation()} onClick={() => modoSub('max')}>
+              <button type="button" className="btn small ghost icon" title={T.vatv.minimizar} aria-label={T.vatv.minimizar} onMouseDown={(e) => e.stopPropagation()} onClick={() => modoSub('min')}><Icon name="minus" size={13} /></button>
+              <button type="button" className="btn small ghost icon" title={sub.modo === 'max' ? T.vatv.restaurar : T.vatv.maximizar} aria-label={sub.modo === 'max' ? T.vatv.restaurar : T.vatv.maximizar} onMouseDown={(e) => e.stopPropagation()} onClick={() => modoSub('max')}>
                 <Icon name={sub.modo === 'max' ? 'copy' : 'stop'} size={12} stroke={1.6} />
               </button>
-              <button type="button" className="btn small ghost icon" title="Cerrar" aria-label="Cerrar la tabla" onMouseDown={(e) => e.stopPropagation()} onClick={cerrarSub}><Icon name="x" size={13} /></button>
+              <button type="button" className="btn small ghost icon" title={T.vatv.cerrar} aria-label={T.vatv.cerrarLaTabla} onMouseDown={(e) => e.stopPropagation()} onClick={cerrarSub}><Icon name="x" size={13} /></button>
             </div>
             {sub.modo !== 'min' && tabla('vatw-sub-body')}
             {sub.modo === 'normal' && <div className="vatw-sub-tam" onMouseDown={(e) => arrastrar(e, 'tamano')} aria-hidden />}
@@ -938,7 +945,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
         <div className="vatw-status">
           <span className="grow vatw-status-txt" title={estadoTexto ?? proyecto}>{estadoTexto ?? proyecto}</span>
           <span className="panel" style={{ width: 90 }} />
-          <span className="panel" style={{ width: 44 }} title={online ? 'Con enlace con la CPU' : 'Sin enlace'}><Icon name={online ? 'enlace' : 'desenlace'} size={13} /></span>
+          <span className="panel" style={{ width: 44 }} title={online ? T.vatv.conEnlace : T.vatv.sinEnlaceCorto}><Icon name={online ? 'enlace' : 'desenlace'} size={13} /></span>
           {cpu}
         </div>
       )}
@@ -965,19 +972,19 @@ function DialogoDisparo({ valor, onCambiar, onCerrar }: { valor: Disparo; onCamb
     <label className="check" key={String(txt)}><input type="radio" name={grupo} checked={sel} onChange={on} />{txt}</label>
   );
   return (
-    <Modal title="Disparo" onClose={onCerrar} width={420}
-      footer={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn primary" onClick={() => { onCambiar(d); onCerrar(); }}>Aceptar</button></>}>
+    <Modal title={T.vatv.disparo} onClose={onCerrar} width={420}
+      footer={<><button className="btn" onClick={onCerrar}>{T.comun.cancelar}</button><button className="btn primary" onClick={() => { onCambiar(d); onCerrar(); }}>{T.comun.aceptar}</button></>}>
       <div className="col" style={{ gap: 14 }}>
         <div className="col" style={{ gap: 6 }}>
-          <b>Punto de disparo de la observación</b>
-          {opcion('punto', d.punto === 'inicio', 'Inicio del ciclo', () => setD({ ...d, punto: 'inicio' }))}
-          {opcion('punto', d.punto === 'fin', 'Fin del ciclo', () => setD({ ...d, punto: 'fin' }))}
-          {opcion('punto', d.punto === 'stop', 'Transición de RUN a STOP', () => setD({ ...d, punto: 'stop' }))}
+          <b>{T.vatv.puntoDisparo}</b>
+          {opcion('punto', d.punto === 'inicio', T.vatv.inicioCiclo, () => setD({ ...d, punto: 'inicio' }))}
+          {opcion('punto', d.punto === 'fin', T.vatv.finCiclo, () => setD({ ...d, punto: 'fin' }))}
+          {opcion('punto', d.punto === 'stop', T.vatv.runAStop, () => setD({ ...d, punto: 'stop' }))}
         </div>
         <div className="col" style={{ gap: 6 }}>
-          <b>Condición de disparo</b>
-          {opcion('cond', d.cond === 'una', 'Una vez', () => setD({ ...d, cond: 'una' }))}
-          {opcion('cond', d.cond === 'perm', 'Permanente', () => setD({ ...d, cond: 'perm' }))}
+          <b>{T.vatv.condicion}</b>
+          {opcion('cond', d.cond === 'una', T.vatv.unaVez, () => setD({ ...d, cond: 'una' }))}
+          {opcion('cond', d.cond === 'perm', T.vatv.permanente, () => setD({ ...d, cond: 'perm' }))}
         </div>
       </div>
     </Modal>
@@ -988,14 +995,14 @@ function DialogoEstado({ sim, onCerrar }: { sim: SimController; onCerrar: () => 
   useSimTick(sim, 5, () => [sim.rev, sim.cpu.state]);
   const run = sim.cpu.state === 'RUN';
   return (
-    <Modal title="Estado operativo" onClose={onCerrar} width={360}
-      footer={<button className="btn" onClick={onCerrar}>Cerrar</button>}>
+    <Modal title={T.vatv.estadoOperativo} onClose={onCerrar} width={360}
+      footer={<button className="btn" onClick={onCerrar}>{T.comun.cerrar}</button>}>
       <div className="row" style={{ gap: 12 }}>
-        <span>Estado actual de la CPU:</span>
+        <span>{T.vatv.estadoActual}</span>
         <b className={run ? 'ok-text' : 'warn-text'}>{sim.cpu.state}</b>
         <span className="spacer" />
-        <button className="btn small" disabled={run} onClick={() => sim.setRun(true)}>Arrancar</button>
-        <button className="btn small" disabled={!run} onClick={() => sim.setRun(false)}>Parar</button>
+        <button className="btn small" disabled={run} onClick={() => sim.setRun(true)}>{T.vatv.arrancar}</button>
+        <button className="btn small" disabled={!run} onClick={() => sim.setRun(false)}>{T.vatv.parar}</button>
       </div>
     </Modal>
   );
@@ -1004,11 +1011,8 @@ function DialogoEstado({ sim, onCerrar }: { sim: SimController; onCerrar: () => 
 function Ayuda() {
   return (
     <div className="col" style={{ gap: 8, fontSize: 13 }}>
-      <p style={{ margin: 0 }}>Pulsa las <b>lentes</b> (Observar variable, Ctrl+F7) para abrir la tabla y leer los valores de la CPU cada medio segundo. Otro clic pausa la lectura.</p>
-      <p style={{ margin: 0 }}>Escribe el operando en la columna <b>Operando</b> (<code>md 30</code> pasa a <code>MD  30</code>). La última fila siempre está vacía: al rellenarla sale otra. Un operando que no existe sale en rojo y no se lee.</p>
-      <p style={{ margin: 0 }}>Haz clic en la celda <b>Formato de visualización</b> ya seleccionada (o pulsa Intro) para elegir el formato. Solo están activos los que encajan con el tamaño del operando.</p>
-      <p style={{ margin: 0 }}>En <b>Valor de forzado</b> escribe el valor en el formato de la fila (<code>W#16#00FF</code>, <code>12.5</code>, <code>true</code>…). <b>Activar valores de forzado</b> lo escribe una vez; <b>Forzar variable</b> (Ctrl+F9) lo mantiene en cada ciclo mientras está pulsado.</p>
-      <p className="faint" style={{ margin: 0 }}>Las teclas 1–8 siguen accionando las entradas E 124.0–E 124.7 si no estás escribiendo en una celda.</p>
+      {T.vatv.ayuda.map((p, i) => <p key={i} style={{ margin: 0 }}><Rico t={p} /></p>)}
+      <p className="faint" style={{ margin: 0 }}>{T.vatv.ayudaTeclas}</p>
     </div>
   );
 }

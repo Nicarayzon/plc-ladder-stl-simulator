@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Simulador de PLC gratuito para aprender a programar autómatas en KOP (Ladder) y AWL (STL).</b><br>
-  Para macOS, Windows y Linux (con Wine). Sin hardware, sin licencias y sin conexión.
+  Para macOS, Windows y Linux (con Wine). En español, inglés y alemán. Sin hardware, sin licencias y sin conexión.
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
   <a href="#contacto">Contacto</a>
 </p>
 
-> **English:** free desktop PLC simulator to learn Ladder (KOP/LAD) and Statement List (AWL/STL) programming. The interface and the built-in theory are in Spanish; code can be written with German or English mnemonics.
+> **English:** free desktop PLC simulator to learn Ladder (KOP/LAD) and Statement List (AWL/STL) programming. Available in English, Spanish and German (interface, theory and examples; change it in Settings ▸ Language). Code can be written with English or German mnemonics.
 
 <p align="center">
   <img src="docs/images/img5.png" alt="Simulador libre: programa AWL en RUN con Observar, entradas y salidas y cronograma de señales">
@@ -65,6 +65,7 @@ Trae la teoría completa y 31 ejemplos resueltos que se ejecutan, para estudiar 
 **Aprender y practicar**
 - **Teoría** por capítulos, con índice y buscador: ciclo de scan, áreas de memoria, tipos de datos, bloques, KOP, AWL, equivalencias entre los dos, errores típicos y trampas de examen.
 - **31 ejemplos resueltos**, agrupados por temas y con pruebas: «Comprobar» pasa las pruebas sobre tu versión.
+- **En español, inglés y alemán:** la interfaz, los menús, la teoría y los ejemplos. La primera vez se abre en el idioma del sistema y se cambia en «Ajustes ▸ Idioma».
 
 **Tus proyectos**
 - Cada proyecto es una carpeta con sus bloques y sus tablas de variables.

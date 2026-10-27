@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { capitulos } from '../../content/referencia';
+import { capitulos, nemotecniaTeoria } from '../../content/referencia';
 import { Markdown } from '../common/Markdown';
 import { ProbarModal } from './Probar';
 import { go } from '../router';
 import { Icon } from '../common/Icon';
+import { T } from '../../i18n';
 
 const CAPS = capitulos();
 
@@ -36,10 +37,10 @@ export function AprenderScreen({ cap }: { cap?: string }) {
   return (
     <div style={{ display: 'flex', height: '100%' }}>
       <aside style={{ width: 290, flex: 'none', borderRight: '1px solid var(--border)', overflowY: 'auto', background: 'var(--bg-elev)', padding: '14px 10px' }}>
-        <input className="input" style={{ width: '100%', marginBottom: 10 }} placeholder="Buscar en la teoría…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar en la teoría" />
+        <input className="input" style={{ width: '100%', marginBottom: 10 }} placeholder={T.aprender.buscar} value={q} onChange={(e) => setQ(e.target.value)} aria-label={T.aprender.buscarEtiqueta} />
         {hits ? (
           <div>
-            <div className="faint" style={{ fontSize: 11.5, margin: '0 6px 6px' }}>{hits.length} resultado(s)</div>
+            <div className="faint" style={{ fontSize: 11.5, margin: '0 6px 6px' }}>{T.aprender.resultados(hits.length)}</div>
             {hits.map((h, i) => (
               <button key={i} className="nav-item" style={{ height: 'auto', padding: '6px 10px', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { go(`aprender/${h.cap}`); setQ(''); setTimeout(() => scrollTo(h.sec), 120); }}>
                 <span style={{ fontWeight: 600, color: 'var(--text)' }}>{h.sec}</span>
@@ -68,7 +69,7 @@ export function AprenderScreen({ cap }: { cap?: string }) {
           </div>
         </div>
       </div>
-      {probar !== null && <ProbarModal code={probar} title={`Probar · ${c.titulo}`} onClose={() => setProbar(null)} />}
+      {probar !== null && <ProbarModal code={probar} title={T.aprender.probarTitulo(c.titulo)} nemotecnia={nemotecniaTeoria} onClose={() => setProbar(null)} />}
     </div>
   );
 }

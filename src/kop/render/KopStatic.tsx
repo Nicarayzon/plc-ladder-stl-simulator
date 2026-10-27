@@ -5,6 +5,7 @@ import { layoutSegment } from '../layout';
 import { KopSvg } from './KopSvg';
 import { displayOperand } from '../../core/translate';
 import { useSettings } from '../../store/settings';
+import { T } from '../../i18n';
 
 export function KopStatic({ segs, titles = true }: { segs: SegmentoKOP[]; titles?: boolean }) {
   const lang = useSettings((s) => s.nemotecnia);
@@ -19,7 +20,7 @@ function KopStaticSeg({ seg, index, title, lang }: { seg: SegmentoKOP; index: nu
   const layout = useMemo(() => layoutSegment(seg), [seg]);
   return (
     <div className="card" style={{ overflowX: 'auto' }}>
-      {title && <div className="faint" style={{ fontSize: 11.5, padding: '5px 10px', borderBottom: '1px solid var(--border)' }}>Segmento {index + 1}{seg.titulo ? ` · ${seg.titulo}` : ''}{seg.meta ? ` · meta ${seg.meta}` : ''}</div>}
+      {title && <div className="faint" style={{ fontSize: 11.5, padding: '5px 10px', borderBottom: '1px solid var(--border)' }}>{T.seg.segmento(index + 1)}{seg.titulo ? ` · ${T.contenido.textosKop[seg.titulo] ?? seg.titulo}` : ''}{seg.meta ? T.contenido.meta(seg.meta) : ''}</div>}
       <div style={{ padding: '4px 0' }}>
         <KopSvg fit layout={layout} flow={null} selected={null} issues={new Map()} lang={lang}
           showOp={(op) => ({ main: displayOperand(op, lang) })}

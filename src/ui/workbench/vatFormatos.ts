@@ -3,6 +3,7 @@ import { FORMATOS, type Formato, fmtReal, fmtValue, parseUserValue } from '../..
 import { bitsF32, s32 } from '../../core/num';
 import { makeReader, type Reader } from '../../sim/readers';
 import { MEM_PREFIX, type Symbols } from '../../core/operands';
+import { T } from '../../i18n';
 
 const PREFIJO = new Map(Object.entries(MEM_PREFIX).map(([p, [area, size]]) => [`${area}${size}`, p]));
 
@@ -65,6 +66,6 @@ export function textoValor(raw: number, r: Reader, f: Formato): string {
 /** Valor de forzado escrito por el alumno en la sintaxis del formato de la fila (W#16#00FF, 12.5, true, L#5, 5S, C#10…) */
 export function valorForzado(text: string, r: Reader, f: Formato): number {
   const t = text.trim();
-  if (!t) throw new Error('Sin valor de forzado');
+  if (!t) throw new Error(T.vat.sinValorForzado);
   return parseUserValue(t, r.size, f);
 }

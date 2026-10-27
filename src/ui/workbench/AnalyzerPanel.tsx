@@ -7,10 +7,12 @@ import { Icon } from '../common/Icon';
 import { Desplegable, downloadText, toast } from '../common/ui';
 import { fmtReal } from '../../core/format';
 import { inputBits, outputBits } from '../../core/usage';
+import { T } from '../../i18n';
+import { displayOperand } from '../../core/translate';
 
 const ROW = 34;
 const AXIS = 22;
-const VISTAS: { value: SignalView; label: string }[] = [{ value: 'dec', label: 'DEC' }, { value: 'hex', label: 'HEX' }, { value: 'analog', label: 'curva' }, { value: 'real', label: 'REAL' }];
+const VISTAS: { value: SignalView; label: string }[] = [{ value: 'dec', label: 'DEC' }, { value: 'hex', label: 'HEX' }, { value: 'analog', label: T.analizador.curva }, { value: 'real', label: 'REAL' }];
 
 function fmtVal(v: number, view: SignalView): string {
   if (Number.isNaN(v)) return '—';
@@ -62,7 +64,9 @@ function coloresDe(doc: Document): Colores {
 export function senalesES(sim: SimController, max = 8): string[] {
   const u = sim.usage;
   if (!u) return [];
-  return [...inputBits(u).slice(0, max), ...outputBits(u).slice(0, max)].map((k) => k.replace(/^([EA])/, '$1 '));
+  // con la nemotecnia del programa: «E 124.0» o, con la inglesa, «I 124.0» (la señal acepta las dos)
+  const lang = sim.programa?.nemotecnia ?? 'de';
+  return [...inputBits(u).slice(0, max), ...outputBits(u).slice(0, max)].map((k) => displayOperand(k.replace(/^([EA])/, '$1 '), lang));
 }
 
 /** Si el cronograma está vacío, añade las entradas y salidas del programa. ¿Ha añadido alguna? */
@@ -371,7 +375,7 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
       const url = URL.createObjectURL(b);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'cronograma.png';
+      a.download = `${T.analizador.fichero}.png`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
@@ -382,30 +386,30 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
       <div className="row" style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 6 }}>
         {!readOnly && (
           <form className="row" style={{ gap: 4 }} onSubmit={(e) => { e.preventDefault(); addSignal(); }}>
-            <input className="input mono" style={{ height: 24, width: 150 }} placeholder="E 124.0, A 124.0, MW 10, T 1…" value={nuevo} onChange={(e) => setNuevo(e.target.value)} aria-label="Señal nueva" />
-            <button className="btn small" type="submit"><Icon name="plus" size={13} />Señal</button>
+            <input className="input mono" style={{ height: 24, width: 150 }} placeholder={T.analizador.ejemplo} value={nuevo} onChange={(e) => setNuevo(e.target.value)} aria-label={T.analizador.senalNueva} />
+            <button className="btn small" type="submit"><Icon name="plus" size={13} />{T.analizador.senal}</button>
           </form>
         )}
-        <button className={`btn small ${follow ? 'active' : ''}`} onClick={() => { setFollow(!follow); setT1(end); }} title="Seguir el final en tiempo real">Seguir</button>
-        <button className="btn small icon" onClick={() => setSpan((s) => Math.max(50, s / 2))} title="Acercar"><Icon name="zoomin" size={14} /></button>
-        <button className="btn small icon" onClick={() => setSpan((s) => Math.min(24 * 3600e3, s * 2))} title="Alejar"><Icon name="zoomout" size={14} /></button>
-        <button className="btn small" onClick={() => { const a = buf.firstTime(); const b = buf.lastTime(); setSpan(Math.max(100, b - a)); setT1(b); setFollow(false); }} title="Ver todo lo registrado">Todo</button>
-        <span className="faint" style={{ fontSize: 11.5 }}>ventana {fmtT(span)}</span>
+        <button className={`btn small ${follow ? 'active' : ''}`} onClick={() => { setFollow(!follow); setT1(end); }} title={T.analizador.seguirTitulo}>{T.analizador.seguir}</button>
+        <button className="btn small icon" onClick={() => setSpan((s) => Math.max(50, s / 2))} title={T.analizador.acercar}><Icon name="zoomin" size={14} /></button>
+        <button className="btn small icon" onClick={() => setSpan((s) => Math.min(24 * 3600e3, s * 2))} title={T.analizador.alejar}><Icon name="zoomout" size={14} /></button>
+        <button className="btn small" onClick={() => { const a = buf.firstTime(); const b = buf.lastTime(); setSpan(Math.max(100, b - a)); setT1(b); setFollow(false); }} title={T.analizador.todoTitulo}>{T.analizador.todo}</button>
+        <span className="faint" style={{ fontSize: 11.5 }}>{T.analizador.ventana(fmtT(span))}</span>
         <span className="sep" />
         <span className="mono" style={{ fontSize: 11.5 }}>
           <span style={{ color: 'var(--accent)' }}>A</span> {curA === null ? '—' : fmtT(curA)} · <span style={{ color: 'var(--err)' }}>B</span> {curB === null ? '—' : fmtT(curB)}
           {curA !== null && curB !== null && <b> · Δt = {Math.abs(curB - curA).toFixed(0)} ms</b>}
         </span>
-        {(curA !== null || curB !== null) && <button className="btn small ghost" onClick={() => { setCurA(null); setCurB(null); }}>Quitar cursores</button>}
+        {(curA !== null || curB !== null) && <button className="btn small ghost" onClick={() => { setCurA(null); setCurB(null); }}>{T.analizador.quitarCursores}</button>}
         <span className="spacer" />
         {!readOnly && (
-          <Desplegable style={{ height: 24, padding: '0 6px', fontSize: 12 }} value={sim.trigger ? `${sim.trigger.signalId}:${sim.trigger.edge}` : ''} aria-label="Disparo"
-            options={[{ value: '', label: 'Sin disparo' }, ...buf.signals.flatMap((s) => (['sube', 'baja', 'cambia'] as const).map((e) => ({ value: `${s.id}:${e}`, label: `Pausar si ${s.label} ${e === 'sube' ? '↑' : e === 'baja' ? '↓' : 'cambia'}` })))]}
+          <Desplegable style={{ height: 24, padding: '0 6px', fontSize: 12 }} value={sim.trigger ? `${sim.trigger.signalId}:${sim.trigger.edge}` : ''} aria-label={T.analizador.disparo}
+            options={[{ value: '', label: T.analizador.sinDisparo }, ...buf.signals.flatMap((s) => (['sube', 'baja', 'cambia'] as const).map((e) => ({ value: `${s.id}:${e}`, label: T.analizador.pausarSi(s.label, e) })))]}
             onChange={(v) => { sim.trigger = v ? { signalId: +v.split(':')[0], edge: v.split(':')[1] as 'sube' } : null; notify(); }} />
         )}
-        <button className="btn small" onClick={() => downloadText('cronograma.csv', buf.toCSV(), 'text/csv')} title="Exportar a CSV">CSV</button>
-        <button className="btn small" onClick={exportPng} title="Exportar imagen">PNG</button>
-        {!readOnly && <button className="btn small ghost" onClick={() => { buf.clear(); notify(); }} title="Borrar lo registrado">Borrar</button>}
+        <button className="btn small" onClick={() => downloadText(`${T.analizador.fichero}.csv`, buf.toCSV(), 'text/csv')} title={T.analizador.csvTitulo}>CSV</button>
+        <button className="btn small" onClick={exportPng} title={T.analizador.pngTitulo}>PNG</button>
+        {!readOnly && <button className="btn small ghost" onClick={() => { buf.clear(); notify(); }} title={T.analizador.borrarTitulo}>{T.analizador.borrar}</button>}
       </div>
       <div className="an" style={{ flex: 1, minHeight: 0 }}>
         <div className="an-side">
@@ -415,18 +419,18 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
               <span className="nm" title={s.text}>{s.label}</span>
               <span className="vl">{fmtVal(valueAt(s, hover), s.view)}</span>
               {!readOnly && s.reader.size > 0 && (
-                <Desplegable style={{ height: 20, padding: '0 4px', fontSize: 10.5, width: 52, gap: 2 }} value={s.view} options={VISTAS} aria-label="Vista"
+                <Desplegable style={{ height: 20, padding: '0 4px', fontSize: 10.5, width: 52, gap: 2 }} value={s.view} options={VISTAS} aria-label={T.analizador.vista}
                   onChange={(v) => { s.view = v; notify(); }} />
               )}
-              {!readOnly && <button className="btn small ghost icon" onClick={() => { buf.remove(s.id); notify(); }} aria-label={`Quitar ${s.label}`}><Icon name="x" size={12} /></button>}
+              {!readOnly && <button className="btn small ghost icon" onClick={() => { buf.remove(s.id); notify(); }} aria-label={T.analizador.quitar(s.label)}><Icon name="x" size={12} /></button>}
             </div>
           ))}
           {!buf.signals.length && (
             <div className="muted" style={{ padding: 10, fontSize: 12 }}>
-              Añade señales para ver su cronograma. Clic = cursor A, Mayús + clic = cursor B.
+              {T.analizador.vacio}
               {!readOnly && !buffer && senalesES(sim).length > 0 && (
                 <button className="btn small" style={{ marginTop: 8 }} onClick={() => { if (anadirSenalesES(sim)) notify(); }}>
-                  <Icon name="plus" size={13} />Entradas y salidas del programa
+                  <Icon name="plus" size={13} />{T.analizador.esDelPrograma}
                 </button>
               )}
             </div>
@@ -462,7 +466,7 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
             setFollow(false);
             setT1(t - ratio * ns + ns);
           }}>
-          <canvas ref={canvas} aria-label="Cronograma de las señales" />
+          <canvas ref={canvas} aria-label={T.analizador.canvas} />
         </div>
       </div>
     </div>

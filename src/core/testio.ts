@@ -4,6 +4,7 @@ import { parseConstant } from './constants';
 import { parseOperand } from './operands';
 import { bitsF32, f32Bits, s16, s32 } from './num';
 import { type CPU, writeBE } from './cpu';
+import { T } from '../i18n';
 
 export type TestValue = number | string | boolean;
 
@@ -19,7 +20,7 @@ export function valueToRaw(value: TestValue, tipo: string | null): number {
   if (typeof value === 'boolean') return value ? 1 : 0;
   if (typeof value === 'string') {
     const c = parseConstant(value);
-    if (c === null) throw new TestValueError(`valor no válido: ${value}`);
+    if (c === null) throw new TestValueError(T.motor.valorNoValidoDe(String(value)));
     return c.value;
   }
   if (!Number.isInteger(value)) return f32Bits(value);
@@ -30,7 +31,7 @@ function toInt(v: TestValue): number {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'string') {
     const n = parseInt(v, 10);
-    if (Number.isNaN(n)) throw new TestValueError(`valor no válido: ${v}`);
+    if (Number.isNaN(n)) throw new TestValueError(T.motor.valorNoValidoDe(String(v)));
     return n;
   }
   return Math.trunc(v);
@@ -42,7 +43,7 @@ export function testWrite(cpu: CPU, key: string, value: TestValue) {
   if (op && op.kind === 'bit') {
     if (op.area === 'E' && !op.ind) { // entrada física: se copia a la PAE al empezar el ciclo
       const b = op.byte!;
-      if (b >= cpu.periphIn.length) throw new TestValueError(`no se puede escribir ${key}`);
+      if (b >= cpu.periphIn.length) throw new TestValueError(T.motor.noEscribir(key));
       if (toInt(value)) cpu.periphIn[b] |= 1 << op.bit!;
       else cpu.periphIn[b] &= ~(1 << op.bit!) & 0xFF;
     } else cpu.wbit(op, toInt(value));
@@ -51,13 +52,13 @@ export function testWrite(cpu: CPU, key: string, value: TestValue) {
   if (op && op.kind === 'mem') {
     const raw = valueToRaw(value, tipo);
     if ((op.area === 'E' || op.area === 'PE') && !op.ind) {
-      if (op.byte! + op.size! > cpu.periphIn.length) throw new TestValueError(`no se puede escribir ${key}`);
+      if (op.byte! + op.size! > cpu.periphIn.length) throw new TestValueError(T.motor.noEscribir(key));
       const mask = op.size === 4 ? 0xFFFFFFFF : (1 << (8 * op.size!)) - 1;
       writeBE(cpu.periphIn, op.byte!, op.size!, raw & mask);
     } else cpu.wmem(op, raw);
     return;
   }
-  throw new TestValueError(`no se puede escribir ${key}`);
+  throw new TestValueError(T.motor.noEscribir(key));
 }
 
 export function testRead(cpu: CPU, key: string): number {
@@ -80,14 +81,14 @@ export function testRead(cpu: CPU, key: string): number {
     if (tipo === 'DINT' || (tipo === null && op.size === 4)) return s32(raw);
     return raw;
   }
-  throw new TestValueError(`no se puede leer ${key}`);
+  throw new TestValueError(T.motor.noLeer(key));
 }
 
 export function expectedMatches(actual: number, expected: TestValue, tipo: string | null): boolean {
   if (tipo === 'REAL') return Math.abs(actual - (typeof expected === 'string' ? parseFloat(expected) : Number(expected))) <= 1e-3;
   if (typeof expected === 'string') {
     const c = parseConstant(expected);
-    if (c === null) throw new TestValueError(`valor no válido: ${expected}`);
+    if (c === null) throw new TestValueError(T.motor.valorNoValidoDe(String(expected)));
     let exp = c.value;
     if ((tipo === null || tipo === 'INT') && Number.isInteger(actual) && actual < 0) exp = s16(exp);
     return actual === exp;

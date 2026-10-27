@@ -13,7 +13,7 @@ let win: Page;
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'automatizacion-e2e-'));
 
 test.beforeAll(async () => {
-  app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_USER_DATA: userData } });
+  app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_IDIOMA: 'es', AUTOMATIZACION_USER_DATA: userData } });
   win = await app.firstWindow();
   await win.setViewportSize({ width: 1440, height: 900 });
 });
@@ -38,7 +38,7 @@ test('arranca en el simulador libre sin los modos de práctica', async () => {
 test('inicio y versión', async () => {
   await goto('inicio');
   const { version } = JSON.parse(fs.readFileSync(path.resolve(HERE, '../../package.json'), 'utf-8'));
-  expect(version).toBe('0.22.0');
+  expect(version).toBe('0.25.0');
   await expect(win.locator('.brand')).toContainText(`v${version}`);
   await expect(win.locator('h1')).toHaveText('Automatizacion');
 });

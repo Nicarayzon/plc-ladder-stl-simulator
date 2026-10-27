@@ -1,6 +1,7 @@
 // Constantes AWL (parse_constant y compañía de la referencia)
 import { CompileError, PLCError } from './errors';
 import { bcdDecode, bcdEncode, f32Bits, hex, roundHalfEven, u16, u32 } from './num';
+import { T as TX } from '../i18n';
 
 export type CType = 'S5TIME' | 'TOD' | 'TIME' | 'DATE' | 'DINT' | 'DWORD' | 'WORD' | 'BYTE' | 'BCD' | 'PTR' | 'CHAR' | 'REAL' | 'INT';
 
@@ -11,13 +12,13 @@ class Bad extends Error {}
 
 /** Elige la base más fina en la que el valor cabe en 3 cifras BCD. */
 export function s5timeFromMs(ms: number): number {
-  if (ms < 0) throw new CompileError('S5TIME no admite valores negativos');
+  if (ms < 0) throw new CompileError(TX.motor.s5Negativo);
   const bases = [10, 100, 1000, 10000];
   for (let i = 0; i < 4; i++) {
     const v = Math.floor(ms / bases[i]);
     if (v <= 999) return ((i << 12) | bcdEncode(v, 3)) >>> 0;
   }
-  throw new CompileError(`S5TIME fuera de rango (máximo 2H46M30S): ${ms} ms`);
+  throw new CompileError(TX.motor.s5Rango(ms));
 }
 
 export function s5timeDecode(w: number): [number, number] {
@@ -26,7 +27,7 @@ export function s5timeDecode(w: number): [number, number] {
   try {
     val = bcdDecode(w & 0x0FFF, 3);
   } catch (e) {
-    if (e instanceof PLCError) throw new PLCError(`Valor de tiempo no válido: 16#${hex(w & 0xFFFF, 4)} no es un S5TIME (¿falta S5T#?)`);
+    if (e instanceof PLCError) throw new PLCError(TX.motor.tiempoNoValido(hex(w & 0xFFFF, 4)));
     throw e;
   }
   return [base, val];
@@ -143,7 +144,7 @@ export function parseConstant(tok: string): Const | null {
     if (T.startsWith('P#')) {
       const body = T.slice(2).replace(/ /g, '');
       if (body.startsWith('DB') && body.includes('.') && body.includes('DBX'))
-        throw new CompileError('Los punteros ANY (P#DBn.DBX… BYTE n) no están soportados en el simulador');
+        throw new CompileError(TX.motor.punterosAny);
       const m = /^(DBX|DIX|[PEAMLV])?(\d+)\.([0-7])$/.exec(body);
       if (!m) throw new Bad(tok);
       const off = parseInt(m[2], 10) * 8 + parseInt(m[3], 10);
@@ -165,7 +166,7 @@ export function parseConstant(tok: string): Const | null {
       throw new Bad(tok);
     }
   } catch (e) {
-    if (e instanceof Bad) throw new CompileError(`Constante no válida: ${tok}`);
+    if (e instanceof Bad) throw new CompileError(TX.motor.constanteNoValida(tok));
     throw e;
   }
   return null;

@@ -5,13 +5,14 @@ import { segId } from '../../core/program';
 import { useSimTick } from './useSim';
 import { explainRow } from '../../core/explain';
 import { AwlHighlight } from '../common/AwlHighlight';
+import { T } from '../../i18n';
 
 export function MessagesPanel({ sim, warnings, onGoto }: { sim: SimController; warnings: ProgramIssue[]; onGoto: (block: string, seg?: string) => void }) {
   useSimTick(sim, 5, () => sim.rev);
   const errs = sim.compiled.errors;
   return (
     <div style={{ padding: '6px 10px', fontSize: 12.5 }}>
-      {!errs.length && !warnings.length && !sim.lastStop && <div className="ok-text">✔ Compilado sin errores.</div>}
+      {!errs.length && !warnings.length && !sim.lastStop && <div className="ok-text">{T.mensajes.sinErrores}</div>}
       {sim.lastStop && <div className="err-text" style={{ marginBottom: 6 }}>■ {sim.lastStop.reason}</div>}
       {errs.map((e, i) => (
         <div key={i} className="row" style={{ alignItems: 'flex-start', padding: '2px 0' }}>
@@ -25,7 +26,7 @@ export function MessagesPanel({ sim, warnings, onGoto }: { sim: SimController; w
           <button className="btn ghost small" style={{ height: 'auto', padding: '0 4px', textAlign: 'left', whiteSpace: 'normal' }} onClick={() => onGoto(e.block, e.seg)}>{e.full}</button>
         </div>
       ))}
-      {sim.hasErrors && <div className="warn-text" style={{ marginTop: 6 }}>El programa tiene errores: la CPU sigue ejecutando la última versión correcta.</div>}
+      {sim.hasErrors && <div className="warn-text" style={{ marginTop: 6 }}>{T.mensajes.conErrores}</div>}
     </div>
   );
 }
@@ -36,13 +37,13 @@ export function GeneratedAwl({ sim, programa, block }: { sim: SimController; pro
   if (!b) return null;
   const parts = b.segmentos.map((s, i) => {
     const id = segId(s);
-    const title = `// Segmento ${i + 1}${(s.lang === 'KOP' ? s.kop.titulo : s.titulo) ? `: ${s.lang === 'KOP' ? s.kop.titulo : s.titulo}` : ''}${s.lang === 'KOP' ? '  (KOP)' : ''}`;
+    const title = `// ${T.mensajes.segmento(i + 1)}${(s.lang === 'KOP' ? s.kop.titulo : s.titulo) ? `: ${s.lang === 'KOP' ? s.kop.titulo : s.titulo}` : ''}${s.lang === 'KOP' ? `  (${T.lenguaje.KOP})` : ''}`;
     const body = s.lang === 'AWL' ? s.awl : (sim.compiled.kopLines.get(id) ?? []).map((l) => l.text).join('\n');
     return `${title}\n${body}`;
   });
   return (
     <div style={{ padding: '6px 12px' }}>
-      <div className="faint" style={{ fontSize: 11.5, marginBottom: 6 }}>Así queda el bloque {block} en AWL. Los segmentos KOP se traducen a un AWL equivalente.</div>
+      <div className="faint" style={{ fontSize: 11.5, marginBottom: 6 }}>{T.mensajes.asiQueda(block)}</div>
       <AwlHighlight code={parts.join('\n\n')} />
     </div>
   );
@@ -54,13 +55,13 @@ export function TracePanel({ sim }: { sim: SimController }) {
   return (
     <div>
       <div className="row" style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>
-        <button className="btn small" onClick={() => sim.captureNextCycle()} disabled={sim.cpu.state !== 'RUN'}>Capturar el próximo ciclo</button>
-        <span className="faint" style={{ fontSize: 11.5 }}>{rows.length ? `${rows.length} instrucciones${sim.traceCycle ? ` · ciclo ${sim.traceCycle}` : ''}` : 'Captura un ciclo o avanza instrucción a instrucción para ver la traza.'}</span>
+        <button className="btn small" onClick={() => sim.captureNextCycle()} disabled={sim.cpu.state !== 'RUN'}>{T.mensajes.capturar}</button>
+        <span className="faint" style={{ fontSize: 11.5 }}>{rows.length ? T.mensajes.instrucciones(rows.length, sim.traceCycle) : T.mensajes.capturaUnCiclo}</span>
       </div>
       {rows.length > 0 && (
         <table className="tbl trace-tbl">
           <thead>
-            <tr><th>Bloque</th><th>Instrucción</th><th>/ER antes</th><th>RLO</th><th>STA</th><th>OR</th><th>OV</th><th>OS</th><th>A1A0</th><th>RB</th><th className="num">ACU1</th><th className="num">ACU2</th><th>Explicación</th></tr>
+            <tr><th>{T.mensajes.bloque}</th><th>{T.mensajes.instruccion}</th><th>{T.mensajes.erAntes}</th><th>{T.reg.rlo}</th><th>{T.reg.sta}</th><th>{T.reg.or}</th><th>{T.reg.ov}</th><th>{T.reg.os}</th><th>{T.reg.a1a0}</th><th>{T.reg.rb}</th><th className="num">{T.reg.acu1}</th><th className="num">{T.reg.acu2}</th><th>{T.mensajes.explicacion}</th></tr>
           </thead>
           <tbody>
             {rows.slice(0, 3000).map((r, i) => (

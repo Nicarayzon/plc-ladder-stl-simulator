@@ -2,35 +2,37 @@
 import { parseOperand, type Op, type Symbols } from '../core/operands';
 import type { Elem, Rama, Salida, SegmentoKOP } from './model';
 import { BOX_DEFS, isSolitaria } from './model';
+import { T } from '../i18n';
 
 export interface KopIssue { id: string; field?: string; msg: string; severity: 'error' | 'aviso' }
 
 type Kind = 'bitTZ' | 'bit' | 'bitRTZ' | 'timer' | 'counter' | 'word' | 'dword' | 'real' | 's5' | 'zw' | 'in' | 'out' | 'block';
 
 function check(op: string, kind: Kind, symbols?: Symbols): string | null {
-  if (!op.trim()) return 'falta el operando';
+  const V = T.kopVal;
+  if (!op.trim()) return V.faltaOperando;
   let o: Op | null;
   try {
     o = parseOperand(op, symbols);
   } catch (e) {
     return (e as Error).message;
   }
-  if (!o) return 'falta el operando';
+  if (!o) return V.faltaOperando;
   const isMem = (sizes: number[]) => o!.kind === 'mem' && sizes.includes(o!.size!);
   switch (kind) {
-    case 'bitTZ': return ['bit', 'timer', 'counter', 'status'].includes(o.kind) ? null : `${o.text} no es un bit, T ni Z`;
-    case 'bit': return o.kind === 'bit' ? null : `${o.text} no es un bit`;
-    case 'bitRTZ': return ['bit', 'timer', 'counter'].includes(o.kind) ? null : `${o.text} no es un bit, T ni Z`;
-    case 'timer': return o.kind === 'timer' ? null : `${o.text} no es un temporizador (T n)`;
-    case 'counter': return o.kind === 'counter' ? null : `${o.text} no es un contador (Z n)`;
-    case 'word': return isMem([2]) || (o.kind === 'const' && ['INT', 'WORD'].includes(o.ctype!)) ? null : `${o.text}: hace falta una palabra o un INT`;
-    case 'dword': return isMem([4]) || (o.kind === 'const' && ['DINT', 'DWORD', 'INT'].includes(o.ctype!)) ? null : `${o.text}: hace falta una doble palabra o un DINT`;
-    case 'real': return isMem([4]) || (o.kind === 'const' && ['REAL', 'DINT', 'DWORD'].includes(o.ctype!)) ? null : `${o.text}: hace falta una doble palabra o un REAL`;
-    case 's5': return isMem([2]) || (o.kind === 'const' && o.ctype === 'S5TIME') ? null : `${o.text}: el tiempo se da como S5T#… o como palabra`;
-    case 'zw': return isMem([2]) || (o.kind === 'const' && (o.ctype === 'BCD' || o.ctype === 'WORD')) ? null : `${o.text}: el valor de contaje se da como C#… o como palabra`;
-    case 'in': return o.kind === 'mem' || o.kind === 'const' || o.kind === 'timer' || o.kind === 'counter' ? null : `${o.text} no es un valor`;
-    case 'out': return o.kind === 'mem' ? null : `${o.text}: la salida tiene que ser un byte, palabra o doble palabra`;
-    case 'block': return o.kind === 'block' && o.name === 'FC' ? null : `${o.text}: solo se puede llamar a FC n`;
+    case 'bitTZ': return ['bit', 'timer', 'counter', 'status'].includes(o.kind) ? null : V.noBitTZ(o.text);
+    case 'bit': return o.kind === 'bit' ? null : V.noBit(o.text);
+    case 'bitRTZ': return ['bit', 'timer', 'counter'].includes(o.kind) ? null : V.noBitTZ(o.text);
+    case 'timer': return o.kind === 'timer' ? null : V.noTemporizador(o.text);
+    case 'counter': return o.kind === 'counter' ? null : V.noContador(o.text);
+    case 'word': return isMem([2]) || (o.kind === 'const' && ['INT', 'WORD'].includes(o.ctype!)) ? null : V.palabra(o.text);
+    case 'dword': return isMem([4]) || (o.kind === 'const' && ['DINT', 'DWORD', 'INT'].includes(o.ctype!)) ? null : V.doble(o.text);
+    case 'real': return isMem([4]) || (o.kind === 'const' && ['REAL', 'DINT', 'DWORD'].includes(o.ctype!)) ? null : V.real(o.text);
+    case 's5': return isMem([2]) || (o.kind === 'const' && o.ctype === 'S5TIME') ? null : V.s5(o.text);
+    case 'zw': return isMem([2]) || (o.kind === 'const' && (o.ctype === 'BCD' || o.ctype === 'WORD')) ? null : V.zw(o.text);
+    case 'in': return o.kind === 'mem' || o.kind === 'const' || o.kind === 'timer' || o.kind === 'counter' ? null : V.noValor(o.text);
+    case 'out': return o.kind === 'mem' ? null : V.salida(o.text);
+    case 'block': return o.kind === 'block' && o.name === 'FC' ? null : V.soloFc(o.text);
   }
   return null;
 }
@@ -61,10 +63,10 @@ export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[]
       }
       case 'SER': e.items.forEach(elem); break;
       case 'PAR':
-        if (e.ramas.length < 2) out.push({ id: e.id, msg: 'un paralelo necesita al menos 2 ramas', severity: 'error' });
+        if (e.ramas.length < 2) out.push({ id: e.id, msg: T.kopVal.paraleloDos, severity: 'error' });
         for (const b of e.ramas) {
-          if (b.k === 'SER' && !b.items.length) out.push({ id: e.id, msg: 'hay una rama paralela vacía', severity: 'error' });
-          if (needsLeft(firstOf(b))) out.push({ id: firstOf(b)!.id, msg: 'NOT, P, N y el conector necesitan lógica a su izquierda', severity: 'error' });
+          if (b.k === 'SER' && !b.items.length) out.push({ id: e.id, msg: T.kopVal.ramaVacia, severity: 'error' });
+          if (needsLeft(firstOf(b))) out.push({ id: firstOf(b)!.id, msg: T.kopVal.necesitaIzquierda, severity: 'error' });
           elem(b);
         }
         break;
@@ -73,7 +75,7 @@ export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[]
   const ramas = (rs: Rama[] | undefined) => rs?.forEach((r) => { if (r.pre) elem(r.pre); salida(r.salida); });
   const chainPin = (c: Elem | undefined) => {
     if (!c) return;
-    if (needsLeft(firstOf(c))) out.push({ id: firstOf(c)!.id, msg: 'NOT, P, N y el conector necesitan lógica a su izquierda', severity: 'error' });
+    if (needsLeft(firstOf(c))) out.push({ id: firstOf(c)!.id, msg: T.kopVal.necesitaIzquierda, severity: 'error' });
     elem(c);
   };
   const salida = (s: Salida) => {
@@ -84,7 +86,7 @@ export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[]
       case 'ZV': case 'ZR': req(s.id, 'z', s.z, 'counter'); break;
       case 'SZ': req(s.id, 'z', s.z, 'counter'); req(s.id, 'zw', s.zw, 'zw'); break;
       case 'JMP': case 'JMPN':
-        if (!/^[A-Za-z][A-Za-z0-9_]{0,3}$/.test(s.meta)) out.push({ id: s.id, field: 'meta', msg: 'la meta tiene de 1 a 4 caracteres y empieza por letra', severity: 'error' });
+        if (!/^[A-Za-z][A-Za-z0-9_]{0,3}$/.test(s.meta)) out.push({ id: s.id, field: 'meta', msg: T.kopVal.meta, severity: 'error' });
         break;
       case 'CALL': req(s.id, 'bloque', s.bloque, 'block'); break;
       case 'TEMP':
@@ -108,11 +110,11 @@ export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[]
     }
   };
 
-  if (needsLeft(firstOf(seg.entrada))) out.push({ id: firstOf(seg.entrada)!.id, msg: 'NOT, P, N y el conector necesitan lógica a su izquierda', severity: 'error' });
+  if (needsLeft(firstOf(seg.entrada))) out.push({ id: firstOf(seg.entrada)!.id, msg: T.kopVal.necesitaIzquierda, severity: 'error' });
   elem(seg.entrada);
   if (seg.salidas.some((r) => isSolitaria(r.salida)) && (seg.salidas.length > 1 || seg.salidas[0].pre))
-    out.push({ id: seg.salidas.find((r) => isSolitaria(r.salida))!.salida.id, msg: 'los saltos, RET y CALL van solos en su segmento', severity: 'error' });
-  if (seg.meta && (!/^[A-Za-z][A-Za-z0-9_]{0,3}$/.test(seg.meta))) out.push({ id: seg.id, field: 'meta', msg: 'la meta tiene de 1 a 4 caracteres y empieza por letra (no por _)', severity: 'error' });
+    out.push({ id: seg.salidas.find((r) => isSolitaria(r.salida))!.salida.id, msg: T.kopVal.solos, severity: 'error' });
+  if (seg.meta && (!/^[A-Za-z][A-Za-z0-9_]{0,3}$/.test(seg.meta))) out.push({ id: seg.id, field: 'meta', msg: T.kopVal.metaSegmento, severity: 'error' });
   ramas(seg.salidas);
   return out;
 }

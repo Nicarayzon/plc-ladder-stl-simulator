@@ -8,9 +8,12 @@ import { s16 } from '../../core/num';
 import { CLOCK_PERIODS_MS } from '../../core/cpu';
 import { useSettings } from '../../store/settings';
 import { bitOf, byteOf, firmaIo, marcasDe, type Marcas } from './ioFirma';
+import { displayOperand } from '../../core/translate';
+import { T } from '../../i18n';
+import { Rico } from '../common/Rico';
 
-const TIPO_LABEL: Record<InputTipo, string> = { INT: 'INT', NA: 'PUL', NC: 'NC', SENSOR: 'SEN' };
-const TIPO_NAME: Record<InputTipo, string> = { INT: 'Interruptor (cambia con cada clic y se queda)', NA: 'Pulsador NA (1 mientras se pulsa)', NC: 'Pulsador NC (0 mientras se pulsa)', SENSOR: 'Sensor (cambia con cada clic)' };
+const TIPO_LABEL: Record<InputTipo, string> = T.io.tipoCorto;
+const TIPO_NAME: Record<InputTipo, string> = T.io.tipoNombre;
 
 function bytesOf(keys: string[]) {
   const m = new Map<number, string[]>();
@@ -33,7 +36,16 @@ export interface IoPanelProps {
   clockByte?: number | null;
   /** Cambia las listas de quitadas/añadidas en una sola actualización */
   onIoState?: (p: { hidden?: string[]; extra?: string[] }) => void;
+  /** Nemotecnia del programa: con la inglesa, las direcciones se ven como I y Q (por dentro siguen siendo E y A) */
+  lang?: 'de' | 'en';
 }
+
+/** Cómo se enseña una dirección del panel (E124.0 → I124.0 con la nemotecnia inglesa) y las letras de entradas y salidas */
+const rotulos = (lang: 'de' | 'en' = 'de') => ({
+  mostrar: (k: string) => displayOperand(k, lang),
+  e: lang === 'en' ? 'I' : 'E',
+  a: lang === 'en' ? 'Q' : 'A',
+});
 
 export function IoPanel(props: IoPanelProps) {
   if (props.variant === 'switches') return <SwitchIo {...props} />;
@@ -55,7 +67,7 @@ function MarcasSec({ sim, symByAddr, clockByte = null, marcas }: { sim: SimContr
   if (!marcas.bits.length && !marcas.words.length) return null;
   return (
     <div className="panel-sec">
-      <h4>Marcas <span className="faint" style={{ textTransform: 'none', letterSpacing: 0 }}>· memoria interna que usa el programa</span></h4>
+      <h4>{T.io.marcas} <span className="faint" style={{ textTransform: 'none', letterSpacing: 0 }}>{T.io.marcasNota}</span></h4>
       {/* una fila por byte de marcas (M 0, M 10, M 20…) con sus 8 bits, como las filas de E y A;
           en la de la marca de ciclo solo salen los bits que usa el programa, cada uno en su columna */}
       {[...new Set(marcas.bits.map(byteOf))].sort((a, b) => a - b).map((b) => {
@@ -63,7 +75,7 @@ function MarcasSec({ sim, symByAddr, clockByte = null, marcas }: { sim: SimContr
         const ciclo = clockByte === b;
         return (
           <div key={b}>
-            <div className="sw-cap">M {b}{ciclo ? ' · marca de ciclo' : ''}</div>
+            <div className="sw-cap">M {b}{ciclo ? T.io.marcaCiclo : ''}</div>
             <div className="sw-row">
               {Array.from({ length: 8 }, (_, i) => {
                 const k = `M${b}.${i}`;
@@ -71,8 +83,8 @@ function MarcasSec({ sim, symByAddr, clockByte = null, marcas }: { sim: SimContr
                 const usada = usados.has(i);
                 if (ciclo && !usada) return null;
                 const sym = symByAddr.get(k);
-                const periodo = ciclo ? `${(CLOCK_PERIODS_MS[i] / 1000).toLocaleString('es-ES')} s` : null;
-                const title = `M ${b}.${i}${sym ? ` «${sym}»` : ''}${periodo ? ` · marca de ciclo de ${periodo}` : ''}${usada ? '' : ' · no la usa el programa'}`;
+                const periodo = ciclo ? `${(CLOCK_PERIODS_MS[i] / 1000).toLocaleString(T.locale)} s` : null;
+                const title = `M ${b}.${i}${sym ? ` «${sym}»` : ''}${periodo ? T.io.marcaCicloDe(periodo) : ''}${usada ? '' : T.io.noLaUsa}`;
                 return (
                   <div key={k} className={`lamp ${v ? 'on' : ''} ${usada ? '' : 'sin-uso'}`} title={title} style={{ gridColumn: i + 1 }}>
                     <span className="lamp-led" />
@@ -139,7 +151,8 @@ export function useTeclasEntradas(sim: SimController, activo: boolean) {
 }
 
 /** Panel del simulador libre: interruptores de palanca E124.0–E124.7, LEDs A124.0–A124.7. */
-function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], onIoState, clockByte }: IoPanelProps) {
+function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], onIoState, clockByte, lang }: IoPanelProps) {
+  const R = rotulos(lang);
   const teclas = useSettings((s) => s.teclasEntradas);
   const [menu, setMenu] = useState<{ x: number; y: number; key: string; out?: boolean } | null>(null);
   const usage = sim.usage;
@@ -203,7 +216,7 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
     const sym = symByAddr.get(k);
     return (
       <button key={k} className={`sw ${v ? 'on' : ''}`} aria-pressed={!!v} style={{ gridColumn: bitOf(k) + 1 }}
-        title={`${k}${sym ? ` «${sym}»` : ''}\n${t === 'NA' ? 'Pulsador NA: 1 mientras se pulsa' : t === 'NC' ? 'Pulsador NC: 0 mientras se pulsa' : 'Interruptor: clic para cambiar · Mayús + clic: 1 mientras lo mantienes'}${fixed && teclas ? `\nTecla ${n} (Mayús + ${n}: pulsador)` : '\nSolo con el ratón'}`}
+        title={`${R.mostrar(k)}${sym ? ` «${sym}»` : ''}\n${t === 'NA' ? T.io.pulsadorNa : t === 'NC' ? T.io.pulsadorNc : T.io.interruptorTitulo}\n${fixed && teclas ? T.io.teclaN(n) : T.io.soloRaton}`}
         onMouseDown={(e) => { if (e.button === 0) down(k, e.shiftKey, `mouse${k}`); }}
         onMouseUp={() => up(`mouse${k}`)}
         onMouseLeave={() => up(`mouse${k}`)}
@@ -214,7 +227,7 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
         <span className="sw-addr">{k.replace(/^E/, '')}</span>
         <span className="sw-foot">
           {fixed && teclas && <span className="kbd">{n}</span>}
-          {(t === 'NA' || t === 'NC') && <span className="kind">{t === 'NA' ? 'PUL' : 'NC'}</span>}
+          {(t === 'NA' || t === 'NC') && <span className="kind">{t === 'NA' ? T.io.pul : 'NC'}</span>}
         </span>
         {sym && <span className="sw-sym">{sym}</span>}
       </button>
@@ -224,7 +237,7 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
     const v = outBit(k);
     const sym = symByAddr.get(k);
     return (
-      <div key={k} className={`lamp ${v ? 'on' : ''}`} title={`${k}${sym ? ` «${sym}»` : ''}\nClic derecho: quitar del panel`} style={{ gridColumn: bitOf(k) + 1 }}
+      <div key={k} className={`lamp ${v ? 'on' : ''}`} title={`${R.mostrar(k)}${sym ? ` «${sym}»` : ''}\n${T.io.quitarClicDerecho}`} style={{ gridColumn: bitOf(k) + 1 }}
         onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, key: k, out: true }); }}>
         <span className="lamp-led" />
         <span className="sw-addr">{k.replace(/^A/, '')}</span>
@@ -236,55 +249,56 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
   return (
     <div>
       <div className="panel-sec">
-        <h4>Entradas <span className="mono" style={{ textTransform: 'none' }}>E</span><span className="spacer" /><button className="btn small ghost" style={{ textTransform: 'none', letterSpacing: 0 }} onClick={() => sim.resetInputs(true)} title="Bajar todos los interruptores (las NC quedan a 1)">Todas a 0</button></h4>
+        <h4>{T.io.entradas} <span className="mono" style={{ textTransform: 'none' }}>{R.e}</span><span className="spacer" /><button className="btn small ghost" style={{ textTransform: 'none', letterSpacing: 0 }} onClick={() => sim.resetInputs(true)} title={T.io.bajarTodos}>{T.io.todasA0}</button></h4>
         {bytesOf(ins).map(([b, keys]) => (
           <div key={b}>
-            <div className="sw-cap">E {b}{b === 124 && teclas ? ' · teclas 1–8' : b === 125 ? ' · con el ratón' : ''}</div>
+            <div className="sw-cap">{R.e} {b}{b === 124 && teclas ? T.io.teclas18 : b === 125 ? T.io.conRaton : ''}</div>
             <div className="sw-row">{keys.map(sw)}</div>
           </div>
         ))}
         <div className="faint" style={{ fontSize: 11, margin: '6px 0' }}>
-          Clic{teclas ? ' (o tecla 1–8 en E124)' : ''}: sube o baja el interruptor. <b>Mayús</b> + clic{teclas ? ' / Mayús + tecla' : ''}: pulsador (1 solo mientras lo mantienes). Clic derecho: tipo o quitar del panel.
+          <Rico t={T.io.ayudaLibre(teclas)} />
         </div>
         <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-          <AddInput onAdd={(k) => onIoState?.({ extra: [...extra.filter((x) => x !== k), k], hidden: hidden.filter((x) => x !== k) })} />
-          {quitadasIn.length > 0 && <button className="btn small ghost" onClick={() => onIoState?.({ hidden: hidden.filter((k) => !k.startsWith('E')) })} title={quitadasIn.join(', ')}>Mostrar entradas quitadas ({quitadasIn.length})</button>}
+          <AddInput lang={lang} onAdd={(k) => onIoState?.({ extra: [...extra.filter((x) => x !== k), k], hidden: hidden.filter((x) => x !== k) })} />
+          {quitadasIn.length > 0 && <button className="btn small ghost" onClick={() => onIoState?.({ hidden: hidden.filter((k) => !k.startsWith('E')) })} title={quitadasIn.join(', ')}>{T.io.mostrarEntradasQuitadas(quitadasIn.length)}</button>}
         </div>
       </div>
       <div className="panel-sec">
-        <h4>Salidas <span className="mono" style={{ textTransform: 'none' }}>A</span></h4>
+        <h4>{T.io.salidas} <span className="mono" style={{ textTransform: 'none' }}>{R.a}</span></h4>
         {bytesOf(outs).map(([b, keys]) => (
           <div key={b}>
-            <div className="sw-cap">A {b}</div>
+            <div className="sw-cap">{R.a} {b}</div>
             <div className="sw-row">{keys.map(led)}</div>
           </div>
         ))}
-        {!outs.length && <div className="faint" style={{ fontSize: 12 }}>No hay salidas en el panel.</div>}
-        {quitadasOut.length > 0 && <button className="btn small ghost" onClick={() => onIoState?.({ hidden: hidden.filter((k) => !k.startsWith('A')) })} title={quitadasOut.join(', ')}>Mostrar salidas quitadas ({quitadasOut.length})</button>}
+        {!outs.length && <div className="faint" style={{ fontSize: 12 }}>{T.io.sinSalidas}</div>}
+        {quitadasOut.length > 0 && <button className="btn small ghost" onClick={() => onIoState?.({ hidden: hidden.filter((k) => !k.startsWith('A')) })} title={quitadasOut.join(', ')}>{T.io.mostrarSalidasQuitadas(quitadasOut.length)}</button>}
       </div>
       <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} />
       {(analog.length > 0 || words.length > 0) && (
         <div className="panel-sec">
-          <h4>Analógicas y palabras</h4>
+          <h4>{T.io.analogicas}</h4>
           {analog.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
           {words.map((w) => <WordOut key={w} sim={sim} addr={w} />)}
         </div>
       )}
       {menu && (
         <ContextMenu x={menu.x} y={menu.y} onClose={() => setMenu(null)}
-          items={menu.out ? [{ label: `Quitar ${menu.key} del panel`, onClick: () => hide(menu.key) }] : [
-            { label: `${(sim.inputs.get(menu.key) ?? 'INT') === 'INT' ? '✓ ' : ''}Interruptor (sube y baja con cada clic)`, onClick: () => { sim.clearInputTipo(menu.key); onInputsChanged?.(); } },
-            { label: `${sim.inputs.get(menu.key) === 'NA' ? '✓ ' : ''}Pulsador NA (1 mientras se pulsa)`, onClick: () => { sim.setInputTipo(menu.key, 'NA'); onInputsChanged?.(); } },
-            { label: `${sim.inputs.get(menu.key) === 'NC' ? '✓ ' : ''}Pulsador NC (0 mientras se pulsa)`, onClick: () => { sim.setInputTipo(menu.key, 'NC'); onInputsChanged?.(); } },
+          items={menu.out ? [{ label: T.io.quitarDelPanel(R.mostrar(menu.key)), onClick: () => hide(menu.key) }] : [
+            { label: `${(sim.inputs.get(menu.key) ?? 'INT') === 'INT' ? '✓ ' : ''}${T.io.menuInterruptor}`, onClick: () => { sim.clearInputTipo(menu.key); onInputsChanged?.(); } },
+            { label: `${sim.inputs.get(menu.key) === 'NA' ? '✓ ' : ''}${T.io.menuNa}`, onClick: () => { sim.setInputTipo(menu.key, 'NA'); onInputsChanged?.(); } },
+            { label: `${sim.inputs.get(menu.key) === 'NC' ? '✓ ' : ''}${T.io.menuNc}`, onClick: () => { sim.setInputTipo(menu.key, 'NC'); onInputsChanged?.(); } },
             { sep: true, label: '' },
-            { label: `Quitar ${menu.key} del panel`, onClick: () => hide(menu.key) },
+            { label: T.io.quitarDelPanel(R.mostrar(menu.key)), onClick: () => hide(menu.key) },
           ]} />
       )}
     </div>
   );
 }
 
-function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps) {
+function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte, lang }: IoPanelProps) {
+  const R = rotulos(lang);
   const teclas = useSettings((s) => s.teclasEntradas);
   const modo = useSettings((s) => s.entradaClic);
   const setSettings = useSettings((s) => s.set);
@@ -344,20 +358,20 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
   return (
     <div>
       <div className="panel-sec">
-        <h4>Entradas</h4>
+        <h4>{T.io.entradas}</h4>
         <div className="row" style={{ gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-          <span className="faint" style={{ fontSize: 11.5 }}>Clic en una entrada:</span>
-          <div className="btn-group" role="group" aria-label="Comportamiento de las entradas al hacer clic">
-            <button className={`btn small ${modo === 'NA' ? 'active' : ''}`} title="Pulsador: vale 1 mientras mantienes pulsado (al menos un ciclo). Para marcha, paro y sensores."
-              onClick={() => { setSettings({ entradaClic: 'NA' }); sim.resetInputs(); }}>Pulsador</button>
-            <button className={`btn small ${modo === 'INT' ? 'active' : ''}`} title="Interruptor: cada clic cambia la entrada y se queda así."
-              onClick={() => { setSettings({ entradaClic: 'INT' }); sim.resetInputs(); }}>Interruptor</button>
+          <span className="faint" style={{ fontSize: 11.5 }}>{T.io.clicEnEntrada}</span>
+          <div className="btn-group" role="group" aria-label={T.io.comportamiento}>
+            <button className={`btn small ${modo === 'NA' ? 'active' : ''}`} title={T.io.pulsadorTitulo}
+              onClick={() => { setSettings({ entradaClic: 'NA' }); sim.resetInputs(); }}>{T.io.pulsador}</button>
+            <button className={`btn small ${modo === 'INT' ? 'active' : ''}`} title={T.io.interruptorClicTitulo}
+              onClick={() => { setSettings({ entradaClic: 'INT' }); sim.resetInputs(); }}>{T.io.interruptor}</button>
           </div>
-          <button className="btn small ghost" onClick={() => sim.resetInputs(true)} title="Poner todas las entradas en reposo (0; las NC a 1)">Todas a 0</button>
+          <button className="btn small ghost" onClick={() => sim.resetInputs(true)} title={T.io.reposoTitulo}>{T.io.todasA0}</button>
         </div>
         <div className="faint" style={{ fontSize: 11, marginBottom: 6 }}>
-          {modo === 'NA' ? 'Mantén pulsado para dejar la entrada a 1. ' : 'Cada clic cambia la entrada y se queda. '}
-          Clic derecho en una entrada para darle su propio tipo (NC, interruptor…){teclas ? ` · teclas 1–8 = E${keyByte}.0–E${keyByte}.7` : ''}.
+          {modo === 'NA' ? T.io.mantenPulsado : T.io.cadaClic}
+          {T.io.clicDerechoTipo(teclas ? T.io.teclasRango(keyByte) : '')}
         </div>
         {bytesOf(ins).map(([b, keys]) => (
           <div key={b} className="io-grid" style={{ marginBottom: 6 }}>
@@ -367,14 +381,14 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
               const m = k.startsWith(`E${keyByte}.`) ? /\.(\d)$/.exec(k) : null;
               return (
                 <button key={k} className={`io-in ${v ? 'on' : ''}`} aria-pressed={!!v}
-                  title={`${k}${symByAddr.get(k) ? ` «${symByAddr.get(k)}»` : ''} — ${TIPO_NAME[tipo]}`}
+                  title={`${R.mostrar(k)}${symByAddr.get(k) ? ` «${symByAddr.get(k)}»` : ''} — ${TIPO_NAME[tipo]}`}
                   onMouseDown={(e) => { if (e.button === 0) sim.press(k); }}
                   onMouseUp={(e) => { if (e.button === 0) sim.release(k); }}
                   onMouseLeave={() => { if (tipo === 'NA' || tipo === 'NC') sim.release(k); }}
                   onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) sim.press(k); } }}
                   onKeyUp={(e) => { if (e.key === ' ' || e.key === 'Enter') sim.release(k); }}
                   onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, key: k }); }}>
-                  <span className="addr"><span className={`led ${v ? 'on' : ''}`} />{k}</span>
+                  <span className="addr"><span className={`led ${v ? 'on' : ''}`} />{R.mostrar(k)}</span>
                   <span className="row2">
                     <span className="sym">{symByAddr.get(k) ?? '\u00a0'}</span>
                     <span className="chips">
@@ -387,17 +401,17 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
             })}
           </div>
         ))}
-        <AddInput onAdd={(k) => setExtraIn((x) => [...x, k])} />
+        <AddInput lang={lang} onAdd={(k) => setExtraIn((x) => [...x, k])} />
       </div>
       <div className="panel-sec">
-        <h4>Salidas</h4>
+        <h4>{T.io.salidas}</h4>
         {bytesOf(outs).map(([b, keys]) => (
           <div key={b} className="io-grid" style={{ marginBottom: 6 }}>
             {keys.map((k) => {
               const v = outBit(k);
               return (
                 <div key={k} className={`io-out ${v ? 'on' : ''}`} title={symByAddr.get(k)}>
-                  <span className="addr"><span className={`led ${v ? 'on' : ''}`} />{k}</span>
+                  <span className="addr"><span className={`led ${v ? 'on' : ''}`} />{R.mostrar(k)}</span>
                   <span className="sym">{symByAddr.get(k) ?? ' '}</span>
                 </div>
               );
@@ -408,7 +422,7 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
       <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} />
       {(analog.length > 0 || words.length > 0) && (
         <div className="panel-sec">
-          <h4>Analógicas y palabras</h4>
+          <h4>{T.io.analogicas}</h4>
           {analog.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
           {words.map((w) => <WordOut key={w} sim={sim} addr={w} />)}
         </div>
@@ -416,7 +430,7 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
       {menu && (
         <ContextMenu x={menu.x} y={menu.y} onClose={() => setMenu(null)}
           items={[
-            { label: `${!sim.inputs.has(menu.key) ? '✓ ' : ''}Como las demás (según el selector «Clic en una entrada»)`, onClick: () => { sim.clearInputTipo(menu.key); onInputsChanged?.(); } },
+            { label: `${!sim.inputs.has(menu.key) ? '✓ ' : ''}${T.io.comoLasDemas}`, onClick: () => { sim.clearInputTipo(menu.key); onInputsChanged?.(); } },
             { sep: true, label: '' },
             ...(['NA', 'NC', 'INT', 'SENSOR'] as InputTipo[]).map((t) => ({ label: `${sim.inputs.get(menu.key) === t ? '✓ ' : ''}${TIPO_NAME[t]}`, onClick: () => { sim.setInputTipo(menu.key, t); onInputsChanged?.(); } })),
           ]} />
@@ -425,16 +439,17 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte }: IoPanelProps)
   );
 }
 
-function AddInput({ onAdd }: { onAdd: (k: string) => void }) {
+function AddInput({ onAdd, lang }: { onAdd: (k: string) => void; lang?: 'de' | 'en' }) {
   const [v, setV] = useState('');
   return (
     <form className="row" style={{ marginTop: 4 }} onSubmit={(e) => {
       e.preventDefault();
-      const m = /^E\s*(\d+)\.([0-7])$/i.exec(v.trim());
+      // E 1.0 o, con la nemotecnia inglesa, I 1.0
+      const m = /^[EI]\s*(\d+)\.([0-7])$/i.exec(v.trim());
       if (m) { onAdd(`E${+m[1]}.${m[2]}`); setV(''); }
     }}>
-      <input className="input mono" style={{ width: 90, height: 24 }} placeholder="E 1.0" value={v} onChange={(e) => setV(e.target.value)} aria-label="Añadir entrada" />
-      <button className="btn small" type="submit">Añadir entrada</button>
+      <input className="input mono" style={{ width: 90, height: 24 }} placeholder={lang === 'en' ? 'I 1.0' : 'E 1.0'} value={v} onChange={(e) => setV(e.target.value)} aria-label={T.io.anadirEntrada} />
+      <button className="btn small" type="submit">{T.io.anadirEntrada}</button>
     </form>
   );
 }
@@ -446,7 +461,7 @@ function AnalogIn({ sim, addr }: { sim: SimController; addr: string }) {
     <div className="analog">
       <span className="mono">{addr}</span>
       <input type="range" min={0} max={32767} step={1} value={v} onChange={(e) => sim.setWord(addr, +e.target.value)} aria-label={addr} />
-      <input className="input mono" style={{ height: 24, width: 64 }} value={v} onChange={(e) => { const n = parseInt(e.target.value, 10); if (Number.isFinite(n)) sim.setWord(addr, n & 0xFFFF); }} aria-label={`${addr} valor`} />
+      <input className="input mono" style={{ height: 24, width: 64 }} value={v} onChange={(e) => { const n = parseInt(e.target.value, 10); if (Number.isFinite(n)) sim.setWord(addr, n & 0xFFFF); }} aria-label={T.io.valor(addr)} />
     </div>
   );
 }
@@ -459,7 +474,7 @@ function WordOut({ sim, addr }: { sim: SimController; addr: string }) {
     <div className="analog">
       <span className="mono">{addr}</span>
       <span className="mono">{Number.isNaN(raw) ? '—' : `${s16(raw)} · W#16#${raw.toString(16).toUpperCase().padStart(4, '0')}`}</span>
-      {isBcd ? <span className="seven" title="Display de 7 segmentos (BCD)">{raw.toString(16).padStart(4, '0')}</span> : <span />}
+      {isBcd ? <span className="seven" title={T.io.display}>{raw.toString(16).padStart(4, '0')}</span> : <span />}
     </div>
   );
 }

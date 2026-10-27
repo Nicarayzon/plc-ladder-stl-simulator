@@ -3,6 +3,8 @@
 // donde se descarga el instalador, que sustituye a la versión anterior (los proyectos se conservan).
 const REPO = 'Nicarayzon/plc-ladder-stl-simulator';
 const PAGINA_RELEASES = `https://github.com/${REPO}/releases`;
+// textos en español por defecto; el menú pasa los del idioma de la app
+const { textos } = require('./idioma.cjs');
 // pruebas automáticas: otra dirección (un servidor local) en lugar de GitHub
 const API_ULTIMA = process.env.AUTOMATIZACION_RELEASES_URL || `https://api.github.com/repos/${REPO}/releases/latest`;
 
@@ -27,62 +29,60 @@ function resumir(notas, max = 600) {
 }
 
 /** Qué hay que decir con la última Release que devuelve GitHub */
-function evaluar(actual, release) {
+function evaluar(actual, release, t = textos('es').actualizaciones) {
   const ultima = partes(release?.tag_name);
-  if (!ultima) return { tipo: 'error', motivo: 'GitHub no ha devuelto ninguna versión publicada' };
+  if (!ultima) return { tipo: 'error', motivo: t.motivos.sinRelease };
   const version = ultima.join('.');
   if (comparar(version, actual) > 0) return { tipo: 'nueva', version, url: release.html_url || PAGINA_RELEASES, notas: resumir(release.body) };
   return { tipo: 'al-dia', version };
 }
 
 /** Pide la última Release a GitHub (con `net.fetch` de Electron o, en las pruebas, otro `fetch`) */
-async function consultar(fetchFn, actual) {
+async function consultar(fetchFn, actual, t = textos('es').actualizaciones) {
   try {
     const r = await fetchFn(API_ULTIMA, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': `Automatizacion/${actual}` } });
-    if (r.status === 404) return { tipo: 'error', motivo: 'todavía no hay ninguna versión publicada' };
-    if (r.status === 403 || r.status === 429) return { tipo: 'error', motivo: 'GitHub limita las consultas seguidas: prueba otra vez dentro de un rato' };
-    if (!r.ok) return { tipo: 'error', motivo: `GitHub ha respondido con el código ${r.status}` };
-    return evaluar(actual, await r.json());
+    if (r.status === 404) return { tipo: 'error', motivo: t.motivos.sinVersiones };
+    if (r.status === 403 || r.status === 429) return { tipo: 'error', motivo: t.motivos.limite };
+    if (!r.ok) return { tipo: 'error', motivo: t.motivos.codigo(r.status) };
+    return evaluar(actual, await r.json(), t);
   } catch {
-    return { tipo: 'error', motivo: 'no hay conexión con GitHub' };
+    return { tipo: 'error', motivo: t.motivos.sinConexion };
   }
 }
 
 /** Cómo se instala encima de la anterior, según el sistema (con Wine, el .exe de Windows) */
-function pasos(plataforma) {
-  return plataforma === 'darwin'
-    ? 'Descarga el .dmg, sal de la app (⌘Q), abre el .dmg y arrastra Automatizacion a Aplicaciones eligiendo «Reemplazar».'
-    : 'Descarga Automatizacion-Setup-….exe, cierra la app y ejecuta el instalador: sustituye a la versión anterior.';
+function pasos(plataforma, t = textos('es').actualizaciones) {
+  return plataforma === 'darwin' ? t.pasosMac : t.pasosWin;
 }
 
 let buscando = false;
 
 /** Menú ▸ Buscar actualizaciones…: consulta y lo dice en un cuadro de diálogo; con versión nueva, «Actualizar» abre su página */
-async function buscarActualizaciones({ app, dialog, shell, net }, ventana, plataforma = process.platform) {
+async function buscarActualizaciones({ app, dialog, shell, net, t = textos('es').actualizaciones }, ventana, plataforma = process.platform) {
   if (buscando) return;
   buscando = true;
   try {
     const actual = app.getVersion();
-    const res = await consultar((url, o) => net.fetch(url, o), actual);
+    const res = await consultar((url, o) => net.fetch(url, o), actual, t);
     const caja = (o) => (ventana && !ventana.isDestroyed() ? dialog.showMessageBox(ventana, o) : dialog.showMessageBox(o));
     if (res.tipo === 'nueva') {
       const { response } = await caja({
-        type: 'info', title: 'Actualizaciones', buttons: ['Actualizar', 'Más tarde'], defaultId: 0, cancelId: 1,
-        message: `Hay una versión nueva: ${res.version}`,
-        detail: `Tienes la ${actual}. «Actualizar» abre su página en el navegador.\n\n${pasos(plataforma)} Tus proyectos se conservan.${res.notas ? `\n\nNovedades:\n${res.notas}` : ''}`,
+        type: 'info', title: t.titulo, buttons: [t.actualizar, t.masTarde], defaultId: 0, cancelId: 1,
+        message: t.hayNueva(res.version),
+        detail: `${t.tienes(actual)}\n\n${pasos(plataforma, t)} ${t.conservan}${res.notas ? `\n\n${t.novedades}\n${res.notas}` : ''}`,
       });
       if (response === 0) await shell.openExternal(res.url);
     } else if (res.tipo === 'al-dia') {
       await caja({
-        type: 'info', title: 'Actualizaciones', buttons: ['Aceptar'],
-        message: 'Tienes la última versión',
-        detail: comparar(actual, res.version) > 0 ? `Tienes la ${actual}; la última publicada es la ${res.version}.` : `Versión ${actual}.`,
+        type: 'info', title: t.titulo, buttons: [t.aceptar],
+        message: t.alDia,
+        detail: comparar(actual, res.version) > 0 ? t.masNueva(actual, res.version) : t.version(actual),
       });
     } else {
       const { response } = await caja({
-        type: 'warning', title: 'Actualizaciones', buttons: ['Aceptar', 'Abrir la página de versiones'], defaultId: 0, cancelId: 0,
-        message: 'No se ha podido comprobar si hay actualizaciones',
-        detail: `Motivo: ${res.motivo}.`,
+        type: 'warning', title: t.titulo, buttons: [t.aceptar, t.abrirVersiones], defaultId: 0, cancelId: 0,
+        message: t.noComprobado,
+        detail: t.motivo(res.motivo),
       });
       if (response === 1) await shell.openExternal(PAGINA_RELEASES);
     }

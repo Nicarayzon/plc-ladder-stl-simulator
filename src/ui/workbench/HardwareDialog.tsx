@@ -6,14 +6,16 @@ import type { SimController } from '../../sim/SimController';
 import { Modal, ContextMenu } from '../common/ui';
 import { Icon } from '../common/Icon';
 import { useSimTick } from './useSim';
+import { T } from '../../i18n';
+import { Rico } from '../common/Rico';
 
 /** Catálogo de estaciones que se pueden añadir. */
 const CATALOGO: { tipo: HwEstacion['tipo']; nombre: string; desc: string }[] = [
-  { tipo: 'CPU', nombre: 'CPU compacta', desc: 'CPU con 2 acumuladores y E/S integrada (entradas EB124…, salidas AB124…)' },
+  { tipo: 'CPU', nombre: T.hw.cpuCompacta, desc: T.hw.cpuCompactaDesc },
 ];
 
-const fmtS = (ms: number) => `${(ms / 1000).toLocaleString('es-ES')} s`;
-const fmtHz = (ms: number) => `${(1000 / ms).toLocaleString('es-ES', { maximumFractionDigits: 3 })} Hz`;
+const fmtS = (ms: number) => `${(ms / 1000).toLocaleString(T.locale)} s`;
+const fmtHz = (ms: number) => `${(1000 / ms).toLocaleString(T.locale, { maximumFractionDigits: 3 })} Hz`;
 
 export function nuevaEstacion(tipo: HwEstacion['tipo'], n: number): HwEstacion {
   return { id: `hw${Date.now().toString(36)}${n}`, tipo, nombre: `CPU(${n})`, marcaCiclo: { activa: true, byte: 0 } };
@@ -40,55 +42,55 @@ export function HardwareDialog({ sim, programa, onChange, onClose }: { sim: SimC
     (a.kind === 'bit' ? a.byte === byte : a.byte <= byte && byte < a.byte + a.size));
 
   return (
-    <Modal title="Hardware del proyecto" onClose={onClose} width={800}
-      footer={<button className="btn primary" onClick={onClose}>Cerrar</button>}>
+    <Modal title={T.hw.titulo} onClose={onClose} width={800}
+      footer={<button className="btn primary" onClick={onClose}>{T.comun.cerrar}</button>}>
       <div className="hw">
         <div className="hw-list">
           <div className="row" style={{ marginBottom: 8 }}>
-            <b style={{ fontSize: 12 }}>Estaciones</b>
+            <b style={{ fontSize: 12 }}>{T.hw.estaciones}</b>
             <span className="spacer" />
-            <button className="btn small" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })}><Icon name="plus" size={13} />Añadir</button>
+            <button className="btn small" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })}><Icon name="plus" size={13} />{T.hw.anadir}</button>
           </div>
           {estaciones.map((e) => (
             <button key={e.id} className={`hw-item ${actual?.id === e.id ? 'cur' : ''}`} onClick={() => setSel(e.id)}>
               <Icon name="cpu" size={15} />
               <span className="grow" style={{ textAlign: 'left' }}>
                 <span style={{ display: 'block', fontWeight: 600 }}>{e.nombre}</span>
-                <span className="faint" style={{ fontSize: 11 }}>{CATALOGO.find((c) => c.tipo === e.tipo)?.nombre ?? e.tipo}{e.marcaCiclo.activa ? ` · marca de ciclo MB${e.marcaCiclo.byte}` : ''}</span>
+                <span className="faint" style={{ fontSize: 11 }}>{CATALOGO.find((c) => c.tipo === e.tipo)?.nombre ?? e.tipo}{e.marcaCiclo.activa ? T.hw.marcaCicloMb(e.marcaCiclo.byte) : ''}</span>
               </span>
             </button>
           ))}
-          {!estaciones.length && <div className="faint" style={{ fontSize: 12 }}>Sin hardware configurado.</div>}
+          {!estaciones.length && <div className="faint" style={{ fontSize: 12 }}>{T.hw.sinHardware}</div>}
         </div>
         <div className="hw-props">
           {!actual ? (
             <div className="empty-proj" style={{ padding: '40px 10px' }}>
               <Icon name="cpu" size={28} />
-              <h3>El proyecto no tiene hardware</h3>
-              <p>Añade una estación para configurar la CPU (por ejemplo, la marca de ciclo).</p>
+              <h3>{T.hw.noTiene}</h3>
+              <p>{T.hw.anadeEstacion}</p>
               {CATALOGO.map((c) => <button key={c.tipo} className="btn primary" onClick={() => add(c.tipo)}><Icon name="plus" size={14} />{c.nombre}</button>)}
             </div>
           ) : (
             <>
               <div className="row" style={{ marginBottom: 12 }}>
-                <label className="row grow" style={{ gap: 6 }}>Nombre
-                  <input className="input grow" value={actual.nombre} onChange={(e) => upd(actual.id, { nombre: e.target.value })} aria-label="Nombre de la estación" />
+                <label className="row grow" style={{ gap: 6 }}>{T.hw.nombre}
+                  <input className="input grow" value={actual.nombre} onChange={(e) => upd(actual.id, { nombre: e.target.value })} aria-label={T.hw.nombreEstacion} />
                 </label>
-                <button className="btn small danger" onClick={() => { if (confirm(`¿Quitar «${actual.nombre}» del hardware?`)) setEstaciones(estaciones.filter((x) => x.id !== actual.id)); }}><Icon name="trash" size={13} />Quitar</button>
+                <button className="btn small danger" onClick={() => { if (confirm(T.hw.confirmarQuitar(actual.nombre))) setEstaciones(estaciones.filter((x) => x.id !== actual.id)); }}><Icon name="trash" size={13} />{T.hw.quitar}</button>
               </div>
               <div className="hw-sec">
-                <div className="hw-sec-title">Ciclo / marca de ciclo</div>
+                <div className="hw-sec-title">{T.hw.cicloSec}</div>
                 <div className="row" style={{ gap: 14, flexWrap: 'wrap' }}>
-                  <label className="check"><input type="checkbox" checked={actual.marcaCiclo.activa} onChange={(e) => upd(actual.id, { marcaCiclo: { ...actual.marcaCiclo, activa: e.target.checked } })} />Marca de ciclo</label>
-                  <label className="row" style={{ gap: 6 }}>Byte de marcas
+                  <label className="check"><input type="checkbox" checked={actual.marcaCiclo.activa} onChange={(e) => upd(actual.id, { marcaCiclo: { ...actual.marcaCiclo, activa: e.target.checked } })} />{T.hw.marcaCiclo}</label>
+                  <label className="row" style={{ gap: 6 }}>{T.hw.byteMarcas}
                     <input className="input mono" type="number" min={0} max={2047} style={{ width: 80 }} value={actual.marcaCiclo.byte} disabled={!actual.marcaCiclo.activa}
-                      onChange={(e) => { const n = Math.max(0, Math.min(2047, parseInt(e.target.value, 10) || 0)); upd(actual.id, { marcaCiclo: { ...actual.marcaCiclo, byte: n } }); }} aria-label="Byte de marcas" />
+                      onChange={(e) => { const n = Math.max(0, Math.min(2047, parseInt(e.target.value, 10) || 0)); upd(actual.id, { marcaCiclo: { ...actual.marcaCiclo, byte: n } }); }} aria-label={T.hw.byteMarcas} />
                   </label>
                 </div>
                 {actual.marcaCiclo.activa && (
                   <>
                     <table className="tbl hw-table">
-                      <thead><tr><th>Bit</th><th>Marca</th><th className="num">Periodo</th><th className="num">Frecuencia</th><th>Ahora</th></tr></thead>
+                      <thead><tr><th>{T.hw.bit}</th><th>{T.hw.marca}</th><th className="num">{T.hw.periodo}</th><th className="num">{T.hw.frecuencia}</th><th>{T.hw.ahora}</th></tr></thead>
                       <tbody>
                         {CLOCK_PERIODS_MS.map((ms, i) => {
                           const v = sim.cpu.clockByte === actual.marcaCiclo.byte ? (sim.cpu.M[actual.marcaCiclo.byte] >> i) & 1 : 0;
@@ -105,10 +107,10 @@ export function HardwareDialog({ sim, programa, onChange, onClose }: { sim: SimC
                       </tbody>
                     </table>
                     {conflicto(actual.marcaCiclo.byte) && (
-                      <div className="warn-text" style={{ fontSize: 12, marginTop: 8 }}>⚠ Tu programa escribe en MB{actual.marcaCiclo.byte}: la CPU sobrescribe ese byte en cada ciclo con la marca de ciclo.</div>
+                      <div className="warn-text" style={{ fontSize: 12, marginTop: 8 }}>{T.hw.conflicto(actual.marcaCiclo.byte)}</div>
                     )}
-                    <div className="faint" style={{ fontSize: 11.5, marginTop: 8 }}>
-                      Cada bit oscila solo, con pulso y pausa iguales (la mitad del periodo a 1 y la otra mitad a 0). Úsalos en el programa como cualquier marca, por ejemplo <span className="mono">U M {actual.marcaCiclo.byte}.5</span> para un intermitente de 1 s.
+                    <div className="faint simbolos-nota" style={{ fontSize: 11.5, marginTop: 8 }}>
+                      <Rico t={T.hw.explicacion(actual.marcaCiclo.byte)} />
                     </div>
                   </>
                 )}

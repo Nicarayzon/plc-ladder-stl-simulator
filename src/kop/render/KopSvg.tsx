@@ -5,6 +5,7 @@ import { CONT_EN, TEMP_EN } from '../model';
 import type { LBox, LItem, Layout, PowerRef } from '../layout';
 import type { Flow, Pw } from '../flow';
 import type { KopIssue } from '../validate';
+import { T } from '../../i18n';
 
 export const CW = 84;
 export const RH = 64;
@@ -267,7 +268,7 @@ export function KopSvg(o: RenderOpts) {
   }
 
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={o.fit ? { maxWidth: '100%', height: 'auto' } : undefined} className="kop-svg" role="img" aria-label="Esquema de contactos del segmento">
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={o.fit ? { maxWidth: '100%', height: 'auto' } : undefined} className="kop-svg" role="img" aria-label={T.kopEd.esquema}>
       <line x1={X0} y1={2} x2={X0} y2={H - 2} className={`rail ${flow ? (flow.get('rail') === 1 ? 'on' : flow.get('rail') === -1 ? 'skip' : '') : ''}`} />
       {out}
       {L.slots.map((s, i) => (

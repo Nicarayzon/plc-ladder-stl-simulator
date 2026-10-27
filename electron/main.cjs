@@ -1,8 +1,9 @@
 // Proceso principal de Electron: una ventana que carga la app web compilada (dist/).
 // Sin integración de Node en el renderizador; todo el simulador corre en la página.
-const { app, BrowserWindow, shell, Menu, dialog, net } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, net, ipcMain } = require('electron');
 const path = require('node:path');
 const { buscarActualizaciones } = require('./actualizaciones.cjs');
+const idiomas = require('./idioma.cjs');
 
 app.setName('Automatizacion');
 // pruebas automáticas: carpeta de datos aparte para no tocar los datos del usuario
@@ -11,63 +12,99 @@ if (process.env.AUTOMATIZACION_USER_DATA) app.setPath('userData', process.env.AU
 const isMac = process.platform === 'darwin';
 const devUrl = process.env.VITE_DEV_SERVER_URL;
 
+// idioma de la app: se decide al arrancar (ver idioma.cjs). Los menús cambian en cuanto se elige otro;
+// la página, al reiniciar.
+let inicio = { idioma: 'es', bienvenida: false };
+let idioma = 'es';
+
 function sendToRenderer(win, script) {
   if (win) win.webContents.executeJavaScript(script).catch(() => {});
 }
 
 function buildMenu() {
+  const t = idiomas.textos(idioma);
   // solo se conecta a GitHub al pulsarlo
-  const actualizaciones = { label: 'Buscar actualizaciones…', click: (_m, w) => { buscarActualizaciones({ app, dialog, shell, net }, w || BrowserWindow.getAllWindows()[0]); } };
+  const actualizaciones = { label: t.buscarActualizaciones, click: (_m, w) => { buscarActualizaciones({ app, dialog, shell, net, t: t.actualizaciones }, w || BrowserWindow.getAllWindows()[0]); } };
   const template = [
     ...(isMac ? [{
       label: 'Automatizacion',
       submenu: [
-        { role: 'about', label: 'Acerca de Automatizacion' },
+        { role: 'about', label: t.acercaDe },
         actualizaciones,
         { type: 'separator' },
-        { role: 'hide', label: 'Ocultar Automatizacion' },
-        { role: 'hideOthers', label: 'Ocultar otros' },
-        { role: 'unhide', label: 'Mostrar todo' },
+        { role: 'hide', label: t.ocultar },
+        { role: 'hideOthers', label: t.ocultarOtros },
+        { role: 'unhide', label: t.mostrarTodo },
         { type: 'separator' },
-        { role: 'quit', label: 'Salir de Automatizacion' },
+        { role: 'quit', label: t.salir },
       ],
     }] : []),
     {
-      label: 'Edición',
+      label: t.edicion,
       submenu: [
-        { label: 'Deshacer', accelerator: 'CmdOrCtrl+Z', click: (_m, w) => sendToRenderer(w, 'window.__appUndo ? window.__appUndo() : document.execCommand("undo")') },
-        { label: 'Rehacer', accelerator: 'Shift+CmdOrCtrl+Z', click: (_m, w) => sendToRenderer(w, 'window.__appRedo ? window.__appRedo() : document.execCommand("redo")') },
+        { label: t.deshacer, accelerator: 'CmdOrCtrl+Z', click: (_m, w) => sendToRenderer(w, 'window.__appUndo ? window.__appUndo() : document.execCommand("undo")') },
+        { label: t.rehacer, accelerator: 'Shift+CmdOrCtrl+Z', click: (_m, w) => sendToRenderer(w, 'window.__appRedo ? window.__appRedo() : document.execCommand("redo")') },
         { type: 'separator' },
-        { role: 'cut', label: 'Cortar' },
-        { role: 'copy', label: 'Copiar' },
-        { role: 'paste', label: 'Pegar' },
-        { role: 'selectAll', label: 'Seleccionar todo' },
+        { role: 'cut', label: t.cortar },
+        { role: 'copy', label: t.copiar },
+        { role: 'paste', label: t.pegar },
+        { role: 'selectAll', label: t.seleccionarTodo },
       ],
     },
     {
-      label: 'Ver',
+      label: t.ver,
       submenu: [
-        { role: 'resetZoom', label: 'Tamaño real' },
-        { role: 'zoomIn', label: 'Ampliar' },
-        { role: 'zoomOut', label: 'Reducir' },
+        { role: 'resetZoom', label: t.tamanoReal },
+        { role: 'zoomIn', label: t.ampliar },
+        { role: 'zoomOut', label: t.reducir },
         { type: 'separator' },
-        { role: 'togglefullscreen', label: 'Pantalla completa' },
-        ...(app.isPackaged ? [] : [{ role: 'reload', label: 'Recargar' }, { role: 'toggleDevTools', label: 'Herramientas de desarrollo' }]),
+        { role: 'togglefullscreen', label: t.pantallaCompleta },
+        ...(app.isPackaged ? [] : [{ role: 'reload', label: t.recargar }, { role: 'toggleDevTools', label: t.herramientasDesarrollo }]),
       ],
     },
     {
-      label: 'Ventana',
+      label: t.ventana,
       submenu: [
-        { role: 'minimize', label: 'Minimizar' },
-        { role: 'zoom', label: 'Zoom' },
-        ...(isMac ? [{ type: 'separator' }, { role: 'front', label: 'Traer todo al frente' }] : [{ role: 'close', label: 'Cerrar' }]),
+        { role: 'minimize', label: t.minimizar },
+        { role: 'zoom', label: t.zoom },
+        ...(isMac ? [{ type: 'separator' }, { role: 'front', label: t.traerAlFrente }] : [{ role: 'close', label: t.cerrar }]),
       ],
     },
     // en Windows no hay menú con el nombre de la app: va en Ayuda
-    ...(isMac ? [] : [{ label: 'Ayuda', submenu: [actualizaciones] }]),
+    ...(isMac ? [] : [{ label: t.ayuda, submenu: [actualizaciones] }]),
   ];
   return Menu.buildFromTemplate(template);
 }
+
+/** Menú y «Acerca de» en el idioma actual */
+function aplicarIdioma() {
+  app.setAboutPanelOptions({
+    applicationName: 'Automatizacion',
+    applicationVersion: app.getVersion(),
+    version: app.getVersion(),
+    copyright: idiomas.textos(idioma).copyright,
+  });
+  Menu.setApplicationMenu(buildMenu());
+}
+
+/** Solo la página de la app (no una dirección externa) puede cambiar el idioma o reiniciar */
+const dePagina = (e) => {
+  const url = e.senderFrame?.url ?? '';
+  return url.startsWith('file://') || (!!devUrl && url.startsWith(devUrl));
+};
+
+ipcMain.on('idioma:inicio', (e) => { e.returnValue = inicio; });
+ipcMain.handle('idioma:guardar', (e, nuevo) => {
+  if (!dePagina(e) || !idiomas.guardar(app, nuevo)) return false;
+  idioma = nuevo;
+  aplicarIdioma();
+  return true;
+});
+ipcMain.on('app:reiniciar', (e) => {
+  if (!dePagina(e)) return;
+  app.relaunch();
+  app.exit(0);
+});
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -83,6 +120,7 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
       spellcheck: false,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
   });
   if (devUrl) win.loadURL(devUrl);
@@ -93,7 +131,7 @@ function createWindow() {
     if (frameName === 'senales' && (url === 'about:blank' || url === '')) {
       return {
         action: 'allow',
-        overrideBrowserWindowOptions: { title: 'Señales E/S', minWidth: 560, minHeight: 220, backgroundColor: '#14161a', fullscreenable: true },
+        overrideBrowserWindowOptions: { title: idiomas.textos(idioma).senales, minWidth: 560, minHeight: 220, backgroundColor: '#14161a', fullscreenable: true },
       };
     }
     if (/^https?:/i.test(url)) shell.openExternal(url);
@@ -114,13 +152,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  app.setAboutPanelOptions({
-    applicationName: 'Automatizacion',
-    applicationVersion: app.getVersion(),
-    version: app.getVersion(),
-    copyright: '© 2026 Arzath — Práctica de autómatas en KOP y AWL',
-  });
-  Menu.setApplicationMenu(buildMenu());
+  inicio = idiomas.alArrancar(app);
+  idioma = inicio.idioma;
+  aplicarIdioma();
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

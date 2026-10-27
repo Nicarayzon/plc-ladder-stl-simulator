@@ -5,6 +5,7 @@ import { clockByteOf, segId, segTitulo, type Programa, type ProgramCompile, type
 import type { CompiledProgram } from './compiler';
 import { analyzeUsage, bitKey } from './usage';
 import { normBlockName } from './compiler';
+import { T } from '../i18n';
 
 export interface LintOptions { ncInputs?: string[] }
 
@@ -23,11 +24,11 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
     const si = b ? b.segmentos.findIndex((s) => segId(s) === o?.seg) : -1;
     const s = b && si >= 0 ? b.segmentos[si] : undefined;
     const t = s ? segTitulo(s) : undefined;
-    return { block: o?.block ?? '', seg: o?.seg, segIndex: si >= 0 ? si : undefined, txt: `${o?.block ?? ''}${si >= 0 ? ` · Segmento ${si + 1}${t ? ` «${t}»` : ''}` : ''}${o?.line && s?.lang === 'AWL' ? `, línea ${o.line}` : ''}` };
+    return { block: o?.block ?? '', seg: o?.seg, segIndex: si >= 0 ? si : undefined, txt: T.lint.donde(o?.block ?? '', si >= 0 ? si + 1 : null, t, o?.line && s?.lang === 'AWL' ? o.line : undefined) };
   };
   const add = (id: string, ins: Instr, msg: string) => {
     const w = where(ins);
-    out.push({ block: w.block, seg: w.seg, segIndex: w.segIndex, line: ins.origin?.line ?? 0, origin: ins.origin, msg: `${id}: ${msg}`, severity: 'aviso', full: `${id} · ${w.txt}: ${msg} (ver ${LINT_REF[id]} de la teoría)` });
+    out.push({ block: w.block, seg: w.seg, segIndex: w.segIndex, line: ins.origin?.line ?? 0, origin: ins.origin, msg: `${id}: ${msg}`, severity: 'aviso', full: `${id} · ${w.txt}: ${msg}${T.lint.verTeoria(LINT_REF[id])}` });
   };
 
   const all: { block: string; ins: Instr; pc: number }[] = [];
@@ -42,7 +43,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
       assigns.set(k, [...(assigns.get(k) ?? []), ins]);
     }
   }
-  for (const [k, list] of assigns) if (list.length > 1) add('L01', list[list.length - 1], `${k} se asigna en ${list.length} sitios: solo cuenta la última asignación del ciclo.`);
+  for (const [k, list] of assigns) if (list.length > 1) add('L01', list[list.length - 1], T.lint.L01(k, list.length));
 
   // L02: comparación con /ER = 1 (sustituye al RLO)
   for (const [, b] of pc.cp.blocks) {
@@ -51,7 +52,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
     b.instrs.forEach((ins, i) => {
       if (targets.has(i)) fc = -1;
       const mn = ins.mn;
-      if (CMP.has(mn) && fc === 1) add('L02', ins, 'la comparación sustituye al RLO de la cadena anterior: ponla entre U( … ) para combinarla.');
+      if (CMP.has(mn) && fc === 1) add('L02', ins, T.lint.L02);
       if (['U', 'UN', 'O', 'ON', 'X', 'XN', 'FP', 'FN', ')'].includes(mn) || CMP.has(mn)) fc = 1;
       else if (['=', 'S', 'R', 'SET', 'CLR', 'O0', 'SI', 'SV', 'SE', 'SS', 'SA', 'ZV', 'ZR', 'FR', 'BEB', 'MCR(', ')MCR', 'CC', 'UC', 'CALL', 'U(', 'UN(', 'O(', 'ON(', 'X(', 'XN('].includes(mn)) fc = 0;
       else if (JUMPS.has(mn)) fc = mn === 'SPA' || mn === 'SPL' ? -1 : ['SPB', 'SPBN', 'SPBB', 'SPBNB', 'SPBI', 'SPBIN'].includes(mn) ? 0 : fc;
@@ -62,15 +63,15 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
   const edges = new Map<string, Instr[]>();
   for (const { ins } of all) if ((ins.mn === 'FP' || ins.mn === 'FN') && !ins.op?.ind) edges.set(opKey(ins), [...(edges.get(opKey(ins)) ?? []), ins]);
   for (const [k, list] of edges) {
-    if (list.length > 1) add('L03', list[1], `la marca de flanco ${k} se usa en ${list.length} flancos: cada flanco necesita su propia marca.`);
+    if (list.length > 1) add('L03', list[1], T.lint.L03(k, list.length));
     const other = all.find(({ ins }) => ['=', 'S', 'R'].includes(ins.mn) && opKey(ins) === k);
-    if (other) add('L03', other.ins, `${k} es una marca de flanco y además se escribe aquí: el flanco dejará de funcionar.`);
+    if (other) add('L03', other.ins, T.lint.L03b(k));
   }
 
   // L04: temporizador arrancado en más de un sitio
   const starts = new Map<string, Instr[]>();
   for (const { ins } of all) if (['SI', 'SV', 'SE', 'SS', 'SA'].includes(ins.mn)) starts.set(opKey(ins), [...(starts.get(opKey(ins)) ?? []), ins]);
-  for (const [k, list] of starts) if (list.length > 1) add('L04', list[1], `${k.replace(/^T/, 'T ')} se arranca en ${list.length} sitios.`);
+  for (const [k, list] of starts) if (list.length > 1) add('L04', list[1], T.lint.L04(k.replace(/^T/, 'T '), list.length));
 
   // L05: L <entero> justo antes de arrancar un temporizador
   for (const [, b] of pc.cp.blocks) {
@@ -78,7 +79,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
       if (!['SI', 'SV', 'SE', 'SS', 'SA'].includes(ins.mn) || i === 0) return;
       const prev = b.instrs[i - 1];
       if (prev.mn === 'L' && prev.op?.kind === 'const' && (prev.op.ctype === 'INT' || prev.op.ctype === 'DINT'))
-        add('L05', prev, `para cargar un tiempo usa S5T#… (L ${prev.op.text} no es un S5TIME y la CPU puede pasar a STOP).`);
+        add('L05', prev, T.lint.L05(prev.op.text));
     });
   }
 
@@ -91,7 +92,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
       const bytes = op.kind === 'bit' ? [op.byte!] : op.kind === 'mem' ? Array.from({ length: op.size! }, (_, j) => op.byte! + j) : [];
       const reads = ['U', 'UN', 'O', 'ON', 'X', 'XN', 'L', 'FP', 'FN'].includes(ins.mn);
       if (reads && bytes.some((x) => !written.has(x)) && !(ins.mn === 'FP' || ins.mn === 'FN')) {
-        add('L06', ins, `${op.text} es un dato local (L) y se lee antes de escribirlo: su valor es imprevisible.`);
+        add('L06', ins, T.lint.L06(op.text));
         bytes.forEach((x) => written.add(x));
       }
       if (['=', 'S', 'R', 'T', 'FP', 'FN'].includes(ins.mn)) bytes.forEach((x) => written.add(x));
@@ -117,7 +118,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
       if (reported.has(key)) continue;
       reported.add(key);
       const shared = Array.from({ length: a.start + a.size - c.start }, (_, k) => `MB ${c.start + k}`).slice(0, 3).join(', ');
-      add('L07', c.ins, `${a.ins.op!.text} y ${c.ins.op!.text} se solapan (comparten ${shared}).`);
+      add('L07', c.ins, T.lint.L07(a.ins.op!.text, c.ins.op!.text, shared));
     }
   }
 
@@ -126,7 +127,7 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
   if (nc.size) {
     for (const { ins } of all) {
       if ((ins.mn === 'UN' || ins.mn === 'ON') && ins.op?.kind === 'bit' && nc.has(opKey(ins)))
-        add('L08', ins, `${opKey(ins)} es un pulsador NC (vale 1 en reposo): un paro NC se programa con contacto NA (U).`);
+        add('L08', ins, T.lint.L08(opKey(ins)));
     }
   }
 
@@ -139,11 +140,11 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
       const init = b.instrs[t - 1];
       if (init?.mn !== 'L') return;
       if (init.op?.kind === 'const') {
-        if ((init.op.value! & 0xFFFF) === 0) add('L09', init, 'el contador del LOOP empieza en 0: dará 65 535 vueltas de más.');
+        if ((init.op.value! & 0xFFFF) === 0) add('L09', init, T.lint.L09);
         return;
       }
       const guard = b.instrs.slice(Math.max(0, t - 8), t).some((x) => ['SPZ', 'SPB', 'SPBN', 'SPMZ', 'SPPZ', 'SPN', 'SPP', 'BEB'].includes(x.mn));
-      if (!guard) add('L09', init, `el contador del LOOP se carga de ${init.op?.text}: si vale 0, LOOP da 65 535 vueltas de más (compruébalo antes con un salto).`);
+      if (!guard) add('L09', init, T.lint.L09b(init.op?.text ?? ''));
       void i;
     });
   }
@@ -153,13 +154,13 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
   for (const [name, b] of pc.cp.blocks) {
     const first = b.instrs.find((i) => i.line > 0 || i.origin?.elem);
     if (!first) continue;
-    if (name.startsWith('FC') && !called.has(name)) add('B01', first, `${name} no se llama desde ningún bloque (falta UC/CC/CALL ${name.replace('FC', 'FC ')} en el OB1): su código no se ejecuta.`);
-    if (name === 'OB100' && b.instrs.some((i) => i.mn === '=' || i.mn === 'T')) add('B02', first, 'el OB100 solo se ejecuta una vez, al pasar a RUN: las asignaciones que pongas aquí no se repiten en cada ciclo (¿querías escribirlas en el OB1?).');
+    if (name.startsWith('FC') && !called.has(name)) add('B01', first, T.lint.B01(name, name.replace('FC', 'FC ')));
+    if (name === 'OB100' && b.instrs.some((i) => i.mn === '=' || i.mn === 'T')) add('B02', first, T.lint.B02);
   }
   // B03: marcas que se consultan pero que el programa nunca escribe (¿marca de ciclo sin activar?)
   for (const m of marcasNuncaEscritas(pc.cp, clockByteOf(p))) {
     const ins = all.find(({ ins: i }) => i.op?.kind === 'bit' && i.op.area === 'M' && !i.op.ind && bitKey('M', i.op.byte!, i.op.bit!) === m.key)?.ins;
-    if (ins) add('B03', ins, `${m.key.replace('M', 'M ')} se consulta pero el programa nunca la escribe, así que vale siempre 0. Si querías un intermitente, activa la marca de ciclo en Hardware (byte ${m.byte}).`);
+    if (ins) add('B03', ins, T.lint.B03(m.key.replace('M', 'M '), m.byte));
   }
   return out;
 }

@@ -2,6 +2,7 @@
 import type { TraceRow } from './cpu';
 import { cleanLine, splitMnemonic } from './compiler';
 import { s16, s32 } from './num';
+import { T as TX } from '../i18n';
 
 const LABEL_RE = /^([A-Za-z_][A-Za-z0-9_]{0,3})\s*:(?!=)\s*(.*)$/;
 
@@ -21,6 +22,7 @@ const b = (v: number) => String(v);
 const neg = (mn: string) => mn.endsWith('N') || mn.endsWith('N(');
 
 function logicSentence(r: TraceRow, op: string): string {
+  const X = TX.traza;
   const mn = r.mn;
   const v = r.opVal ?? r.sta;
   const isNeg = neg(mn);
@@ -28,15 +30,15 @@ function logicSentence(r: TraceRow, op: string): string {
   const xs = isNeg ? `NOT ${op} = ¬${v} = ${x}` : `${op} = ${v}`;
   const base = mn[0];
   const sym = base === 'U' ? '∧' : base === 'O' ? '∨' : '⊕';
-  if (r.or_antes && base === 'U') return `El bit OR está a 1 (un grupo anterior dio 1): el resultado se queda en 1.`;
+  if (r.or_antes && base === 'U') return X.orA1;
   if (!r.er_antes) {
-    if (r.or_antes) return `Primera consulta (/ER = 0) con OR = 1: RLO := (${xs}) ∨ 1 = 1.`;
-    return `Primera consulta (/ER = 0): RLO := ${xs}.`;
+    if (r.or_antes) return X.primeraConOr(xs);
+    return X.primera(xs);
   }
   const inner = base === 'U' ? r.rlo_antes & x : base === 'O' ? r.rlo_antes | x : r.rlo_antes ^ x;
-  if (r.or_antes) return `RLO := (${r.rlo_antes} ${sym} ${x}) ∨ OR(1) = 1. Después OR = 0.`;
+  if (r.or_antes) return X.conOr(r.rlo_antes, sym, x);
   void inner;
-  return `RLO := RLO ${sym} ${isNeg ? `¬${op}` : op} = ${r.rlo_antes} ${sym} ${x} = ${r.rlo}.`;
+  return X.combina(sym, isNeg ? `¬${op}` : op, r.rlo_antes, x, r.rlo);
 }
 
 const CMP_TXT: Record<string, string> = { '==': '=', '<>': '≠', '>': '>', '<': '<', '>=': '≥', '<=': '≤' };
@@ -48,91 +50,92 @@ function acuVal(v: number, typ: string): string {
 }
 
 export function explainRow(r: TraceRow): string {
+  const X = TX.traza;
   const mn = r.mn;
   const op = rowOperand(r.instr);
-  const T = (n: number) => (n ? 'sí' : 'no');
+  const T = (n: number) => (n ? X.si : X.no);
   switch (mn) {
     case 'U': case 'UN': case 'O': case 'ON': case 'X': case 'XN':
       return logicSentence(r, op);
     case 'O0':
-      if (!r.er_antes) return 'O sin operando con /ER = 0: no hay grupo Y que cerrar; la siguiente instrucción será primera consulta.';
-      return `Cierra el grupo Y: OR := RLO = ${r.rlo_antes}; la siguiente instrucción será primera consulta.`;
+      if (!r.er_antes) return X.o0SinCadena;
+      return X.o0(r.rlo_antes);
     case 'U(': case 'UN(': case 'O(': case 'ON(': case 'X(': case 'XN(':
-      return `Abre paréntesis: guarda RLO = ${r.rlo_antes}, OR = ${r.or_antes} y /ER = ${r.er_antes} en la pila; dentro empieza una cadena nueva.`;
+      return X.abreParentesis(r.rlo_antes, r.or_antes, r.er_antes);
     case ')': {
       const n = r.nest;
-      if (!n) return 'Cierra el paréntesis.';
+      if (!n) return X.cierraParentesis;
       const k = n.kind;
       const sym = k[0] === 'U' ? '∧' : k[0] === 'O' ? '∨' : '⊕';
       const innerTxt = neg(k) ? `¬(${r.rlo_antes})` : `(${r.rlo_antes})`;
-      if (!n.fc) return `Se cierra el paréntesis: como antes no había cadena (/ER = 0), RLO := ${innerTxt} = ${r.rlo}.`;
-      return `Se recupera el RLO de antes del paréntesis (${n.rlo}) y se combina: ${n.rlo} ${sym} ${innerTxt} = ${r.rlo}.`;
+      if (!n.fc) return X.cierraSinCadena(innerTxt, r.rlo);
+      return X.cierraCombina(n.rlo, sym, innerTxt, r.rlo);
     }
     case '=':
-      return `${op} := RLO = ${r.sta}. Cierra la cadena (/ER = 0).`;
+      return X.asigna(op, r.sta);
     case 'S':
-      if (/^Z/i.test(op)) return r.rlo_antes ? `S ${op} con RLO = 1: si es un flanco, carga en el contador el valor BCD de ACU1.` : `RLO = 0: S ${op} no hace nada.`;
-      return r.rlo_antes ? `Como RLO = 1, pone ${op} a 1.` : `RLO = 0: S no hace nada (${op} = ${r.sta}).`;
+      if (/^Z/i.test(op)) return r.rlo_antes ? X.sContador(op) : X.sNada(op);
+      return r.rlo_antes ? X.sPone(op) : X.sNoHace(op, r.sta);
     case 'R':
-      return r.rlo_antes ? `Como RLO = 1, pone ${op} a 0.` : `RLO = 0: R no hace nada.`;
-    case 'NOT': return `Invierte el RLO: ${r.rlo_antes} → ${r.rlo}.`;
-    case 'SET': return 'RLO := 1 y cierra la cadena (/ER = 0).';
-    case 'CLR': return 'RLO := 0 y cierra la cadena (/ER = 0).';
-    case 'SAVE': return `Guarda el RLO en RB: RB := ${r.br}.`;
+      return r.rlo_antes ? X.rPone(op) : X.rNoHace;
+    case 'NOT': return X.not(r.rlo_antes, r.rlo);
+    case 'SET': return X.set;
+    case 'CLR': return X.clr;
+    case 'SAVE': return X.save(r.br);
     case 'FP':
-      return `Flanco positivo: RLO de entrada = ${r.sta} y la marca ${op} valía ${r.opVal ?? '?'} → RLO := ${r.rlo}; la marca guarda ${r.sta}.`;
+      return X.fp(r.sta, op, r.opVal ?? '?', r.rlo);
     case 'FN':
-      return `Flanco negativo: RLO de entrada = ${r.sta} y la marca ${op} valía ${r.opVal ?? '?'} → RLO := ${r.rlo}; la marca guarda ${r.sta}.`;
+      return X.fn(r.sta, op, r.opVal ?? '?', r.rlo);
     case 'L':
-      return `ACU2 := ACU1 (${r.acu1_antes}); ACU1 := ${op} = ${r.acu1}. No toca el RLO.`;
+      return X.l(r.acu1_antes, op, r.acu1);
     case 'LC':
-      return `ACU2 := ACU1; ACU1 := valor de ${op} en BCD = W#16#${(r.acu1 & 0xFFFF).toString(16).toUpperCase().padStart(4, '0')}.`;
+      return X.lc(op, (r.acu1 & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'));
     case 'T':
-      return `${op} := ACU1 = ${r.acu1}. La transferencia no depende del RLO.`;
+      return X.t(op, r.acu1);
     case 'SI': case 'SV': case 'SE': case 'SS': case 'SA': {
-      const nm: Record<string, string> = { SI: 'impulso', SV: 'impulso prolongado', SE: 'retardo a la conexión', SS: 'retardo a la conexión con memoria', SA: 'retardo a la desconexión' };
-      return `${mn} ${op} (${nm[mn]}) con RLO = ${r.rlo}: ${mn === 'SA' ? (r.rlo ? 'mientras S = 1 la salida vale 1 y no cuenta' : 'en el flanco de bajada carga el tiempo y empieza a contar') : r.rlo ? 'si es un flanco de subida, carga el tiempo de ACU1 y arranca' : mn === 'SI' || mn === 'SE' ? 'con S = 0 se para y Q = 0' : 'S = 0 no lo para'}.`;
+      const nm: Record<string, string> = X.temporizadores;
+      return X.temporizador(mn, op, nm[mn], r.rlo, mn === 'SA' ? (r.rlo ? X.saS1 : X.saFlanco) : r.rlo ? X.tArranca : mn === 'SI' || mn === 'SE' ? X.tPara : X.tNoPara);
     }
-    case 'FR': return `Habilitación (FR) ${op}: con un flanco de subida rearma el flanco de arranque.`;
-    case 'ZV': return r.rlo ? `ZV ${op}: si hay flanco de subida, cuenta +1.` : `ZV ${op} con RLO = 0: no cuenta.`;
-    case 'ZR': return r.rlo ? `ZR ${op}: si hay flanco de subida, cuenta −1.` : `ZR ${op} con RLO = 0: no cuenta.`;
+    case 'FR': return X.fr(op);
+    case 'ZV': return r.rlo ? X.zv(op) : X.zvNo(op);
+    case 'ZR': return r.rlo ? X.zr(op) : X.zrNo(op);
   }
   if (/^(==|<>|>=|<=|>|<)[IDR]$/.test(mn)) {
     const typ = mn[mn.length - 1];
     const rel = mn.slice(0, -1);
-    return `Compara ACU2 (${acuVal(r.acu2, typ)}) ${CMP_TXT[rel]} ACU1 (${acuVal(r.acu1, typ)}): ${T(r.rlo)} → RLO := ${r.rlo}. La comparación sustituye al RLO anterior${r.er_antes ? ' (¡ojo! había una cadena abierta: usa U( … ) para combinarla)' : ''}.`;
+    return X.compara(acuVal(r.acu2, typ), CMP_TXT[rel], acuVal(r.acu1, typ), T(r.rlo), r.rlo, !!r.er_antes);
   }
   if (mn === '+I' || mn === '-I' || mn === '*I' || mn === '/I') {
     const a = s16(r.acu2);
     const bb = s16(r.acu1_antes);
     const exact = mn === '+I' ? a + bb : mn === '-I' ? a - bb : mn === '*I' ? a * bb : bb === 0 ? NaN : Math.trunc(a / bb);
     const sym = mn[0] === '*' ? '×' : mn[0] === '/' ? '÷' : mn[0] === '-' ? '−' : '+';
-    if (mn === '/I' && bb === 0) return `División entre 0: ACU1 no cambia; A1A0 = 11 y OV = OS = 1.`;
-    if (r.ov) return `${a} ${sym} ${bb} = ${exact} no cabe en INT → queda ${mn === '*I' ? r.acu1 : r.acu1_int}; OV = OS = 1.`;
-    if (mn === '/I') return `${a} ÷ ${bb}: cociente ${r.acu1_int} en ACU1-L y resto ${s16(r.acu1 >>> 16)} en ACU1-H.`;
-    return `ACU1 := ACU2 ${sym} ACU1 = ${a} ${sym} ${bb} = ${mn === '*I' ? r.acu1 : r.acu1_int}.`;
+    if (mn === '/I' && bb === 0) return X.divCero;
+    if (r.ov) return X.noCabe(a, sym, bb, exact, mn === '*I' ? r.acu1 : r.acu1_int);
+    if (mn === '/I') return X.divide(a, bb, r.acu1_int, s16(r.acu1 >>> 16));
+    return X.aritmetica(sym, a, bb, mn === '*I' ? r.acu1 : r.acu1_int);
   }
-  if (['+D', '-D', '*D', '/D', 'MOD'].includes(mn)) return `Operación de 32 bits: ACU1 := ${r.acu1}${r.ov ? ' (desbordamiento: OV = OS = 1)' : ''}.`;
-  if (['+R', '-R', '*R', '/R', 'SQR', 'SQRT', 'EXP', 'LN', 'SIN', 'COS', 'TAN', 'ASIN', 'ACOS', 'ATAN', 'ABS'].includes(mn)) return `Operación en coma flotante (REAL)${r.ov ? ': resultado no válido o fuera de rango, OV = OS = 1' : ''}.`;
+  if (['+D', '-D', '*D', '/D', 'MOD'].includes(mn)) return X.op32(r.acu1, !!r.ov);
+  if (['+R', '-R', '*R', '/R', 'SQR', 'SQRT', 'EXP', 'LN', 'SIN', 'COS', 'TAN', 'ASIN', 'ACOS', 'ATAN', 'ABS'].includes(mn)) return X.real(!!r.ov);
   if (mn.startsWith('SP') || mn === 'LOOP') {
-    if (mn === 'SPA') return `Salta siempre a ${op}.`;
-    if (mn === 'SPB' || mn === 'SPBB') return r.jumped ? `Salta a ${op} porque RLO = 1 (y deja RLO = 1, /ER = 0).` : `No salta porque RLO = 0, pero ${mn} deja RLO = 1 y /ER = 0.`;
-    if (mn === 'SPBN' || mn === 'SPBNB') return r.jumped ? `Salta a ${op} porque RLO = 0 (y deja RLO = 1, /ER = 0).` : `No salta porque RLO = 1; ${mn} deja RLO = 1 y /ER = 0.`;
-    if (mn === 'LOOP') return r.jumped ? `ACU1-L := ACU1-L − 1 = ${r.acu1_int & 0xFFFF}; como no es 0, vuelve a ${op}.` : 'ACU1-L llega a 0: sale del bucle.';
-    return r.jumped ? `Se cumple la condición: salta a ${op}.` : 'No se cumple la condición: sigue con la instrucción siguiente.';
+    if (mn === 'SPA') return X.spa(op);
+    if (mn === 'SPB' || mn === 'SPBB') return r.jumped ? X.spbSalta(op) : X.spbNo(mn);
+    if (mn === 'SPBN' || mn === 'SPBNB') return r.jumped ? X.spbnSalta(op) : X.spbnNo(mn);
+    if (mn === 'LOOP') return r.jumped ? X.loop(r.acu1_int & 0xFFFF, op) : X.loopFin;
+    return r.jumped ? X.saltoSi(op) : X.saltoNo;
   }
-  if (mn === 'BEB') return r.rlo_antes ? 'RLO = 1: termina el bloque.' : 'RLO = 0: no termina el bloque; deja RLO = 1 y /ER = 0.';
-  if (mn === 'BE' || mn === 'BEA') return 'Fin del bloque.';
-  if (mn === 'UC' || mn === 'CALL') return `Llama a ${op}; al volver, /ER = 0 y OR = 0.`;
-  if (mn === 'CC') return r.rlo_antes ? `RLO = 1: llama a ${op}.` : `RLO = 0: no llama a ${op}.`;
+  if (mn === 'BEB') return r.rlo_antes ? X.bebSi : X.bebNo;
+  if (mn === 'BE' || mn === 'BEA') return X.be;
+  if (mn === 'UC' || mn === 'CALL') return X.llama(op);
+  if (mn === 'CC') return r.rlo_antes ? X.ccSi(op) : X.ccNo(op);
   if (['ITB', 'BTI', 'ITD', 'DTR', 'RND', 'TRUNC', 'RND+', 'RND-', 'BTD', 'DTB', 'INVI', 'INVD', 'NEGI', 'NEGD', 'NEGR', 'CAW', 'CAD'].includes(mn))
-    return `Conversión ${mn}: ACU1 := ${r.acu1}${r.ov ? ' (fuera de rango: OV = OS = 1, ACU1 no cambia)' : ''}.`;
-  if (['UW', 'OW', 'XOW', 'UD', 'OD', 'XOD'].includes(mn)) return `Lógica de palabras: ACU1 := W#16#${(r.acu1 >>> 0).toString(16).toUpperCase()}; A1 = ${r.cc1} (resultado ${r.cc1 ? '≠' : '='} 0).`;
-  if (['SLW', 'SRW', 'SSI', 'SLD', 'SRD', 'SSD', 'RLD', 'RRD', 'RLDA', 'RRDA'].includes(mn)) return `Desplazamiento/rotación: ACU1 := ${r.acu1}; A1 = último bit que salió (${r.cc1}).`;
-  if (mn === 'TAK') return 'Intercambia ACU1 y ACU2.';
-  if (mn === 'INC' || mn === 'DEC') return `${mn} solo actúa sobre el byte bajo de ACU1 (sin acarreo): ACU1-LL := ${r.acu1 & 0xFF}.`;
-  if (mn === '+') return `Suma la constante a ACU1 sin tocar los bits de estado: ACU1 := ${r.acu1}.`;
-  if (mn === 'AUF') return `Abre ${op}.`;
-  if (mn === 'NOP' || mn === 'BLD') return 'No hace nada.';
+    return X.conversion(mn, r.acu1, !!r.ov);
+  if (['UW', 'OW', 'XOW', 'UD', 'OD', 'XOD'].includes(mn)) return X.palabras((r.acu1 >>> 0).toString(16).toUpperCase(), r.cc1);
+  if (['SLW', 'SRW', 'SSI', 'SLD', 'SRD', 'SSD', 'RLD', 'RRD', 'RLDA', 'RRDA'].includes(mn)) return X.desplaza(r.acu1, r.cc1);
+  if (mn === 'TAK') return X.tak;
+  if (mn === 'INC' || mn === 'DEC') return X.incDec(mn, r.acu1 & 0xFF);
+  if (mn === '+') return X.suma(r.acu1);
+  if (mn === 'AUF') return X.auf(op);
+  if (mn === 'NOP' || mn === 'BLD') return X.nada;
   return '';
 }

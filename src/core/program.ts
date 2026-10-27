@@ -5,6 +5,7 @@ import { CompileError } from './errors';
 import { compileKopSegment, newKopCtx, type KopLine } from '../kop/compile';
 import { kopIsBlank, type SegmentoKOP } from '../kop/model';
 import { validateSegment } from '../kop/validate';
+import { T } from '../i18n';
 
 export type Segmento =
   | { lang: 'KOP'; kop: SegmentoKOP }
@@ -86,7 +87,7 @@ function where(p: Programa, block: string, segIdx: number | undefined, line: num
   const b = p.bloques.find((x) => normBlockName(x.nombre) === block);
   const s = b?.segmentos[segIdx];
   const t = s ? segTitulo(s) : undefined;
-  return `${block} · Segmento ${segIdx + 1}${t ? ` «${t}»` : ''}${line ? `, línea ${line}` : ''}`;
+  return T.motor.donde(block, segIdx + 1, t, line);
 }
 
 /** Comprueba la tabla de símbolos. */
@@ -95,16 +96,16 @@ export function checkSymbols(p: Programa): ProgramIssue[] {
   const seen = new Set<string>();
   p.simbolos.forEach((s, i) => {
     const name = s.nombre.trim();
-    const mk = (msg: string): ProgramIssue => ({ block: 'Símbolos', line: i + 1, msg, severity: 'error', full: `Símbolos, fila ${i + 1}: ${msg}` });
+    const mk = (msg: string): ProgramIssue => ({ block: 'Símbolos', line: i + 1, msg, severity: 'error', full: T.motor.simbolosFila(i + 1, msg) });
     if (!name && !s.dir.trim()) return;
-    if (!name) { out.push(mk('falta el nombre')); return; }
-    if (seen.has(name)) out.push(mk(`el símbolo "${name}" está repetido`));
+    if (!name) { out.push(mk(T.motor.faltaNombre)); return; }
+    if (seen.has(name)) out.push(mk(T.motor.simboloRepetido(name)));
     seen.add(name);
     try {
       const op = parseOperand(s.dir, null, 'de');
-      if (!op || !['bit', 'mem', 'timer', 'counter', 'block'].includes(op.kind)) out.push(mk(`dirección no válida para "${name}": ${s.dir}`));
+      if (!op || !['bit', 'mem', 'timer', 'counter', 'block'].includes(op.kind)) out.push(mk(T.motor.dirNoValida(name, s.dir)));
     } catch (e) {
-      out.push(mk(`dirección no válida para "${name}": ${(e as Error).message}`));
+      out.push(mk(T.motor.dirNoValida(name, (e as Error).message)));
     }
   });
   return out;
@@ -121,11 +122,11 @@ export function compileProgram(p: Programa): ProgramCompile {
   for (const b of p.bloques) {
     const name = normBlockName(b.nombre);
     if (!/^(OB|FC)\d+$/.test(name)) {
-      errors.push({ block: name, line: 0, msg: `nombre de bloque no válido: ${b.nombre} (usa OB1, OB100, FC1…)`, severity: 'error', full: `Bloque ${b.nombre}: nombre no válido (usa OB1, OB100, FC1…)` });
+      errors.push({ block: name, line: 0, msg: T.motor.nombreBloque(b.nombre), severity: 'error', full: T.motor.nombreBloqueFull(b.nombre) });
       continue;
     }
     if (names.has(name)) {
-      errors.push({ block: name, line: 0, msg: `el bloque ${name} está repetido`, severity: 'error', full: `El bloque ${name} está repetido` });
+      errors.push({ block: name, line: 0, msg: T.motor.bloqueRepetido(name), severity: 'error', full: T.motor.bloqueRepetidoFull(name) });
       continue;
     }
     names.add(name);
@@ -140,12 +141,12 @@ export function compileProgram(p: Programa): ProgramCompile {
           lines.push({ text, line: li + 1, origin, lang: p.nemotecnia });
           // las metas que empiezan por _ están reservadas para el compilador KOP
           const m = /^\s*(_[A-Za-z0-9_]{0,3})\s*:(?!=)/.exec(cleanLine(text));
-          if (m) errors.push({ block: name, seg: id, segIndex: si, line: li + 1, origin, msg: `la meta ${m[1].toUpperCase()} empieza por _ (reservado para el KOP)`, severity: 'error', full: `${where(p, name, si, li + 1)}: la meta ${m[1].toUpperCase()} empieza por _ (reservado para el KOP)` });
+          if (m) errors.push({ block: name, seg: id, segIndex: si, line: li + 1, origin, msg: T.motor.metaGuion(m[1].toUpperCase()), severity: 'error', full: `${where(p, name, si, li + 1)}: ${T.motor.metaGuion(m[1].toUpperCase())}` });
         });
       } else {
         if (kopIsBlank(s.kop)) {
           // segmento KOP recién añadido y sin rellenar: no hace nada (no bloquea el programa)
-          warnings.push({ block: name, seg: id, segIndex: si, line: 0, origin: { block: name, seg: id }, msg: 'segmento KOP sin rellenar: no hace nada', severity: 'aviso', full: `${where(p, name, si, undefined)}: segmento KOP sin rellenar (no hace nada hasta que escribas los operandos)` });
+          warnings.push({ block: name, seg: id, segIndex: si, line: 0, origin: { block: name, seg: id }, msg: T.motor.kopVacio, severity: 'aviso', full: `${where(p, name, si, undefined)}: ${T.motor.kopVacioFull}` });
           return;
         }
         const issues = validateSegment(s.kop, symbols);
@@ -174,7 +175,7 @@ export function compileProgram(p: Programa): ProgramCompile {
     }
     blocks.set(name, res.block);
   }
-  if (!blocks.has('OB1')) errors.push({ block: 'OB1', line: 0, msg: 'Falta el OB1', severity: 'error', full: 'Falta el OB1 (el bloque que se ejecuta en cada ciclo)' });
+  if (!blocks.has('OB1')) errors.push({ block: 'OB1', line: 0, msg: T.motor.faltaOb1, severity: 'error', full: T.motor.faltaOb1Full });
   return { cp: errors.length ? null : { blocks }, errors, warnings, kopLines, symbols };
 }
 

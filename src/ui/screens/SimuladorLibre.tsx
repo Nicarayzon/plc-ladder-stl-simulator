@@ -13,14 +13,15 @@ import { emptyWbState, migrarVat, nextVat } from '../workbench/types';
 import { filasTZ } from '../workbench/vat';
 import { useSettings } from '../../store/settings';
 import * as ops from '../workbench/programOps';
+import { T } from '../../i18n';
 
-const BLOCK_DESC: Record<string, string> = { OB1: 'programa cíclico', OB100: 'arranque' };
+const BLOCK_DESC: Record<string, string> = T.libre.descBloque;
 
 export function SimuladorLibre() {
   const { proyectos, actual, crear, setActual } = useProjects();
   const [block, setBlock] = useState('OB1');
   useEffect(() => {
-    if (!proyectos.length) crear('Proyecto 1', emptyProgram(), emptyWbState());
+    if (!proyectos.length) crear(T.libre.proyectoN(1), { ...emptyProgram(), nemotecnia: useSettings.getState().nemotecnia }, emptyWbState());
     else if (!actual || !proyectos.some((p) => p.id === actual)) setActual(proyectos[0].id);
   }, [proyectos.length, actual]); // eslint-disable-line react-hooks/exhaustive-deps
   const proj = proyectos.find((p) => p.id === actual);
@@ -61,10 +62,10 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
     for (let i = 2; ; i++) if (!usados.has(`${base} (${i})`)) return `${base} (${i})`;
   };
   const validarNombre = (actualNombre?: string) => (v: string) =>
-    proyectos.some((p) => p.nombre.trim().toLowerCase() === v.trim().toLowerCase() && p.nombre !== actualNombre) ? 'Ya hay un proyecto con ese nombre' : null;
+    proyectos.some((p) => p.nombre.trim().toLowerCase() === v.trim().toLowerCase() && p.nombre !== actualNombre) ? T.libre.yaHayProyecto : null;
 
   const nuevoProyecto = async () => {
-    const nombre = await askText({ title: 'Nuevo proyecto', label: 'Nombre del proyecto (la carpeta):', value: nombreLibre(`Proyecto ${proyectos.length + 1}`), ok: 'Crear', validate: validarNombre() });
+    const nombre = await askText({ title: T.libre.nuevoProyectoTitulo, label: T.libre.nombreCarpeta, value: nombreLibre(T.libre.proyectoN(proyectos.length + 1)), ok: T.libre.crear, validate: validarNombre() });
     if (!nombre) return;
     const id = crear(nombre, newProjectProgram(), emptyWbState());
     onOpen(id, 'OB1');
@@ -85,93 +86,93 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
   /** «Insertar nuevo objeto» */
   const insertarObjeto = (p: Proyecto): MenuItem => {
     const nombres = p.programa.bloques.map((b) => normBlockName(b.nombre));
-    return { label: 'Insertar nuevo objeto', items: [
-      ...(nombres.includes('OB1') ? [] : [{ label: 'Bloque de organización (OB1)', onClick: () => crearBloque(p, 'OB1') }]),
-      { label: `Función (${ops.nextFc(p.programa)})`, onClick: () => crearBloque(p, ops.nextFc(p.programa)) },
-      { label: 'Bloque de organización (OB100)', disabled: nombres.includes('OB100'), onClick: () => crearBloque(p, 'OB100') },
+    return { label: T.libre.insertarObjeto, items: [
+      ...(nombres.includes('OB1') ? [] : [{ label: T.libre.obj.ob1, onClick: () => crearBloque(p, 'OB1') }]),
+      { label: T.libre.obj.fc(ops.nextFc(p.programa)), onClick: () => crearBloque(p, ops.nextFc(p.programa)) },
+      { label: T.libre.obj.ob100, disabled: nombres.includes('OB100'), onClick: () => crearBloque(p, 'OB100') },
       { sep: true, label: '' },
-      { label: 'Tabla de variables', onClick: () => crearVat(p) },
+      { label: T.libre.obj.vat, onClick: () => crearVat(p) },
     ] };
   };
 
   const menuProyecto = (p: Proyecto): MenuItem[] => {
     const nombres = p.programa.bloques.map((b) => normBlockName(b.nombre));
     return [
-      { label: 'Crear OB1 (programa cíclico)', disabled: nombres.includes('OB1'), onClick: () => crearBloque(p, 'OB1') },
-      { label: `Crear ${ops.nextFc(p.programa)} (función)`, onClick: () => crearBloque(p, ops.nextFc(p.programa)) },
-      { label: 'Crear OB100 (arranque)', disabled: nombres.includes('OB100'), onClick: () => crearBloque(p, 'OB100') },
-      { label: `Crear tabla de variables (${nextVat(p.wb)})`, onClick: () => crearVat(p) },
+      { label: T.libre.crearOb1, disabled: nombres.includes('OB1'), onClick: () => crearBloque(p, 'OB1') },
+      { label: T.libre.crearFc(ops.nextFc(p.programa)), onClick: () => crearBloque(p, ops.nextFc(p.programa)) },
+      { label: T.libre.crearOb100, disabled: nombres.includes('OB100'), onClick: () => crearBloque(p, 'OB100') },
+      { label: T.libre.crearVat(nextVat(p.wb)), onClick: () => crearVat(p) },
       { sep: true, label: '' },
-      { label: 'Renombrar…', onClick: async () => { const n = await askText({ title: 'Renombrar proyecto', label: 'Nombre del proyecto:', value: p.nombre, validate: validarNombre(p.nombre) }); if (n) actualizar(p.id, { nombre: n }); } },
-      { label: 'Duplicar', onClick: () => { const id = crear(nombreLibre(`${p.nombre} (copia)`), structuredClone(p.programa), structuredClone(p.wb)); onOpen(id, 'OB1'); } },
-      { label: 'Exportar proyecto (.json)', onClick: () => downloadText(`${p.nombre}.json`, JSON.stringify({ formato: 'automatizacion-proyecto-v1', nombre: p.nombre, programa: p.programa, wb: p.wb }, null, 2), 'application/json') },
-      { label: 'Exportar fuente AWL (.awl)', onClick: () => downloadText(`${p.nombre}.awl`, exportAwlSource(p.programa)) },
+      { label: T.libre.renombrar, onClick: async () => { const n = await askText({ title: T.libre.renombrarProyecto, label: T.libre.nombreProyecto, value: p.nombre, validate: validarNombre(p.nombre) }); if (n) actualizar(p.id, { nombre: n }); } },
+      { label: T.libre.duplicar, onClick: () => { const id = crear(nombreLibre(T.libre.copia(p.nombre)), structuredClone(p.programa), structuredClone(p.wb)); onOpen(id, 'OB1'); } },
+      { label: T.libre.exportarJson, onClick: () => downloadText(`${p.nombre}.json`, JSON.stringify({ formato: 'automatizacion-proyecto-v1', nombre: p.nombre, programa: p.programa, wb: p.wb }, null, 2), 'application/json') },
+      { label: T.libre.exportarAwl, onClick: () => downloadText(`${p.nombre}.awl`, exportAwlSource(p.programa)) },
       { sep: true, label: '' },
-      { label: 'Borrar proyecto', onClick: () => { if (confirm(`¿Borrar el proyecto «${p.nombre}» con todos sus bloques? No se puede deshacer.`)) borrar(p.id); } },
+      { label: T.libre.borrarProyecto, onClick: () => { if (confirm(T.libre.confirmarBorrarProyecto(p.nombre))) borrar(p.id); } },
     ];
   };
 
   const menuBloque = (p: Proyecto, b: string): MenuItem[] => [
-    { label: `Abrir ${b}`, onClick: () => onOpen(p.id, b) },
+    { label: T.libre.abrir(b), onClick: () => onOpen(p.id, b) },
     insertarObjeto(p),
     { sep: true, label: '' },
-    ...(b.startsWith('FC') ? [{ label: `Renombrar ${b}…`, onClick: async () => {
+    ...(b.startsWith('FC') ? [{ label: T.libre.renombrarX(b), onClick: async () => {
       const nombres = p.programa.bloques.map((x) => normBlockName(x.nombre));
-      const to = (await askText({ title: `Renombrar ${b}`, label: 'Nuevo nombre (FC n):', value: b, validate: (v) => {
+      const to = (await askText({ title: T.libre.renombrarTitulo(b), label: T.libre.nuevoNombreFc, value: b, validate: (v) => {
         const t = v.toUpperCase().replace(/\s+/g, '');
-        return !/^FC\d+$/.test(t) ? 'Escribe FC seguido de un número (FC2, FC10…)' : nombres.includes(t) && t !== b ? `Ya existe ${t}` : null;
+        return !/^FC\d+$/.test(t) ? T.libre.fcInvalida : nombres.includes(t) && t !== b ? T.libre.yaExiste(t) : null;
       } }))?.toUpperCase().replace(/\s+/g, '');
       if (to && to !== b) { actualizar(p.id, { programa: ops.renameBlock(p.programa, b, to) }); onOpen(p.id, to); }
     } }] : []),
-    { label: `Borrar ${b}`, onClick: () => { if (confirm(`¿Borrar el bloque ${b} de «${p.nombre}»?`)) actualizar(p.id, { programa: ops.removeBlock(p.programa, b) }); } },
+    { label: T.libre.borrarX(b), onClick: () => { if (confirm(T.libre.confirmarBorrarBloque(b, p.nombre))) actualizar(p.id, { programa: ops.removeBlock(p.programa, b) }); } },
   ];
 
   const menuVat = (p: Proyecto, v: string): MenuItem[] => [
-    { label: `Abrir ${v}`, onClick: () => onOpenVat(p.id, v) },
+    { label: T.libre.abrir(v), onClick: () => onOpenVat(p.id, v) },
     insertarObjeto(p),
     { sep: true, label: '' },
-    { label: `Renombrar ${v}…`, onClick: async () => {
+    { label: T.libre.renombrarX(v), onClick: async () => {
       const vats = p.wb.vats ?? [];
-      const to = (await askText({ title: `Renombrar ${v}`, label: 'Nombre de la tabla de variables:', value: v, validate: (x) => {
+      const to = (await askText({ title: T.libre.renombrarTitulo(v), label: T.libre.nombreVat, value: v, validate: (x) => {
         const t = x.trim();
-        return !t ? 'Escribe un nombre' : t.length > 24 ? 'Como mucho 24 caracteres' : vats.some((o) => o.nombre !== v && o.nombre.toUpperCase() === t.toUpperCase()) ? `Ya existe ${t}` : null;
+        return !t ? T.libre.escribeNombre : t.length > 24 ? T.libre.max24 : vats.some((o) => o.nombre !== v && o.nombre.toUpperCase() === t.toUpperCase()) ? T.libre.yaExiste(t) : null;
       } }))?.trim();
       if (!to || to === v) return;
       actualizar(p.id, { wb: { ...p.wb, vats: vats.map((o) => (o.nombre === v ? { ...o, nombre: to } : o)) } });
       onOpenVat(p.id, to);
     } },
-    { label: `Borrar ${v}`, onClick: () => { if (confirm(`¿Borrar la tabla de variables ${v} de «${p.nombre}»?`)) actualizar(p.id, { wb: { ...p.wb, vats: (p.wb.vats ?? []).filter((o) => o.nombre !== v) } }); } },
+    { label: T.libre.borrarX(v), onClick: () => { if (confirm(T.libre.confirmarBorrarVat(v, p.nombre))) actualizar(p.id, { wb: { ...p.wb, vats: (p.wb.vats ?? []).filter((o) => o.nombre !== v) } }); } },
   ];
 
   const menuGeneral: MenuItem[] = [
-    { label: 'Nuevo proyecto…', onClick: nuevoProyecto },
+    { label: T.libre.nuevoProyectoMenu, onClick: nuevoProyecto },
     { sep: true, label: '' },
-    { label: 'Importar proyecto (.json)…', onClick: async () => {
+    { label: T.libre.importarJson, onClick: async () => {
       const txt = await pickFile('.json,application/json');
       if (!txt) return;
       try {
         const d = JSON.parse(txt);
-        if (!d.programa?.bloques) throw new Error('no es un proyecto de Automatizacion');
-        const id = crear(nombreLibre(d.nombre ?? 'Importado'), migrarHw(d.programa), migrarVat(d.wb ?? emptyWbState()));
+        if (!d.programa?.bloques) throw new Error(T.libre.noEsProyecto);
+        const id = crear(nombreLibre(d.nombre ?? T.libre.importado), migrarHw(d.programa), migrarVat(d.wb ?? emptyWbState()));
         onOpen(id, 'OB1');
-        toast('Proyecto importado');
-      } catch (e) { toast(`No se pudo importar: ${(e as Error).message}`); }
+        toast(T.libre.proyectoImportado);
+      } catch (e) { toast(T.libre.noSePudoImportar((e as Error).message)); }
     } },
-    { label: 'Importar fuente AWL (.awl)…', onClick: async () => {
+    { label: T.libre.importarAwl, onClick: async () => {
       const txt = await pickFile('.awl,.AWL,.txt');
       if (!txt) return;
-      try { const id = crear(nombreLibre('Fuente AWL importada'), importAwlSource(txt), emptyWbState()); onOpen(id, 'OB1'); toast('Fuente importada'); } catch (e) { toast(`No se pudo importar: ${(e as Error).message}`); }
+      try { const id = crear(nombreLibre(T.libre.fuenteImportada), importAwlSource(txt), emptyWbState()); onOpen(id, 'OB1'); toast(T.libre.fuenteImportadaAviso); } catch (e) { toast(T.libre.noSePudoImportar((e as Error).message)); }
     } },
   ];
 
   return (
-    <aside className="explorer" style={{ width }} aria-label="Proyectos">
+    <aside className="explorer" style={{ width }} aria-label={T.libre.proyectos}>
       <div className="explorer-head">
-        <span>Proyectos</span>
+        <span>{T.libre.proyectos}</span>
         <span className="spacer" />
-        <button className="btn small" onClick={nuevoProyecto} title="Crear un proyecto nuevo (carpeta)"><Icon name="plus" size={13} />Nuevo</button>
-        <button className="btn small ghost icon" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY, items: menuGeneral })} aria-label="Más opciones"><Icon name="dots" size={14} /></button>
-        <button className="btn small ghost icon" onClick={onCollapse} title="Ocultar el explorador" aria-label="Ocultar el explorador"><Icon name="left" size={14} /></button>
+        <button className="btn small" onClick={nuevoProyecto} title={T.libre.nuevoTitulo}><Icon name="plus" size={13} />{T.libre.nuevo}</button>
+        <button className="btn small ghost icon" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY, items: menuGeneral })} aria-label={T.libre.masOpciones}><Icon name="dots" size={14} /></button>
+        <button className="btn small ghost icon" onClick={onCollapse} title={T.libre.ocultarExplorador} aria-label={T.libre.ocultarExplorador}><Icon name="left" size={14} /></button>
       </div>
       <div className="explorer-list">
         {proyectos.map((p) => {
@@ -188,7 +189,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
                 <Icon name={expanded ? 'down' : 'right'} size={12} />
                 <Icon name="folder" size={14} />
                 <span className="ex-name">{p.nombre}</span>
-                <button className="btn small ghost icon ex-add" title="Crear un bloque en este proyecto" aria-label="Crear bloque"
+                <button className="btn small ghost icon ex-add" title={T.libre.crearBloqueTitulo} aria-label={T.libre.crearBloque}
                   onClick={(e) => { e.stopPropagation(); setMenu({ x: e.clientX, y: e.clientY, items: menuProyecto(p).slice(0, 4) }); }}><Icon name="plus" size={12} /></button>
               </div>
               {expanded && (
@@ -203,16 +204,16 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
                     </div>
                   ))}
                   {(p.wb.vats ?? []).map((v) => (
-                    <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={`Tabla de variables ${v.nombre}: se abre en su ventana`}
+                    <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={T.libre.vatTitulo(v.nombre)}
                       onClick={() => onOpenVat(p.id, v.nombre)} onKeyDown={(e) => { if (e.key === 'Enter') onOpenVat(p.id, v.nombre); }}
                       onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: menuVat(p, v.nombre) }); }}>
                       <span className="ex-bicon">VAT</span>
                       <span className="mono">{v.nombre}</span>
-                      <span className="faint ex-desc">tabla de variables</span>
+                      <span className="faint ex-desc">{T.libre.tablaDeVariables}</span>
                     </div>
                   ))}
                   {!bloques.includes('OB1') && (
-                    <button className="btn small ex-create" onClick={() => crearBloque(p, 'OB1')}><Icon name="plus" size={12} />Crear OB1</button>
+                    <button className="btn small ex-create" onClick={() => crearBloque(p, 'OB1')}><Icon name="plus" size={12} />{T.libre.crearOb1Boton}</button>
                   )}
                 </div>
               )}
@@ -220,7 +221,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
           );
         })}
       </div>
-      <div className="explorer-foot faint">Clic derecho en una carpeta o un bloque para más opciones.</div>
+      <div className="explorer-foot faint">{T.libre.pie}</div>
       {menu && <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={() => setMenu(null)} />}
     </aside>
   );
@@ -237,7 +238,7 @@ function ProjectWorkbench({ proj, block, onBlock, explorerHidden, onShowExplorer
       block={block} onBlock={onBlock} vatVentanas proyecto={proj.nombre} vatPedida={vatPedida} onVatAtendida={onVatAtendida}
       title={(
         <span className="row" style={{ gap: 6 }}>
-          {explorerHidden && <button className="btn small icon" onClick={onShowExplorer} title="Mostrar el explorador de proyectos" aria-label="Mostrar proyectos"><Icon name="folder" size={14} /></button>}
+          {explorerHidden && <button className="btn small icon" onClick={onShowExplorer} title={T.libre.mostrarExplorador} aria-label={T.libre.mostrarProyectos}><Icon name="folder" size={14} /></button>}
           <Icon name="folder" size={14} />
           <span title={proj.nombre}>{proj.nombre}</span>
         </span>

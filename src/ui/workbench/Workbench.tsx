@@ -27,6 +27,8 @@ import { translateAwl } from '../../core/translate';
 import { SenalesFuera, type SenalesVentana } from './SenalesVentana';
 import { VatFlotante, VatVista, useTablasVat } from './VatVentana';
 import type { SignalView } from '../../sim/analyzer';
+import { T } from '../../i18n';
+import { Rico } from '../common/Rico';
 
 type RightTab = 'io' | 'vat' | 'tz' | 'cpu' | 'sym';
 /** `vat:VAT_1`: tabla de variables acoplada abajo */
@@ -189,7 +191,7 @@ export function Workbench(props: WorkbenchProps) {
     return {
       move: (d: -1 | 1) => change(ops.moveSegment(programa, block, id, d)),
       duplicate: () => change(ops.duplicateSegment(programa, block, id)),
-      remove: () => { if (confirm('¿Borrar este segmento?')) change(ops.deleteSegment(programa, block, id)); },
+      remove: () => { if (confirm(T.wb.confirmarBorrarSegmento)) change(ops.deleteSegment(programa, block, id)); },
       insertAfter: (lang: 'AWL' | 'KOP') => { const n = ops.newSegment(lang); change(ops.insertSegment(programa, block, id, n)); setFocusSeg(segId(n)); },
       toAwl: s.lang === 'KOP' ? () => {
         let txt = kopToAwlText(s.kop, block);
@@ -200,7 +202,7 @@ export function Workbench(props: WorkbenchProps) {
         change(ops.updateSegment(programa, block, id, () => ({ lang: 'AWL', id, titulo: s.kop.titulo, comentario: s.kop.comentario, awl: txt })));
       } : undefined,
       toKop: s.lang === 'AWL' ? () => {
-        if (s.awl.trim()) { toast('Este segmento no tiene representación en KOP (solo se convierten segmentos vacíos)'); return; }
+        if (s.awl.trim()) { toast(T.wb.sinKop); return; }
         const k = ops.newKopSegment();
         change(ops.updateSegment(programa, block, id, () => ({ lang: 'KOP', kop: { ...k, id, titulo: s.titulo, comentario: s.comentario } })));
       } : undefined,
@@ -217,16 +219,16 @@ export function Workbench(props: WorkbenchProps) {
 
   const blockItems = (name?: string) => {
     const items = [
-      ...(blocks.includes('OB1') ? [] : [{ label: 'Crear OB1 (programa cíclico)', disabled: false, onClick: () => { change(ops.addBlock(programa, 'OB1')); setBlock('OB1'); } }]),
-      { label: `Añadir ${ops.nextFc(programa)}`, onClick: () => { const n = ops.nextFc(programa); change(ops.addBlock(programa, n)); setBlock(n); } },
-      { label: 'Añadir OB100 (arranque)', disabled: blocks.includes('OB100'), onClick: () => { change(ops.addBlock(programa, 'OB100')); setBlock('OB100'); } },
+      ...(blocks.includes('OB1') ? [] : [{ label: T.wb.crearOb1, disabled: false, onClick: () => { change(ops.addBlock(programa, 'OB1')); setBlock('OB1'); } }]),
+      { label: T.wb.anadir(ops.nextFc(programa)), onClick: () => { const n = ops.nextFc(programa); change(ops.addBlock(programa, n)); setBlock(n); } },
+      { label: T.wb.anadirOb100, disabled: blocks.includes('OB100'), onClick: () => { change(ops.addBlock(programa, 'OB100')); setBlock('OB100'); } },
     ];
     if (name && name !== 'OB1') {
-      items.push({ label: `Borrar ${name}`, disabled: false, onClick: () => { if (confirm(`¿Borrar el bloque ${name}?`)) change(ops.removeBlock(programa, name)); } });
-      if (name.startsWith('FC')) items.push({ label: `Renombrar ${name}…`, disabled: false, onClick: async () => {
-        const to = (await askText({ title: `Renombrar ${name}`, label: 'Nuevo nombre (FC n):', value: name, validate: (v) => {
+      items.push({ label: T.libre.borrarX(name), disabled: false, onClick: () => { if (confirm(T.wb.confirmarBorrarBloque(name))) change(ops.removeBlock(programa, name)); } });
+      if (name.startsWith('FC')) items.push({ label: T.libre.renombrarX(name), disabled: false, onClick: async () => {
+        const to = (await askText({ title: T.libre.renombrarTitulo(name), label: T.libre.nuevoNombreFc, value: name, validate: (v) => {
           const t = v.toUpperCase().replace(/\s+/g, '');
-          return !/^FC\d+$/.test(t) ? 'Escribe FC seguido de un número (FC2, FC10…)' : blocks.includes(t) && t !== name ? `Ya existe ${t}` : null;
+          return !/^FC\d+$/.test(t) ? T.libre.fcInvalida : blocks.includes(t) && t !== name ? T.libre.yaExiste(t) : null;
         } }))?.toUpperCase().replace(/\s+/g, '');
         if (to && to !== name) { change(ops.renameBlock(programa, name, to)); setBlock(to); }
       } });
@@ -236,7 +238,7 @@ export function Workbench(props: WorkbenchProps) {
 
   const setNemo = (n: 'de' | 'en') => {
     if (n === nemo) return;
-    const conv = confirm(`¿Convertir también el código AWL a la nemotécnica ${n === 'en' ? 'inglesa (A, I, Q…)' : 'alemana (U, E, A…)'}?`);
+    const conv = confirm(T.wb.convertirNemotecnia(n));
     const p: Programa = { ...programa, nemotecnia: n, bloques: conv ? programa.bloques.map((b) => ({ ...b, segmentos: b.segmentos.map((s) => (s.lang === 'AWL' ? { ...s, awl: translateAwl(s.awl, n) } : s)) })) : programa.bloques };
     change(p);
     useSettings.getState().set({ nemotecnia: n });
@@ -249,18 +251,18 @@ export function Workbench(props: WorkbenchProps) {
           <>
             {props.hardware && (
               <button className={`btn small ${programa.hw?.estaciones.length ? 'active' : ''}`} onClick={() => setHwOpen(true)}
-                title={programa.hw?.estaciones.length ? `Hardware: ${programa.hw.estaciones.map((e) => e.nombre).join(', ')}${clockByte !== null ? ` · marca de ciclo MB${clockByte}` : ''}` : 'Configurar el hardware (CPU, marca de ciclo)'}>
-                <Icon name="cpu" size={13} />Hardware
+                title={programa.hw?.estaciones.length ? T.wb.hardwareTitulo(programa.hw.estaciones.map((e) => e.nombre).join(', '), clockByte) : T.wb.hardwareConfigurar}>
+                <Icon name="cpu" size={13} />{T.wb.hardware}
               </button>
             )}
             {senales && (
               <div className="btn-group">
                 <button className={`btn small ${senalesVisibles ? 'active' : ''}`} onClick={botonSenales} aria-pressed={senalesVisibles}
-                  title={senalesFuera ? 'Las señales están en otra ventana: clic para traerla delante' : senalesVisibles ? 'Ocultar las señales de entradas y salidas' : 'Ver las señales de entradas y salidas (cronograma de 0 y 1)'}>
-                  <Icon name="wave" size={13} />Señales E/S
+                  title={senalesFuera ? T.wb.senalesFueraTitulo : senalesVisibles ? T.wb.senalesOcultar : T.wb.senalesVer}>
+                  <Icon name="wave" size={13} />{T.wb.senales}
                 </button>
-                <button className={`btn small icon ${senalesFuera ? 'active' : ''}`} onClick={sacarSenales} aria-label={senalesFuera ? 'Traer las señales a esta ventana' : 'Abrir las señales en otra ventana'}
-                  title={senalesFuera ? 'Traer las señales a esta ventana' : 'Abrir las señales en otra ventana (por ejemplo, en otro monitor)'}>
+                <button className={`btn small icon ${senalesFuera ? 'active' : ''}`} onClick={sacarSenales} aria-label={senalesFuera ? T.wb.traerSenales : T.wb.abrirSenalesFuera}
+                  title={senalesFuera ? T.wb.traerSenales : T.wb.abrirSenalesFueraTitulo}>
                   <Icon name="popout" size={13} />
                 </button>
               </div>
@@ -269,7 +271,7 @@ export function Workbench(props: WorkbenchProps) {
         ) : undefined}
         extra={(
         <>
-          <div className="btn-group" title="Nemotécnica">
+          <div className="btn-group" title={T.wb.nemotecnia}>
             <button className={`btn small ${nemo === 'de' ? 'active' : ''}`} onClick={() => setNemo('de')}>DE</button>
             <button className={`btn small ${nemo === 'en' ? 'active' : ''}`} onClick={() => setNemo('en')}>EN</button>
           </div>
@@ -278,35 +280,35 @@ export function Workbench(props: WorkbenchProps) {
       )} />
       <div className="wb-main">
         <div className="wb-center">
-          <div className="block-tabs" role="tablist" aria-label="Bloques">
+          <div className="block-tabs" role="tablist" aria-label={T.wb.bloques}>
             {blocks.map((b) => (
               <button key={b} role="tab" aria-selected={b === block} className={`block-tab ${b === block ? 'active' : ''}`} onClick={() => setBlock(b)}
                 onContextMenu={(e) => { if (readOnly) return; e.preventDefault(); setBlockMenu({ x: e.clientX, y: e.clientY, name: b }); }}>
                 {b}{blockErr(b) && <span className="err-dot" />}
               </button>
             ))}
-            {!readOnly && <button className="btn small ghost icon" onClick={(e) => setBlockMenu({ x: e.clientX, y: e.clientY })} title="Añadir bloque" aria-label="Añadir bloque"><Icon name="plus" size={14} /></button>}
+            {!readOnly && <button className="btn small ghost icon" onClick={(e) => setBlockMenu({ x: e.clientX, y: e.clientY })} title={T.wb.anadirBloque} aria-label={T.wb.anadirBloque}><Icon name="plus" size={14} /></button>}
             <span className="spacer" />
             <span className="faint" style={{ fontSize: 11.5, paddingBottom: 4 }}>
-              {block === 'OB1' ? 'Programa cíclico' : block === 'OB100' ? 'Arranque (solo el primer ciclo)' : 'Función: se ejecuta cuando se llama (UC/CC/CALL)'}
+              {block === 'OB1' ? T.wb.descOb1 : block === 'OB100' ? T.wb.descOb100 : T.wb.descFc}
             </span>
           </div>
           <LoadStatus sim={sim} onErrors={() => showBottom('msg')} onGoto={gotoSeg} pistaCiclo={pistaCiclo} onActivarCiclo={activarCiclo} />
           {stop && (
             <div className="stop-banner" role="alert">
               <Icon name="alert" />
-              <span className="grow">{stop.reason}{stop.loc && <> — en {stop.loc.block}{stop.loc.src ? `: ${stop.loc.src.replace(/\s+/g, ' ')}` : ''}</>}</span>
-              {stop.loc?.origin?.seg && <button className="btn small" onClick={() => gotoSeg(stop.loc!.block, stop.loc!.origin!.seg)}>Ir a la línea</button>}
-              <button className="btn small" onClick={() => sim.setRun(true)}>Rearrancar</button>
+              <span className="grow">{stop.reason}{stop.loc && <>{T.wb.stopEn(stop.loc.block)}{stop.loc.src ? `: ${stop.loc.src.replace(/\s+/g, ' ')}` : ''}</>}</span>
+              {stop.loc?.origin?.seg && <button className="btn small" onClick={() => gotoSeg(stop.loc!.block, stop.loc!.origin!.seg)}>{T.wb.irALinea}</button>}
+              <button className="btn small" onClick={() => sim.setRun(true)}>{T.wb.rearrancar}</button>
             </div>
           )}
           <div className="seg-list">
             {!blocks.length && (
               <div className="empty-proj">
                 <Icon name="folder" size={28} />
-                <h3>Proyecto vacío</h3>
-                <p>Crea el <b>OB1</b>: es el bloque que la CPU ejecuta en cada ciclo. Después podrás añadir FC y OB100.</p>
-                {!readOnly && <button className="btn primary" onClick={() => { change(ops.addBlock(programa, 'OB1')); setBlock('OB1'); }}><Icon name="plus" size={14} />Crear OB1</button>}
+                <h3>{T.wb.proyectoVacio}</h3>
+                <p><Rico t={T.wb.proyectoVacioTexto} /></p>
+                {!readOnly && <button className="btn primary" onClick={() => { change(ops.addBlock(programa, 'OB1')); setBlock('OB1'); }}><Icon name="plus" size={14} />{T.wb.crearOb1Boton}</button>}
               </div>
             )}
             {blk?.segmentos.map((s, i) => (
@@ -316,8 +318,8 @@ export function Workbench(props: WorkbenchProps) {
             ))}
             {!readOnly && blk && (
               <div className="add-seg">
-                <button className="btn" onClick={() => { const n = ops.newSegment('AWL'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="plus" size={14} />Segmento AWL</button>
-                <button className="btn" onClick={() => { const n = ops.newSegment('KOP'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="ladder" size={14} />Segmento KOP</button>
+                <button className="btn" onClick={() => { const n = ops.newSegment('AWL'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="plus" size={14} />{T.wb.segmentoAwl}</button>
+                <button className="btn" onClick={() => { const n = ops.newSegment('KOP'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="ladder" size={14} />{T.wb.segmentoKop}</button>
               </div>
             )}
           </div>
@@ -325,12 +327,12 @@ export function Workbench(props: WorkbenchProps) {
         <div className="splitter-x" onMouseDown={(e) => startRight(e, '-x')} role="separator" aria-orientation="vertical" />
         <aside className="wb-right" style={{ width: rightW }}>
           <Tabs<RightTab> value={right} onChange={setRight} tabs={[
-            { id: 'io', label: 'E/S' },
-            ...(vatEnVentana ? [] : [{ id: 'vat' as const, label: 'Variables' }, { id: 'tz' as const, label: 'T / Z' }]),
-            { id: 'cpu', label: 'CPU' }, { id: 'sym', label: 'Símbolos' },
+            { id: 'io', label: T.wb.tabs.io },
+            ...(vatEnVentana ? [] : [{ id: 'vat' as const, label: T.wb.tabs.vat }, { id: 'tz' as const, label: T.wb.tabs.tz }]),
+            { id: 'cpu', label: T.wb.tabs.cpu }, { id: 'sym', label: T.wb.tabs.sym },
           ]} />
           <div className="wb-right-body">
-            {right === 'io' && <IoPanel sim={sim} symByAddr={symByAddr} variant={props.ioVariant} clockByte={clockByte} hidden={wbState.hidden} extra={wbState.extra}
+            {right === 'io' && <IoPanel sim={sim} symByAddr={symByAddr} variant={props.ioVariant} clockByte={clockByte} lang={nemo} hidden={wbState.hidden} extra={wbState.extra}
               onIoState={(p) => onWbState({ ...wbState, ...p, inputs: [...sim.inputs.entries()] })}
               onInputsChanged={() => onWbState({ ...wbState, inputs: [...sim.inputs.entries()] })} />}
             {right === 'vat' && <VatPanel sim={sim} rows={wbState.vat as VatRow[]} onRows={(vat) => onWbState({ ...wbState, vat })} symbols={sim.compiled.symbols} symByAddr={symByAddr} />}
@@ -343,14 +345,14 @@ export function Workbench(props: WorkbenchProps) {
       {bottomOpen && <div className="splitter-y" onMouseDown={(e) => startBottom(e, '-y')} role="separator" aria-orientation="horizontal" />}
       <div className={`wb-bottom ${bottomOpen ? '' : 'collapsed'}`} style={bottomOpen ? { height: bottomH } : undefined}>
         <Tabs<BottomTab> value={bottom} onChange={(t) => { if (t === 'an' && senales && !senalesFuera) senalesPorDefecto(); showBottom(t); }} tabs={[
-          { id: 'an', label: senales ? <><Icon name="wave" size={13} />Señales E/S{senalesFuera ? <span className="faint"> (en otra ventana)</span> : null}</> : 'Analizador lógico' },
+          { id: 'an', label: senales ? <><Icon name="wave" size={13} />{T.wb.senales}{senalesFuera ? <span className="faint">{T.wb.enOtraVentana}</span> : null}</> : T.wb.analizador },
           ...vatsAbajo.map((a) => ({ id: `vat:${a.nombre}` as const, label: <><Icon name="table" size={13} />{a.nombre}</> })),
-          { id: 'msg', label: <>Mensajes {sim.compiled.errors.length > 0 ? <span className="badge err">{sim.compiled.errors.length}</span> : warnings.length > 0 ? <span className="badge warn">{warnings.length}</span> : null}</> },
-          { id: 'awl', label: 'AWL generado' },
-          { id: 'trace', label: 'Traza del ciclo' },
+          { id: 'msg', label: <>{T.wb.mensajes} {sim.compiled.errors.length > 0 ? <span className="badge err">{sim.compiled.errors.length}</span> : warnings.length > 0 ? <span className="badge warn">{warnings.length}</span> : null}</> },
+          { id: 'awl', label: T.wb.awlGenerado },
+          { id: 'trace', label: T.wb.trazaCiclo },
         ]} right={senales ? (
-          <button className="btn small ghost" onClick={() => setBottomOpen(!bottomOpen)} title={bottomOpen ? 'Ocultar el panel de abajo' : 'Mostrar el panel de abajo'}>
-            <Icon name={bottomOpen ? 'down' : 'up'} size={13} />{bottomOpen ? 'Ocultar' : 'Mostrar'}
+          <button className="btn small ghost" onClick={() => setBottomOpen(!bottomOpen)} title={bottomOpen ? T.wb.ocultarAbajo : T.wb.mostrarAbajo}>
+            <Icon name={bottomOpen ? 'down' : 'up'} size={13} />{bottomOpen ? T.wb.ocultar : T.wb.mostrar}
           </button>
         ) : undefined} />
         {bottomOpen && (
@@ -358,10 +360,10 @@ export function Workbench(props: WorkbenchProps) {
             {bottom === 'an' && (senalesFuera ? (
               <div className="senales-aparte">
                 <Icon name="popout" size={22} />
-                <div>Las señales E/S están abiertas en otra ventana.</div>
+                <div>{T.wb.senalesAbiertasFuera}</div>
                 <div className="row" style={{ gap: 8 }}>
-                  <button className="btn small" onClick={() => senalesFuera.focus()}>Ir a la ventana</button>
-                  <button className="btn small" onClick={sacarSenales}>Traer aquí</button>
+                  <button className="btn small" onClick={() => senalesFuera.focus()}>{T.wb.irAVentana}</button>
+                  <button className="btn small" onClick={sacarSenales}>{T.wb.traerAqui}</button>
                 </div>
               </div>
             ) : <AnalyzerPanel sim={sim} onSignalsChange={onSignals} />)}
@@ -371,7 +373,7 @@ export function Workbench(props: WorkbenchProps) {
             {vatsAbajo.map((a) => {
               const t = vats.find((v) => v.nombre === a.nombre);
               return t && bottom === `vat:${a.nombre}` && (
-                <VatVista key={a.nombre} sim={sim} ses={tablas.sesion(a.nombre)} modo="abajo" nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
+                <VatVista key={a.nombre} sim={sim} ses={tablas.sesion(a.nombre)} modo="abajo" lang={nemo} nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
                   symbols={sim.compiled.symbols} symByAddr={symByAddr} onCerrar={() => tablas.cerrar(a.nombre)} onFlotante={() => tablas.cambiarModo(a.nombre, 'flotante')} />
               );
             })}
@@ -385,7 +387,7 @@ export function Workbench(props: WorkbenchProps) {
         return t && (
           <VatFlotante key={a.nombre} nombre={a.nombre} ses={ses} z={30 + Math.max(0, tablas.orden.indexOf(a.nombre))}
             onFrente={() => tablas.frente(a.nombre)} onAcoplar={() => tablas.cambiarModo(a.nombre, 'abajo')} onCerrar={() => tablas.cerrar(a.nombre)}>
-            <VatVista sim={sim} ses={ses} modo="flotante" nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
+            <VatVista sim={sim} ses={ses} modo="flotante" lang={nemo} nombre={a.nombre} proyecto={props.proyecto ?? ''} filas={t.filas} onFilas={(f) => setFilas(a.nombre, f)}
               symbols={sim.compiled.symbols} symByAddr={symByAddr} onCerrar={() => tablas.cerrar(a.nombre)} />
           </VatFlotante>
         );
@@ -405,16 +407,16 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], onActivarCiclo }: 
   let body: ReactNode;
   if (!sim.programa.bloques.some((b) => normBlockName(b.nombre) === 'OB1')) {
     cls = 'warn';
-    body = <><Icon name="folder" size={13} /><span className="grow"><b>Falta el OB1</b>: crea el OB1 (programa cíclico) para que la CPU ejecute algo.</span></>;
+    body = <><Icon name="folder" size={13} /><span className="grow"><Rico t={T.wb.estado.faltaOb1} /></span></>;
   } else if (errs.length) {
     cls = 'err';
     const e0 = errs[0];
     body = (
       <>
         <Icon name="alert" size={14} />
-        <span className="grow" title={errs.map((x) => x.full).join('\n')}><b>{errs.length} error{errs.length > 1 ? 'es' : ''}: lo que ves NO está cargado en la CPU</b> (sigue ejecutando la versión anterior). {e0.full}</span>
-        {e0.seg && <button className="btn small" onClick={() => onGoto(e0.block, e0.seg)}>Ir al error</button>}
-        {errs.length > 1 && <button className="btn small ghost" onClick={onErrors}>Ver todos</button>}
+        <span className="grow" title={errs.map((x) => x.full).join('\n')}><Rico t={T.wb.estado.errores(errs.length)} />{e0.full}</span>
+        {e0.seg && <button className="btn small" onClick={() => onGoto(e0.block, e0.seg)}>{T.wb.estado.irAlError}</button>}
+        {errs.length > 1 && <button className="btn small ghost" onClick={onErrors}>{T.wb.estado.verTodos}</button>}
       </>
     );
   } else if (pistaCiclo.length && onActivarCiclo) {
@@ -424,20 +426,20 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], onActivarCiclo }: 
     body = (
       <>
         <Icon name="clock" size={13} />
-        <span className="grow" title="Una marca que nadie escribe vale siempre 0. Las marcas de ciclo las escribe la CPU solo si se activan en la configuración del hardware."><b>{nombres}{pistaCiclo.length > 3 ? '…' : ''} siempre vale 0</b>: tu programa la consulta pero no la escribe nunca. ¿Es una marca de ciclo? Actívala en Hardware.</span>
-        <button className="btn small" onClick={() => onActivarCiclo(byte)}>Activar marca de ciclo en MB{byte}</button>
+        <span className="grow" title={T.wb.estado.cicloTitulo}><Rico t={T.wb.estado.cicloTexto(nombres + (pistaCiclo.length > 3 ? '…' : ''))} /></span>
+        <button className="btn small" onClick={() => onActivarCiclo(byte)}>{T.wb.estado.activarCiclo(byte)}</button>
       </>
     );
   } else if (cpu.state === 'STOP') {
     cls = 'warn';
-    body = <><Icon name="stop" size={12} /><span className="grow"><b>CPU en STOP</b>{sim.lastStop ? ' por un error de ejecución' : ''}: el programa no se ejecuta. Pulsa <b>RUN</b>.</span></>;
+    body = <><Icon name="stop" size={12} /><span className="grow"><Rico t={T.wb.estado.stop(!!sim.lastStop)} /></span></>;
   } else if (!sim.playing) {
     cls = 'warn';
     body = cpu.phase === 'CYCLE'
-      ? <><Icon name="pause" size={12} /><span className="grow"><b>En pausa a mitad de ciclo</b> (paso a paso): «Instr.» ejecuta la siguiente instrucción, «Ciclo» termina el ciclo y ▶ sigue en tiempo real.</span></>
-      : <><Icon name="pause" size={12} /><span className="grow"><b>Simulación en pausa</b>: no se ejecutan ciclos, así que las entradas que cambies no llegan al programa. Pulsa ▶.</span></>;
+      ? <><Icon name="pause" size={12} /><span className="grow"><Rico t={T.wb.estado.pausaCiclo} /></span></>
+      : <><Icon name="pause" size={12} /><span className="grow"><Rico t={T.wb.estado.pausa} /></span></>;
   } else {
-    body = <><Icon name="check" size={14} /><span className="grow">Programa cargado en la CPU y ejecutándose (RUN).</span></>;
+    body = <><Icon name="check" size={14} /><span className="grow">{T.wb.estado.run}</span></>;
   }
   return <div className={`load-status ${cls}`} role="status">{body}</div>;
 }

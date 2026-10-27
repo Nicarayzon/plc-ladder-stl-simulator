@@ -8,6 +8,7 @@ import { Desplegable, toast } from '../common/ui';
 import { normAddr } from './symbols';
 import { operandosDe } from './vat';
 import type { VatFila } from './types';
+import { T } from '../../i18n';
 
 export type VatRow = VatFila;
 
@@ -55,7 +56,7 @@ export function VatPanel({ sim, rows, onRows, symbols, symByAddr, valorTZ = fals
     const r = readers[i];
     if (r instanceof Error) return;
     const txt = edit[i];
-    if (txt === undefined || txt.trim() === '') { toast('Escribe el valor en la columna «Nuevo valor»'); return; }
+    if (txt === undefined || txt.trim() === '') { toast(T.vatPanel.escribeValor); return; }
     try {
       const raw = parseUserValue(txt, r.size, rows[i].fmt);
       if (mode === 'mod') sim.modify(rows[i].text, raw, valorTZ);
@@ -69,7 +70,7 @@ export function VatPanel({ sim, rows, onRows, symbols, symByAddr, valorTZ = fals
     <div>
       <table className="tbl vat">
         <thead>
-          <tr><th>Operando</th><th>Formato</th><th className="num">Valor</th><th>Nuevo valor</th><th /></tr>
+          <tr><th>{T.vatPanel.operando}</th><th>{T.vatPanel.formato}</th><th className="num">{T.vatPanel.valor}</th><th>{T.vatPanel.nuevoValor}</th><th /></tr>
         </thead>
         <tbody>
           {rows.map((row, i) => {
@@ -86,23 +87,23 @@ export function VatPanel({ sim, rows, onRows, symbols, symByAddr, valorTZ = fals
                   {err && <div className="err-text" style={{ fontSize: 11 }}>{(r as Error).message}</div>}
                 </td>
                 <td>
-                  <Desplegable style={{ height: 24, padding: '0 6px' }} value={row.fmt} options={OPCIONES_FMT} disabled={err || r.size === 0 || tzValor(r)} aria-label="Formato"
+                  <Desplegable style={{ height: 24, padding: '0 6px' }} value={row.fmt} options={OPCIONES_FMT} disabled={err || r.size === 0 || tzValor(r)} aria-label={T.vatPanel.formato}
                     onChange={(fmt) => onRows(rows.map((x, j) => (j === i ? { ...x, fmt } : x)))} />
                 </td>
-                <td className={`num val ${forced ? 'forced' : ''}`} title={forced ? 'Forzado' : undefined}>
+                <td className={`num val ${forced ? 'forced' : ''}`} title={forced ? T.vatPanel.forzado : undefined}>
                   {err || Number.isNaN(raw) ? '—' : fmtValue(raw, r.size, row.fmt)}{forced && ' F'}
                 </td>
                 <td style={{ width: 110 }}>
                   <input className="input mono" value={edit[i] ?? ''} placeholder={r instanceof Error ? '' : r.size === 0 ? '0 / 1' : r.kind === 'counterBcd' ? 'C#10' : row.fmt === 'S5TIME' ? '5S' : ''}
-                    onChange={(e) => setEdit({ ...edit, [i]: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && apply(i, 'mod')} aria-label="Nuevo valor" />
+                    onChange={(e) => setEdit({ ...edit, [i]: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && apply(i, 'mod')} aria-label={T.vatPanel.nuevoValor} />
                 </td>
                 <td style={{ whiteSpace: 'nowrap' }}>
-                  <button className="btn small" disabled={err} onClick={() => apply(i, 'mod')} title="Escribir una vez (Forzar valor)">Modificar</button>{' '}
+                  <button className="btn small" disabled={err} onClick={() => apply(i, 'mod')} title={T.vatPanel.modificarTitulo}>{T.vatPanel.modificar}</button>{' '}
                   {forced
-                    ? <button className="btn small active" onClick={() => sim.unforce((r as Reader).op.text)} title="Quitar el forzado">Desforzar</button>
-                    : <button className="btn small" disabled={err || !(r as Reader).op || (r as Reader).kind.startsWith('timer') || (r as Reader).kind.startsWith('counter')} onClick={() => apply(i, 'force')} title="Forzar de forma permanente (se reaplica en cada ciclo)">Forzar</button>}
+                    ? <button className="btn small active" onClick={() => sim.unforce((r as Reader).op.text)} title={T.vatPanel.quitarForzado}>{T.vatPanel.desforzar}</button>
+                    : <button className="btn small" disabled={err || !(r as Reader).op || (r as Reader).kind.startsWith('timer') || (r as Reader).kind.startsWith('counter')} onClick={() => apply(i, 'force')} title={T.vatPanel.forzarTitulo}>{T.vatPanel.forzar}</button>}
                   {' '}
-                  <button className="btn small ghost icon" onClick={() => onRows(rows.filter((_, j) => j !== i))} aria-label="Quitar fila"><Icon name="x" size={13} /></button>
+                  <button className="btn small ghost icon" onClick={() => onRows(rows.filter((_, j) => j !== i))} aria-label={T.vatPanel.quitarFila}><Icon name="x" size={13} /></button>
                 </td>
               </tr>
             );
@@ -110,16 +111,16 @@ export function VatPanel({ sim, rows, onRows, symbols, symByAddr, valorTZ = fals
         </tbody>
       </table>
       <form className="row" style={{ padding: 10 }} onSubmit={(e) => { e.preventDefault(); add(); }}>
-        <input className="input mono grow" placeholder={valorTZ ? 'Operando: E 124.0, A 124.0, MW 10, M 0.0, T 1, Z 0…' : 'E 124.0, A 124.0, MW 10, M 0.0, T 1:VALOR, Z 1…'} value={nuevo} onChange={(e) => setNuevo(e.target.value)} aria-label="Operando nuevo"
+        <input className="input mono grow" placeholder={valorTZ ? T.vatPanel.ejemploTZ : T.vatPanel.ejemplo} value={nuevo} onChange={(e) => setNuevo(e.target.value)} aria-label={T.vatPanel.operandoNuevo}
           list={sugerencias.length ? listaId : undefined} />
         {sugerencias.length > 0 && <datalist id={listaId}>{sugerencias.map((t) => <option key={t} value={t} />)}</datalist>}
-        <button className="btn small" type="submit"><Icon name="plus" size={13} />Añadir</button>
+        <button className="btn small" type="submit"><Icon name="plus" size={13} />{T.vatPanel.anadir}</button>
       </form>
       {sim.forces.size > 0 && (
         <div className="panel-sec" style={{ borderTop: '1px solid var(--border)' }}>
-          <h4>Forzados permanentes <button className="btn small" style={{ marginLeft: 'auto' }} onClick={() => sim.unforceAll()}>Quitar todos</button></h4>
+          <h4>{T.vatPanel.forzadosPermanentes} <button className="btn small" style={{ marginLeft: 'auto' }} onClick={() => sim.unforceAll()}>{T.vatPanel.quitarTodos}</button></h4>
           {[...sim.forces.entries()].map(([k, f]) => (
-            <div key={k} className="row mono" style={{ fontSize: 12 }}><span className="warn-text">F</span>{f.text} = {f.display}<span className="spacer" /><button className="btn small ghost" onClick={() => sim.unforce(k)}>Quitar</button></div>
+            <div key={k} className="row mono" style={{ fontSize: 12 }}><span className="warn-text">F</span>{f.text} = {f.display}<span className="spacer" /><button className="btn small ghost" onClick={() => sim.unforce(k)}>{T.vatPanel.quitar}</button></div>
           ))}
         </div>
       )}

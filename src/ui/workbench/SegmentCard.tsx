@@ -14,6 +14,7 @@ import { operandEnToDe } from '../../core/translate';
 import { makeReader, readRaw, type Reader } from '../../sim/readers';
 import { s16, s32 } from '../../core/num';
 import type { Symbols } from '../../core/operands';
+import { T } from '../../i18n';
 
 export interface SegOps {
   move: (dir: -1 | 1) => void;
@@ -168,8 +169,8 @@ function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, 
     <>
       {observe && (
         <div className="obs-head" style={{ paddingRight: 12 }}>
-          <span title="Resultado lógico (RLO) después de la instrucción">RLO</span><span title="STA: estado del bit consultado o escrito por la instrucción (en «S M 10.0» es el valor de M 10.0 tras la instrucción)">STA</span><span className="w" title="Acumulador 1">ACU1</span><span className="w" title="Acumulador 2">ACU2</span>
-          {observeExtra && <><span>/ER</span><span>OR</span><span>A1A0</span><span>OV</span><span>OS</span></>}
+          <span title={T.seg.rloTitulo}>{T.reg.rlo}</span><span title={T.seg.staTitulo}>{T.reg.sta}</span><span className="w" title={T.seg.acu1Titulo}>{T.reg.acu1}</span><span className="w" title={T.seg.acu2Titulo}>{T.reg.acu2}</span>
+          {observeExtra && <><span>{T.reg.er}</span><span>{T.reg.or}</span><span>{T.reg.a1a0}</span><span>{T.reg.ov}</span><span>{T.reg.os}</span></>}
         </div>
       )}
       <AwlEditor value={seg.awl} readOnly={readOnly} lang={lang} symbols={symbols} diagnostics={diags} observe={obs} observeWidth={w} values={values}
@@ -192,31 +193,31 @@ export const SegmentCard = memo(function SegmentCard(props: Props) {
   const setTitle = (t: string) => onChange(seg.lang === 'KOP' ? { ...seg, kop: { ...seg.kop, titulo: t } } : { ...seg, titulo: t });
   const setComment = (t: string) => onChange(seg.lang === 'KOP' ? { ...seg, kop: { ...seg.kop, comentario: t } } : { ...seg, comentario: t });
   const items: MenuItem[] = [
-    { label: 'Insertar segmento AWL debajo', onClick: () => ops.insertAfter('AWL') },
-    { label: 'Insertar segmento KOP debajo', onClick: () => ops.insertAfter('KOP') },
+    { label: T.seg.insertarAwl, onClick: () => ops.insertAfter('AWL') },
+    { label: T.seg.insertarKop, onClick: () => ops.insertAfter('KOP') },
     { sep: true, label: '' },
-    { label: 'Subir', onClick: () => ops.move(-1), disabled: index === 0 },
-    { label: 'Bajar', onClick: () => ops.move(1), disabled: index === total - 1 },
-    { label: 'Duplicar', onClick: ops.duplicate },
-    { label: showComment || comentario ? 'Ocultar comentario' : 'Añadir comentario', onClick: () => setShowComment(!showComment) },
+    { label: T.seg.subir, onClick: () => ops.move(-1), disabled: index === 0 },
+    { label: T.seg.bajar, onClick: () => ops.move(1), disabled: index === total - 1 },
+    { label: T.seg.duplicar, onClick: ops.duplicate },
+    { label: showComment || comentario ? T.seg.ocultarComentario : T.seg.anadirComentario, onClick: () => setShowComment(!showComment) },
     { sep: true, label: '' },
-    ...(seg.lang === 'KOP' && ops.toAwl ? [{ label: 'Convertir a AWL', onClick: ops.toAwl }] : []),
-    ...(seg.lang === 'AWL' && ops.toKop ? [{ label: 'Convertir a KOP (solo si está vacío)', onClick: ops.toKop }] : []),
-    { label: 'Borrar segmento', onClick: ops.remove, disabled: total <= 1 },
+    ...(seg.lang === 'KOP' && ops.toAwl ? [{ label: T.seg.aAwl, onClick: ops.toAwl }] : []),
+    ...(seg.lang === 'AWL' && ops.toKop ? [{ label: T.seg.aKop, onClick: ops.toKop }] : []),
+    { label: T.seg.borrar, onClick: ops.remove, disabled: total <= 1 },
   ];
   return (
-    <section className={`seg ${errs.length ? 'has-error' : ''} ${focused ? 'focused' : ''}`} id={`seg-${id}`} onMouseDown={onFocus} aria-label={`Segmento ${index + 1}`}>
+    <section className={`seg ${errs.length ? 'has-error' : ''} ${focused ? 'focused' : ''}`} id={`seg-${id}`} onMouseDown={onFocus} aria-label={T.seg.segmento(index + 1)}>
       <div className="seg-head">
-        <span className="num">Segmento {index + 1}</span>
-        <span className={`lang-badge ${seg.lang === 'KOP' ? 'kop' : 'awl'}`}>{seg.lang}</span>
-        <input className="title-input" placeholder="Título del segmento" value={titulo ?? ''} readOnly={readOnly} onChange={(e) => setTitle(e.target.value)} aria-label="Título del segmento" />
-        <button className={`btn small ghost ${segBp ? 'active' : ''}`} title="Punto de parada al empezar este segmento" onClick={() => sim.toggleBreakpoint(originKeySeg(block, id))}>
+        <span className="num">{T.seg.segmento(index + 1)}</span>
+        <span className={`lang-badge ${seg.lang === 'KOP' ? 'kop' : 'awl'}`}>{T.lenguaje[seg.lang]}</span>
+        <input className="title-input" placeholder={T.seg.titulo} value={titulo ?? ''} readOnly={readOnly} onChange={(e) => setTitle(e.target.value)} aria-label={T.seg.titulo} />
+        <button className={`btn small ghost ${segBp ? 'active' : ''}`} title={T.seg.puntoParada} onClick={() => sim.toggleBreakpoint(originKeySeg(block, id))}>
           <span className="cm-bp" style={{ visibility: segBp ? 'visible' : 'visible', opacity: segBp ? 1 : 0.25 }} />
         </button>
-        {!readOnly && <button className="btn small ghost icon" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })} aria-label="Opciones del segmento"><Icon name="dots" /></button>}
+        {!readOnly && <button className="btn small ghost icon" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })} aria-label={T.seg.opciones}><Icon name="dots" /></button>}
       </div>
       {(showComment || comentario) && (
-        <textarea className="seg-comment" rows={1} placeholder="Comentario del segmento" value={comentario ?? ''} readOnly={readOnly} onChange={(e) => setComment(e.target.value)} aria-label="Comentario del segmento" />
+        <textarea className="seg-comment" rows={1} placeholder={T.seg.comentario} value={comentario ?? ''} readOnly={readOnly} onChange={(e) => setComment(e.target.value)} aria-label={T.seg.comentario} />
       )}
       <div className="seg-body">
         {seg.lang === 'AWL'
@@ -225,7 +226,7 @@ export const SegmentCard = memo(function SegmentCard(props: Props) {
       </div>
       {errs.length > 0 && (
         <div className="seg-errors">
-          {errs.slice(0, 8).map((e, i) => <div key={i}><Icon name="alert" size={13} />{e.line > 0 && seg.lang === 'AWL' ? `Línea ${e.line}: ` : ''}{e.msg}</div>)}
+          {errs.slice(0, 8).map((e, i) => <div key={i}><Icon name="alert" size={13} />{e.line > 0 && seg.lang === 'AWL' ? T.seg.linea(e.line) : ''}{e.msg}</div>)}
         </div>
       )}
       {menu && <ContextMenu x={menu.x} y={menu.y} items={items} onClose={() => setMenu(null)} />}

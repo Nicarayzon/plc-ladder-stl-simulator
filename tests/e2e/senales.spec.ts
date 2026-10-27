@@ -9,7 +9,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 test('señales E/S: botón, ventana aparte, teclas y simulación con la principal minimizada', async () => {
   test.setTimeout(180_000);
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'automatizacion-sen-'));
-  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_USER_DATA: userData } });
+  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_IDIOMA: 'es', AUTOMATIZACION_USER_DATA: userData } });
   const win = await app.firstWindow();
   await win.setViewportSize({ width: 1440, height: 900 });
   const errores: string[] = [];

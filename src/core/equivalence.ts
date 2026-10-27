@@ -4,6 +4,7 @@ import { CPU } from './cpu';
 import { analyzeUsage, inputBits, outputBits, outputWords, analogInputs, bitKey, type Usage } from './usage';
 import { Rng } from './rng';
 import { testRead, testWrite, type TestValue } from './testio';
+import { T } from '../i18n';
 
 export interface EquivOptions {
   /** Entradas adicionales (por ejemplo, marcas que el ejercicio usa como entrada): «M0.0», «MW10» */
@@ -260,12 +261,13 @@ export async function checkEquivalence(alumno: CompiledProgram, solucion: Compil
 }
 
 /** Frase para el alumno a partir del contraejemplo. */
-export function describeCounterexample(c: Counterexample): string {
+/** `ver`: cómo se escribe cada operando (con la nemotecnia inglesa, E0.0 → I0.0) */
+export function describeCounterexample(c: Counterexample, ver: (k: string) => string = (k) => k): string {
   const d = c.diff;
-  if (d.key === 'estado') return `Con esta secuencia tu CPU queda en ${d.alumno} y la de la solución en ${d.solucion}.`;
+  if (d.key === 'estado') return T.correccion.cpuQueda(d.alumno, d.solucion);
   const v = (x: number | string) => (typeof x === 'number' && Number.isNaN(x) ? '—' : String(x));
   if (/^\w+\d+\.\d$/.test(d.key)) {
-    return `Con esta secuencia tu ${d.key} ${d.alumno === 1 ? 'se enciende' : 'se apaga'} y el de la solución ${d.solucion === 1 ? 'se enciende' : 'no'} (paso ${d.step + 1}).`;
+    return T.correccion.bit(ver(d.key), d.alumno === 1, d.solucion === 1, d.step + 1);
   }
-  return `Con esta secuencia tu ${d.key} vale ${v(d.alumno)} y el de la solución ${v(d.solucion)} (paso ${d.step + 1}).`;
+  return T.correccion.valor(ver(d.key), v(d.alumno), v(d.solucion), d.step + 1);
 }

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Modal } from './ui';
+import { T } from '../../i18n';
 
 interface AskOpts { title: string; label?: string; value?: string; placeholder?: string; ok?: string; validate?: (v: string) => string | null }
 
@@ -11,7 +12,7 @@ function AskModal({ o, done }: { o: AskOpts; done: (v: string | null) => void })
   const submit = () => { if (!err && v.trim()) done(v.trim()); };
   return (
     <Modal title={o.title} onClose={() => done(null)} width={420}
-      footer={<><button className="btn" onClick={() => done(null)}>Cancelar</button><button className="btn primary" disabled={!!err || !v.trim()} onClick={submit}>{o.ok ?? 'Aceptar'}</button></>}>
+      footer={<><button className="btn" onClick={() => done(null)}>{T.comun.cancelar}</button><button className="btn primary" disabled={!!err || !v.trim()} onClick={submit}>{o.ok ?? T.comun.aceptar}</button></>}>
       {o.label && <div style={{ marginBottom: 6 }}>{o.label}</div>}
       <input className="input" style={{ width: '100%' }} autoFocus value={v} placeholder={o.placeholder} onChange={(e) => setV(e.target.value)}
         onFocus={(e) => e.target.select()} onKeyDown={(e) => { if (e.key === 'Enter') submit(); }} aria-label={o.label ?? o.title} />

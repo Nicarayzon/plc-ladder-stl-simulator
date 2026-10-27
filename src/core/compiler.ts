@@ -2,6 +2,7 @@
 import { CompileError } from './errors';
 import { EN2DE, JUMPS, MNEMONICS, NEST_OPEN, NO_OPERAND, BITLOGIC, TSTART, WORDLOG, SHIFTS } from './mnemonics';
 import { type Op, type Symbols, parseOperand } from './operands';
+import { T } from '../i18n';
 
 export type Lang = 'de' | 'en';
 
@@ -120,7 +121,7 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
 
   const fail = (sl: SourceLine | null, msg: string): never => {
     const issue: CompileIssue = { line: sl ? sl.line : 0, msg, origin: sl?.origin };
-    if (!collect) throw new CompileError(sl ? `Línea ${sl.line}: ${msg}` : msg);
+    if (!collect) throw new CompileError(sl ? T.motor.linea(sl.line, msg) : msg);
     errors.push(issue);
     throw new LineErr(msg);
   };
@@ -134,7 +135,7 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       const lm = LABEL_RE.exec(line);
       if (lm) {
         const lname = lm[1].toUpperCase();
-        if (labels.has(lname) || pendingSet.has(lname)) fail(sl, `meta duplicada: ${lname}`);
+        if (labels.has(lname) || pendingSet.has(lname)) fail(sl, T.motor.metaDuplicada(lname));
         pending.push(lname);
         pendingSet.add(lname);
         line = pyStrip(lm[2]);
@@ -143,11 +144,11 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       let [mn, rest] = splitMnemonic(line);
       const llang = sl.lang ?? lang;
       if (llang === 'en') mn = EN2DE[mn] ?? mn;
-      if (!MNEMONICS.has(mn)) fail(sl, `instrucción desconocida: ${mn}`);
-      if (mn === 'ENT' || mn === 'LEAVE') fail(sl, `${mn} solo existe en CPU con 4 acumuladores (el simulador tiene 2)`);
+      if (!MNEMONICS.has(mn)) fail(sl, T.motor.desconocida(mn));
+      if (mn === 'ENT' || mn === 'LEAVE') fail(sl, T.motor.cuatroAcus(mn));
       let op: Op | null = null;
       if (JUMPS.has(mn)) {
-        if (!LABEL_NAME.test(rest)) fail(sl, `${mn} necesita una meta válida (máx. 4 caracteres, empieza por letra)`);
+        if (!LABEL_NAME.test(rest)) fail(sl, T.motor.metaValida(mn));
         op = { kind: 'label', name: rest.toUpperCase(), text: rest.toUpperCase() };
       } else if (rest) {
         try {
@@ -159,16 +160,16 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       }
       const k = op ? op.kind : null;
       const need = (...kinds: string[]) => {
-        if (!kinds.includes(k as string)) fail(sl, `operando no válido para ${mn}: ${rest || '(ninguno)'}`);
+        if (!kinds.includes(k as string)) fail(sl, T.motor.operandoNoValidoPara(mn, rest));
       };
 
       if (BITLOGIC.has(mn)) {
         if (op === null) {
           if (mn === 'O') mn = 'O0';
-          else fail(sl, `${mn} necesita un operando`);
+          else fail(sl, T.motor.necesitaOperando(mn));
         } else need('bit', 'timer', 'counter', 'status');
       } else if (NO_OPERAND.has(mn)) {
-        if (op !== null) fail(sl, `${mn} no lleva operando`);
+        if (op !== null) fail(sl, T.motor.sinOperando(mn));
       } else if (mn === '=') need('bit');
       else if (mn === 'S') need('bit', 'counter');
       else if (mn === 'R') need('bit', 'timer', 'counter');
@@ -178,16 +179,16 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       else if (mn === 'ZV' || mn === 'ZR') need('counter');
       else if (mn === 'L') {
         need('const', 'mem', 'timer', 'counter', 'stw', 'dbreg');
-        if (k === 'mem' && op!.area === 'PA') fail(sl, 'la periferia de salidas (PA) no se puede leer');
+        if (k === 'mem' && op!.area === 'PA') fail(sl, T.motor.paNoLeer);
       } else if (mn === 'LC') need('timer', 'counter');
       else if (mn === 'T') {
         need('mem', 'stw');
-        if (k === 'mem' && op!.area === 'PE') fail(sl, 'la periferia de entradas (PE) no se puede escribir');
+        if (k === 'mem' && op!.area === 'PE') fail(sl, T.motor.peNoEscribir);
       } else if (WORDLOG.has(mn) || SHIFTS.has(mn)) {
         if (op !== null) need('const');
       } else if (mn === 'INC' || mn === 'DEC') {
         need('const');
-        if (op!.value! > 255) fail(sl, `${mn}: la constante va de 0 a 255`);
+        if (op!.value! > 255) fail(sl, T.motor.constante255(mn));
       } else if (mn === '+') need('const');
       else if (mn === 'NOP' || mn === 'BLD') need('const');
       else if (mn === 'LAR1' || mn === 'LAR2') {
@@ -198,10 +199,10 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
         if (op !== null) need('const');
       } else if (mn === 'AUF') {
         need('block');
-        if (op!.name !== 'DB' && op!.name !== 'DI') fail(sl, 'AUF solo abre DB o DI');
+        if (op!.name !== 'DB' && op!.name !== 'DI') fail(sl, T.motor.aufDbDi);
       } else if (mn === 'UC' || mn === 'CC' || mn === 'CALL') {
         need('block');
-        if (op!.name !== 'FC' && op!.name !== 'SFC') fail(sl, 'el intérprete de referencia solo llama a FC sin parámetros');
+        if (op!.name !== 'FC' && op!.name !== 'SFC') fail(sl, T.motor.soloFc);
       }
 
       if (NEST_OPEN.has(mn)) depth += 1;
@@ -209,7 +210,7 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
         depth -= 1;
         if (depth < 0) {
           depth = 0;
-          fail(sl, "')' sin paréntesis abierto");
+          fail(sl, T.motor.cierraSinAbrir);
         }
       }
       const ins: Instr = { mn, op, line: sl.line, src: pyStrip(sl.text), target: -1, splCount: 0, origin: sl.origin };
@@ -229,7 +230,7 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
     instrs.push({ mn: 'NOP', op: { kind: 'const', value: 0, ctype: 'INT', text: '0' }, line: 0, src: 'NOP 0', target: -1, splCount: 0, origin: last });
   }
   if (depth !== 0) {
-    const msg = 'Falta cerrar paréntesis: hay más "(" que ")"';
+    const msg = T.motor.faltaCerrar;
     if (!collect) throw new CompileError(msg);
     errors.push({ line: 0, msg });
   }
@@ -239,8 +240,8 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
     const lname = ins.op!.name!;
     const tgt = labels.get(lname);
     if (tgt === undefined) {
-      const msg = `la meta ${lname} no existe`;
-      if (!collect) throw new CompileError(`Línea ${ins.line}: ${msg}`);
+      const msg = T.motor.metaNoExiste(lname);
+      if (!collect) throw new CompileError(T.motor.linea(ins.line, msg));
       errors.push({ line: ins.line, msg, origin: ins.origin });
       continue;
     }
@@ -250,8 +251,8 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       let bad = count < 0;
       for (let j = i + 1; j < tgt && !bad; j++) if (instrs[j].mn !== 'SPA') bad = true;
       if (bad) {
-        const msg = 'SPL debe ir seguido de una lista de SPA y luego de su meta';
-        if (!collect) throw new CompileError(`Línea ${ins.line}: ${msg}`);
+        const msg = T.motor.spl;
+        if (!collect) throw new CompileError(T.motor.linea(ins.line, msg));
         errors.push({ line: ins.line, msg, origin: ins.origin });
         continue;
       }
@@ -286,6 +287,6 @@ export function compileProgramText(blocks: string | Record<string, string>, symb
     const n = normBlockName(k);
     out.set(n, compileBlockText(v, symbols, lang, n));
   }
-  if (!out.has('OB1')) throw new CompileError('Falta el OB1');
+  if (!out.has('OB1')) throw new CompileError(T.motor.faltaOb1);
   return { blocks: out };
 }

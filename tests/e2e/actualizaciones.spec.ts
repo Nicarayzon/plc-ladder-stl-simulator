@@ -47,7 +47,7 @@ test('buscar actualizaciones: versión nueva, al día y sin versiones publicadas
   await new Promise<void>((r) => servidor.listen(0, '127.0.0.1', r));
   const url = `http://127.0.0.1:${(servidor.address() as AddressInfo).port}/releases/latest`;
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'automatizacion-act-'));
-  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_USER_DATA: userData, AUTOMATIZACION_RELEASES_URL: url } });
+  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_IDIOMA: 'es', AUTOMATIZACION_USER_DATA: userData, AUTOMATIZACION_RELEASES_URL: url } });
   await app.firstWindow();
 
   // hay una versión nueva: «Actualizar» abre su página

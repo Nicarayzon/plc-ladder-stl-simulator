@@ -3,6 +3,7 @@ import { type CompiledProgram } from './compiler';
 import { CPU, type TraceRow } from './cpu';
 import { type Symbols } from './operands';
 import { expectedMatches, splitKey, testRead, testWrite, type TestValue } from './testio';
+import { T } from '../i18n';
 
 export interface Paso {
   poner?: Record<string, TestValue>;
@@ -92,7 +93,7 @@ export function runTestDetailed(code: Program, test: Prueba, opts: StepRunOption
       if (!expectedMatches(got, exp, tipo)) {
         fails.push({
           paso: i, key: k, got, expected: exp, stop: cpu.state === 'STOP' ? cpu.stopReason : null,
-          msg: `paso ${i}: ${k} = ${pyRepr(got)}, se esperaba ${pyRepr(exp)}` + (cpu.state === 'STOP' ? `  [CPU en STOP: ${cpu.stopReason}]` : ''),
+          msg: T.motor.pasoDistinto(i, k, pyRepr(got), pyRepr(exp)) + (cpu.state === 'STOP' ? T.motor.enStop(String(cpu.stopReason)) : ''),
         });
       }
     }
@@ -101,7 +102,7 @@ export function runTestDetailed(code: Program, test: Prueba, opts: StepRunOption
       if (cpu.state !== step.esperar_estado) {
         fails.push({
           paso: i, key: 'estado', got: cpu.state, expected: step.esperar_estado, stop: cpu.stopReason,
-          msg: `paso ${i}: estado = ${cpu.state}, se esperaba ${step.esperar_estado}` + (cpu.stopReason ? ` (${cpu.stopReason})` : ''),
+          msg: T.motor.pasoEstado(i, cpu.state, String(step.esperar_estado)) + (cpu.stopReason ? ` (${cpu.stopReason})` : ''),
         });
       }
     }
@@ -139,17 +140,17 @@ export function runTraceTest(code: Program, spec: TrazaSpec): string[] {
   const { rows } = traceOneCycle(code, spec.inicial);
   const fails: string[] = [];
   const exp = spec.filas;
-  if (rows.length !== exp.length) fails.push(`la traza tiene ${rows.length} filas y se esperaban ${exp.length}`);
+  if (rows.length !== exp.length) fails.push(T.motor.trazaFilas(rows.length, exp.length));
   const n = Math.min(rows.length, exp.length);
   for (let i = 0; i < n; i++) {
     const got = rows[i] as unknown as Record<string, unknown>;
     for (const [k, v] of Object.entries(exp[i])) {
       if (k === 'i') {
         if (lastColon(normInstr(String(got.instr))) !== lastColon(normInstr(String(v))))
-          fails.push(`fila ${i + 1}: instrucción «${got.instr}», se esperaba «${v}»`);
+          fails.push(T.motor.trazaInstr(i + 1, String(got.instr), String(v)));
         continue;
       }
-      if (got[k] !== v) fails.push(`fila ${i + 1} (${got.instr}): ${k} = ${got[k]}, se esperaba ${v}`);
+      if (got[k] !== v) fails.push(T.motor.trazaValor(i + 1, String(got.instr), k, String(got[k]), String(v)));
     }
   }
   return fails;
@@ -172,6 +173,6 @@ export function runChronoTest(code: Program, spec: CronoSpec): { fails: string[]
     for (let j = 0; j < Math.floor(paso / cycleMs) - nHalf; j++) cpu.scan();
   }
   const fails: string[] = [];
-  for (const [k, exp] of Object.entries(spec.salidas)) if (got[k] !== exp) fails.push(`${k}: obtenido ${got[k]}, se esperaba ${exp}`);
+  for (const [k, exp] of Object.entries(spec.salidas)) if (got[k] !== exp) fails.push(T.motor.cronograma(k, String(got[k]), String(exp)));
   return { fails, got };
 }

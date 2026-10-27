@@ -17,6 +17,9 @@ import { ExerciseShell, GradeReport } from './common';
 import { Icon } from '../../common/Icon';
 import { toast } from '../../common/ui';
 import type { ProgramIssue } from '../../../core/program';
+import { T } from '../../../i18n';
+import { displayOperand } from '../../../core/translate';
+import { useSettings } from '../../../store/settings';
 
 export interface ExResult { g: Grade; eq: EquivResult | null; lints: ProgramIssue[]; nota: number }
 
@@ -59,12 +62,12 @@ export function WorkbenchExercise({ e, back, initial, solution, withEquivalence,
   const check = async () => {
     const pc = compileProgram(prog);
     if (!pc.cp) {
-      toast(`El programa tiene errores: ${pc.errors[0]?.full ?? ''}`);
+      toast(T.ejercicio.conErrores(pc.errors[0]?.full ?? ''));
       return;
     }
     setBusy(true);
     try {
-      const g = gradeProgram(pc.cp, e);
+      const g = gradeProgram(pc.cp, e, (k) => displayOperand(k, prog.nemotecnia));
       let eq: EquivResult | null = null;
       if (withEquivalence && solution) {
         const obs = [...new Set((e.prueba?.pasos ?? []).flatMap((p) => Object.keys(p.esperar ?? {})))];
@@ -91,14 +94,14 @@ export function WorkbenchExercise({ e, back, initial, solution, withEquivalence,
     sim.analyzer.clear();
     const keys = new Set<string>();
     for (const p of e.prueba.pasos.slice(0, res.g.failStep)) {
-      for (const k of [...Object.keys(p.poner ?? {}), ...(p.pulso ? [p.pulso] : []), ...Object.keys(p.esperar ?? {})]) keys.add(k.replace(/:.*/, '').replace(/^([A-Z]+)(\d)/, '$1 $2'));
+      for (const k of [...Object.keys(p.poner ?? {}), ...(p.pulso ? [p.pulso] : []), ...Object.keys(p.esperar ?? {})]) keys.add(displayOperand(k.replace(/:.*/, '').replace(/^([A-Z]+)(\d)/, '$1 $2'), prog.nemotecnia));
     }
     for (const s of [...sim.analyzer.signals]) sim.analyzer.remove(s.id);
     for (const k of keys) { try { sim.analyzer.add(k, sim.compiled.symbols); } catch { /* */ } }
     for (const [k, v] of Object.entries(e.prueba.inicial ?? {})) testWrite(cpu, k, v);
     for (const p of e.prueba.pasos.slice(0, res.g.failStep)) applyStep(cpu, p);
     sim.bump();
-    toast(`Simulación reproducida hasta el paso ${res.g.failStep}: mira el analizador lógico`);
+    toast(T.ejercicio.reproducida(res.g.failStep));
   };
 
   return (
@@ -106,8 +109,8 @@ export function WorkbenchExercise({ e, back, initial, solution, withEquivalence,
       actions={(
         <>
           {extraActions?.({ load })}
-          <button className="btn" onClick={() => { if (confirm('¿Volver al programa inicial? Se perderán tus cambios.')) { borrarBorrador(e.id); load(initial()); } }}><Icon name="refresh" size={14} />Restaurar</button>
-          <button className="btn primary" onClick={check} disabled={busy}><Icon name="check" size={14} />{busy ? 'Comprobando…' : 'Comprobar'}</button>
+          <button className="btn" onClick={() => { if (confirm(T.ejercicio.volverInicial)) { borrarBorrador(e.id); load(initial()); } }}><Icon name="refresh" size={14} />{T.ejercicio.restaurar}</button>
+          <button className="btn primary" onClick={check} disabled={busy}><Icon name="check" size={14} />{busy ? T.ejercicio.comprobando : T.ejercicio.comprobar}</button>
         </>
       )}
       left={(
@@ -116,8 +119,8 @@ export function WorkbenchExercise({ e, back, initial, solution, withEquivalence,
             <GradeReport g={{ ...res.g, nota: res.nota }} onReplay={replay} extra={(
               <>
                 {res.eq && (res.eq.equivalente
-                  ? <div className="ok-text" style={{ marginTop: 8 }}>✔ Equivalente a la solución ({res.eq.modo === 'combinacional' ? `${res.eq.probados} combinaciones de entradas` : `${res.eq.probados} pasos aleatorios`}{res.eq.aproximado ? ', aproximado' : ''}).</div>
-                  : <div style={{ marginTop: 8 }}><b>Tu programa no es equivalente a la solución: mira el cronograma.</b><CounterexampleView c={res.eq.contraejemplo!} /></div>)}
+                  ? <div className="ok-text" style={{ marginTop: 8 }}>{T.ejercicio.equivalente(res.eq.modo === 'combinacional' ? T.ejercicio.combinaciones(res.eq.probados) : T.ejercicio.pasosAleatorios(res.eq.probados), !!res.eq.aproximado)}</div>
+                  : <div style={{ marginTop: 8 }}><b>{T.ejercicio.noEquivalente}</b><CounterexampleView c={res.eq.contraejemplo!} /></div>)}
                 {res.lints.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     {res.lints.map((l, i) => <div key={i} className="warn-text" style={{ fontSize: 12.5 }}>⚠ {l.full}</div>)}
@@ -136,6 +139,9 @@ export function WorkbenchExercise({ e, back, initial, solution, withEquivalence,
 
 /** Cronograma estático del contraejemplo de la equivalencia. */
 export function CounterexampleView({ c }: { c: Counterexample }) {
+  // las entradas y salidas, con la nemotecnia elegida (E0.0 → I0.0 con la inglesa)
+  const nemotecnia = useSettings((s) => s.nemotecnia);
+  const ver = (k: string) => displayOperand(k, nemotecnia);
   const outs = c.outputs.filter((k) => c.alumno[k].some((v, i) => v !== c.solucion[k][i]) || c.outputs.length <= 3);
   const n = c.steps.length;
   const cell = (v: number) => (Number.isNaN(v) ? '—' : String(v));
@@ -143,20 +149,20 @@ export function CounterexampleView({ c }: { c: Counterexample }) {
   const times = c.steps.map((s) => { const r = t; t += s.ciclos * c.cycleMs; return r; });
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ fontSize: 12.5, marginBottom: 6 }}>{describeCounterexample(c)}</div>
+      <div style={{ fontSize: 12.5, marginBottom: 6 }}>{describeCounterexample(c, ver)}</div>
       <div style={{ overflowX: 'auto' }}>
         <table className="tbl" style={{ width: 'auto', fontFamily: 'var(--mono)', fontSize: 11.5 }}>
           <thead>
-            <tr><th>Paso</th>{c.steps.map((_, i) => <th key={i} className="num">{i + 1}</th>)}</tr>
+            <tr><th>{T.ejercicio.paso}</th>{c.steps.map((_, i) => <th key={i} className="num">{i + 1}</th>)}</tr>
             <tr><th>t (ms)</th>{times.map((x, i) => <th key={i} className="num" style={{ fontWeight: 400 }}>{x}</th>)}</tr>
           </thead>
           <tbody>
             {c.inputs.map((k) => (
-              <tr key={k}><td><b>{k}</b></td>{c.steps.map((s, i) => <td key={i} className="num">{cell(s.inputs[k] ?? 0)}</td>)}</tr>
+              <tr key={k}><td><b>{ver(k)}</b></td>{c.steps.map((s, i) => <td key={i} className="num">{cell(s.inputs[k] ?? 0)}</td>)}</tr>
             ))}
             {outs.map((k) => (
               <tr key={`o${k}`}>
-                <td><b>{k}</b><div className="faint" style={{ fontSize: 10 }}>tuyo / solución</div></td>
+                <td><b>{ver(k)}</b><div className="faint" style={{ fontSize: 10 }}>{T.ejercicio.tuyoSolucion}</div></td>
                 {c.alumno[k].map((v, i) => {
                   const bad = v !== c.solucion[k][i] && !(Number.isNaN(v) && Number.isNaN(c.solucion[k][i]));
                   return <td key={i} className="num" style={bad ? { background: 'var(--err-bg)', color: 'var(--err)' } : undefined}>{cell(v)} / {cell(c.solucion[k][i])}</td>;
@@ -169,7 +175,7 @@ export function CounterexampleView({ c }: { c: Counterexample }) {
           </tbody>
         </table>
       </div>
-      <div className="faint" style={{ fontSize: 11, marginTop: 4 }}>Cada paso fija las entradas y ejecuta {c.steps.map((s) => s.ciclos).join(', ')} ciclo(s) de {c.cycleMs} ms. Prueba la secuencia en el simulador.</div>
+      <div className="faint" style={{ fontSize: 11, marginTop: 4 }}>{T.ejercicio.cadaPaso(c.steps.map((s) => s.ciclos).join(', '), c.cycleMs)}</div>
       <span style={{ display: 'none' }}>{n}</span>
     </div>
   );

@@ -1,6 +1,6 @@
 # Beispiele zu KOP und AWL
 
-> Deutsche Übersetzung der Beispiele aus `src/content/ejemplos_KOP_AWL.md`, die auf der Website vorkommen.
+> Deutsche Übersetzung der Beispiele aus `src/content/ejemplos_KOP_AWL.md`: die der Website und die 31 Beispiele der App („Beispiele“).
 > - Die Kennungen (E01, Q01…) bleiben gleich: Die Seiten werden daraus erzeugt (`web/teoria/paginas.ts`).
 > - Die Tests (```yaml) werden hier nicht wiederholt: Die interaktiven Felder lesen sie immer aus der spanischen Datei.
 > - Auf der Website wird der erste ```text-Block eines Beispiels mit KOP-Modell durch die Zeichnung ersetzt.
@@ -352,6 +352,17 @@ Dieselben Eingänge wie in Q01. Welchen Wert hat A4.0?
       =     A 4.0
 ```
 
+### E11b — Stromstoßschalter mit Exklusiv-ODER (nur AWL)
+
+```awl
+      U     E 0.0
+      FP    M 10.0
+      =     M 10.1
+      U     M 10.1
+      X     A 4.0       // Impuls XOR aktueller Zustand
+      =     A 4.0
+```
+
 ### E12 — Einschaltverzögerung (SE / S_EVERZ)
 
 **Aufgabe**: A4.0 schaltet 5 s nach dem Einschalten von E0.0 ein, und nur wenn E0.0 noch 1 ist. E0.1 setzt zurück. MW10 enthält die Restzeit binär und MW12 in BCD.
@@ -400,6 +411,73 @@ Dieselben Eingänge wie in Q01. Welchen Wert hat A4.0?
       SA    T 2
       U     T 2
       =     A 4.1
+```
+
+### E14 — Impuls (SI / S_IMPULS)
+
+**Aufgabe**: A4.2 = 1 für höchstens 2 s, solange E0.3 gedrückt ist.
+
+```text
+                 T3
+             +-----------+
+   E0.3      | S_IMPULS  |                       A4.2
+ |---| |-----|S         Q|-----------------------( )
+ S5T#2S -----|TW         |
+             +-----------+
+```
+
+```awl
+      U     E 0.3
+      L     S5T#2S
+      SI    T 3
+      U     T 3
+      =     A 4.2
+```
+
+### E15 — Verlängerter Impuls (SV / S_VIMP)
+
+**Aufgabe**: Ein kurzer Impuls an E0.4 hält A4.3 für 2 s eingeschaltet. Ein neuer Impuls startet die Zeit neu.
+
+```text
+                 T4
+             +-----------+
+   E0.4      | S_VIMP    |                       A4.3
+ |---| |-----|S         Q|-----------------------( )
+ S5T#2S -----|TW         |
+             +-----------+
+```
+
+```awl
+      U     E 0.4
+      L     S5T#2S
+      SV    T 4
+      U     T 4
+      =     A 4.3
+```
+
+### E16 — Speichernde Einschaltverzögerung (SS / S_SEVERZ)
+
+**Aufgabe**: Ein Impuls an E0.5 schaltet A4.4 nach 3 s ein, und A4.4 bleibt an, bis das Rücksetzen E0.6 gedrückt wird.
+
+```text
+                 T5
+             +-----------+
+   E0.5      | S_SEVERZ  |                       A4.4
+ |---| |-----|S         Q|-----------------------( )
+ S5T#3S -----|TW         |
+   E0.6      |           |
+ |---| |-----|R          |
+             +-----------+
+```
+
+```awl
+      U     E 0.5
+      L     S5T#3S
+      SS    T 5
+      U     E 0.6
+      R     T 5
+      U     T 5
+      =     A 4.4
 ```
 
 ### E17 — Blinker (1 s an / 1 s aus) mit zwei Zeiten

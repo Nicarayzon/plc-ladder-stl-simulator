@@ -1,6 +1,7 @@
 // Formatos de visualización y entrada de valores (tabla de variables, paneles, analizador)
 import { parseConstant } from './constants';
 import { bitsF32, f32Bits, s16, s32, hex } from './num';
+import { T } from '../i18n';
 
 export type Formato = 'BOOL' | 'BIN' | 'HEX' | 'DEC' | 'UDEC' | 'BCD' | 'REAL' | 'S5TIME' | 'TIME' | 'CHAR';
 export const FORMATOS: Formato[] = ['BOOL', 'BIN', 'HEX', 'DEC', 'UDEC', 'BCD', 'REAL', 'S5TIME', 'TIME', 'CHAR'];
@@ -61,7 +62,7 @@ export function fmtReal(x: number, cifras = 7): string {
 export function fmtS5time(w: number): string {
   const base = (w >> 12) & 3;
   const d = [(w >> 8) & 0xF, (w >> 4) & 0xF, w & 0xF];
-  if (d.some((x) => x > 9)) return `W#16#${hex(w & 0xFFFF, 4)} (no es S5TIME)`;
+  if (d.some((x) => x > 9)) return T.motor.noEsS5(hex(w & 0xFFFF, 4));
   const v = d[0] * 100 + d[1] * 10 + d[2];
   const ms = v * [10, 100, 1000, 10000][base];
   return `S5T#${fmtDuration(ms)}`;
@@ -92,17 +93,17 @@ export function parseUserValue(text: string, size: 0 | 1 | 2 | 4, f: Formato): n
   if (size === 0) {
     if (/^(1|true|on|sí|si)$/i.test(t)) return 1;
     if (/^(0|false|off|no)$/i.test(t)) return 0;
-    throw new Error('Un bit vale 0 o 1');
+    throw new Error(T.motor.bit01);
   }
   if (f === 'REAL' || (/^[+-]?\d*\.\d+(e[+-]?\d+)?$/i.test(t) && size === 4)) {
     const v = parseFloat(t);
-    if (Number.isNaN(v)) throw new Error('Número REAL no válido');
+    if (Number.isNaN(v)) throw new Error(T.motor.realNoValido);
     return f32Bits(v);
   }
   if (f === 'BCD' && /^-?\d+$/.test(t)) {
     const v = parseInt(t, 10);
     const c = parseConstant(`C#${Math.abs(v)}`);
-    if (!c) throw new Error('BCD no válido');
+    if (!c) throw new Error(T.motor.bcdNoValido);
     return c.value | (v < 0 ? 0xF000 : 0);
   }
   if (f === 'S5TIME' && !/#/.test(t)) {
@@ -110,7 +111,7 @@ export function parseUserValue(text: string, size: 0 | 1 | 2 | 4, f: Formato): n
     if (c) return c.value;
   }
   const c = parseConstant(t);
-  if (!c) throw new Error('Valor no válido');
+  if (!c) throw new Error(T.motor.valorNoValido);
   return c.value;
 }
 

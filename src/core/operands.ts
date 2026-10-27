@@ -1,6 +1,7 @@
 // Operandos AWL (parse_operand de la referencia)
 import { CompileError } from './errors';
 import { type CType, parseConstant } from './constants';
+import { T } from '../i18n';
 
 export type Area = 'E' | 'A' | 'M' | 'L' | 'PE' | 'PA' | 'DB' | 'DI';
 export type OpKind = 'const' | 'status' | 'stw' | 'dbreg' | 'ar' | 'timer' | 'counter' | 'block' | 'bit' | 'mem' | 'label';
@@ -80,10 +81,10 @@ export function parseOperand(text: string, symbols?: Symbols, lang: 'de' | 'en' 
   if (s.startsWith('"')) {
     const name = stripQuotes(s);
     const addr = lookupSymbol(symbols, name);
-    if (addr === undefined) throw new CompileError(`Símbolo no definido: "${name}"`);
+    if (addr === undefined) throw new CompileError(T.motor.simboloNoDefinido(name));
     s = addr;
   }
-  if (s.startsWith('#')) throw new CompileError(`Variable local ${s}: el intérprete de referencia no admite interfaces de bloque`);
+  if (s.startsWith('#')) throw new CompileError(T.motor.variableLocal(s));
   if (lang === 'en') s = translateEnOperand(s);
   const S = s.toUpperCase().replace(/\s+/g, ' ').trim();
   const c = parseConstant(s);
@@ -95,7 +96,7 @@ export function parseOperand(text: string, symbols?: Symbols, lang: 'de' | 'en' 
   let m = RE_TZ.exec(S);
   if (m) {
     const n = parseInt(m[2], 10);
-    if (n > 255) throw new CompileError(`${S}: solo existen T0..T255 / Z0..Z255`);
+    if (n > 255) throw new CompileError(T.motor.tz255(S));
     return { kind: m[1] === 'T' ? 'timer' : 'counter', n, text: S };
   }
   m = RE_BLOCK.exec(S);
@@ -113,7 +114,7 @@ export function parseOperand(text: string, symbols?: Symbols, lang: 'de' | 'en' 
     } else {
       const iop = parseOperand(inner);
       if (!iop || iop.kind !== 'mem' || iop.size !== 4 || !['M', 'L', 'DB', 'DI'].includes(iop.area!))
-        throw new CompileError(`Puntero indirecto no válido: [${inner}] (usa MD, LD, DBD o DID)`);
+        throw new CompileError(T.motor.punteroIndirecto(inner));
       ind = { k: 'mem', ptr: iop };
     }
     if (areaTok in BIT_AREAS) return { kind: 'bit', area: BIT_AREAS[areaTok], ind, text: S };
@@ -125,17 +126,17 @@ export function parseOperand(text: string, symbols?: Symbols, lang: 'de' | 'en' 
   if (m) {
     const db = parseInt(m[1], 10);
     if (m[2] === 'DBX') {
-      if (m[4] === undefined) throw new CompileError(`${S}: falta el número de bit`);
+      if (m[4] === undefined) throw new CompileError(T.motor.faltaBit(S));
       return { kind: 'bit', area: 'DB', db, byte: parseInt(m[3], 10), bit: parseInt(m[4], 10), text: S };
     }
-    if (m[4] !== undefined) throw new CompileError(`${S}: un byte/palabra no lleva número de bit`);
+    if (m[4] !== undefined) throw new CompileError(T.motor.sobraBit(S));
     const [area, size] = MEM_PREFIX[m[2]];
     return { kind: 'mem', area, size, db, byte: parseInt(m[3], 10), text: S };
   }
   m = RE_BIT.exec(S);
   if (m) {
     const bit = parseInt(m[3], 10);
-    if (bit > 7) throw new CompileError(`${S}: el número de bit va de 0 a 7`);
+    if (bit > 7) throw new CompileError(T.motor.bit07(S));
     return { kind: 'bit', area: BIT_AREAS[m[1]], byte: parseInt(m[2], 10), bit, text: S };
   }
   m = RE_MEM.exec(S);
@@ -143,5 +144,5 @@ export function parseOperand(text: string, symbols?: Symbols, lang: 'de' | 'en' 
     const [area, size] = MEM_PREFIX[m[1]];
     return { kind: 'mem', area, size, byte: parseInt(m[2], 10), text: S };
   }
-  throw new CompileError(`Operando no válido: ${text.trim()}`);
+  throw new CompileError(T.motor.operandoNoValido(text.trim()));
 }

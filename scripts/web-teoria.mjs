@@ -28,6 +28,8 @@ const ajustesWeb = {
   name: 'ajustes-web',
   setup(b) {
     b.onResolve({ filter: /\/store\/settings$/ }, () => ({ path: path.join(raiz, 'scripts/web/ajustes-web.ts') }));
+    // ni el diccionario de la app: los textos de la web van aparte (ver i18n-web.ts)
+    b.onResolve({ filter: /\/i18n$/ }, () => ({ path: path.join(raiz, 'scripts/web/i18n-web.ts') }));
   },
 };
 

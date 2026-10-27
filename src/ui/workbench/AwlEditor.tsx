@@ -7,6 +7,7 @@ import { autocompletion, completionKeymap } from '@codemirror/autocomplete';
 import { linter, setDiagnostics, type Diagnostic } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 import { awlCompletion, awlStream } from './awlLang';
+import { T } from '../../i18n';
 
 export interface ObsLine { line: number; cells: string[]; dim: boolean; count: number }
 /** Valor en vivo de un operando, mostrado justo detrás del código de la línea */
@@ -95,7 +96,7 @@ class ValWidget extends WidgetType {
     const el = document.createElement('span');
     el.className = `cm-val ${this.cls}`;
     el.textContent = this.text;
-    el.title = 'Valor actual del operando';
+    el.title = T.seg.valorActual;
     return el;
   }
   override ignoreEvent() { return true; }

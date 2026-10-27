@@ -10,7 +10,7 @@ files:
   - package.json
 asar: true
 npmRebuild: false
-electronLanguages: [es, en]
+electronLanguages: [es, en, de]
 afterPack: scripts/adhoc-sign.cjs
 mac:
   artifactName: Automatizacion-${version}-arm64-mac.${ext}

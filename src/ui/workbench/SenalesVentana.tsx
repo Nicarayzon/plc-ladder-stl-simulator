@@ -11,10 +11,11 @@ import { useSimTick } from './useSim';
 import { Icon } from '../common/Icon';
 import { toast } from '../common/ui';
 import { guardarGeom, leerGeom, prepararDocumento, useBombeo } from './ventanaAparte';
+import { T } from '../../i18n';
 
 const GEOM_KEY = 'automatizacion-senales-ventana';
 const NOMBRE = 'senales';
-const TITULO = 'Señales E/S — Automatizacion';
+const TITULO = T.senales.titulo;
 
 export interface SenalesVentana {
   /** Ventana aparte abierta (null = las señales van abajo, en la ventana principal) */
@@ -43,7 +44,7 @@ export function useSenalesVentana(): SenalesVentana {
     const feats = g ? `left=${g.x},top=${g.y},width=${g.w},height=${g.h}` : 'width=1100,height=460';
     const w = window.open('', NOMBRE, feats);
     if (!w) {
-      toast('No se ha podido abrir la ventana de señales');
+      toast(T.senales.noSeAbre);
       return;
     }
     if (!w.document.getElementById('senales-root')) {
@@ -96,7 +97,7 @@ function EstadoCpu({ sim }: { sim: SimController }) {
     <>
       <span className="led-label"><span className={`led ${run ? 'on' : ''}`} />RUN</span>
       <span className="led-label"><span className={`led yellow ${!run ? 'on' : ''}`} />STOP</span>
-      {run && !sim.playing && <span className="warn-text" style={{ fontSize: 12 }}>en pausa</span>}
+      {run && !sim.playing && <span className="warn-text" style={{ fontSize: 12 }}>{T.senales.enPausa}</span>}
     </>
   );
 }
@@ -112,7 +113,7 @@ export function SenalesFuera({ sim, win, nombre, onSignalsChange, onTraer }: {
   const root = win.document.getElementById('senales-root');
 
   useEffect(() => {
-    win.document.title = nombre ? `Señales E/S — ${nombre}` : TITULO;
+    win.document.title = nombre ? T.senales.tituloDe(nombre) : TITULO;
   }, [win, nombre]);
 
   useBombeo(sim, win);
@@ -122,14 +123,14 @@ export function SenalesFuera({ sim, win, nombre, onSignalsChange, onTraer }: {
     <div className="senales-win">
       <div className="senales-head">
         <Icon name="wave" size={15} />
-        <b>Señales E/S</b>
+        <b>{T.senales.senales}</b>
         {nombre && <span className="faint">· {nombre}</span>}
         <span className="sep" />
         <EstadoCpu sim={sim} />
         <CycleStatus sim={sim} />
         <span className="spacer" />
-        <button className="btn small" onClick={onTraer} title="Cerrar esta ventana y ver las señales abajo, en la ventana principal">
-          <Icon name="down" size={13} />Volver a la ventana principal
+        <button className="btn small" onClick={onTraer} title={T.senales.volverTitulo}>
+          <Icon name="down" size={13} />{T.senales.volver}
         </button>
       </div>
       <div className="senales-body">

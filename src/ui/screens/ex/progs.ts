@@ -6,9 +6,13 @@ import { newKopSegment } from '../../workbench/programOps';
 import type { Ejercicio } from '../../../content/banco';
 import { translateAwl } from '../../../core/translate';
 import { getSettings } from '../../../store/settings';
+import { T } from '../../../i18n';
+
+/** Título o comentario de un modelo KOP en el idioma de la app */
+const textoKop = (t: string | undefined) => (t ? T.contenido.textosKop[t] ?? t : t);
 
 export function programFromKop(segs: SegmentoKOP[]): Programa {
-  return { nemotecnia: getSettings().nemotecnia, simbolos: [], bloques: [{ nombre: 'OB1', segmentos: segs.map((kop) => ({ lang: 'KOP' as const, kop })) }] };
+  return { nemotecnia: getSettings().nemotecnia, simbolos: [], bloques: [{ nombre: 'OB1', segmentos: segs.map((kop) => ({ lang: 'KOP' as const, kop: { ...kop, titulo: textoKop(kop.titulo), comentario: textoKop(kop.comentario) } })) }] };
 }
 
 export function programFromEx(e: Ejercicio): Programa {

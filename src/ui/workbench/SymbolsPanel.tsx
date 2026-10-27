@@ -1,6 +1,8 @@
 import type { Simbolo } from '../../core/program';
 import { Icon } from '../common/Icon';
 import { Desplegable } from '../common/ui';
+import { Rico } from '../common/Rico';
+import { T } from '../../i18n';
 
 const TIPOS = ['BOOL', 'BYTE', 'WORD', 'INT', 'DWORD', 'DINT', 'REAL', 'S5TIME', 'TIMER', 'COUNTER'];
 const OPCIONES_TIPO = TIPOS.map((t) => ({ value: t, label: t }));
@@ -21,25 +23,25 @@ export function SymbolsPanel({ simbolos, onChange, errors, readOnly }: { simbolo
   return (
     <div>
       <table className="tbl">
-        <thead><tr><th>Símbolo</th><th>Dirección</th><th>Tipo</th><th>Comentario</th><th /></tr></thead>
+        <thead><tr><th>{T.simbolos.simbolo}</th><th>{T.simbolos.direccion}</th><th>{T.simbolos.tipo}</th><th>{T.simbolos.comentario}</th><th /></tr></thead>
         <tbody>
           {simbolos.map((s, i) => (
             <tr key={i}>
-              <td><input className="input" style={{ height: 24, width: '100%' }} value={s.nombre} disabled={readOnly} onChange={(e) => upd(i, { nombre: e.target.value })} aria-label="Símbolo" /></td>
+              <td><input className="input" style={{ height: 24, width: '100%' }} value={s.nombre} disabled={readOnly} onChange={(e) => upd(i, { nombre: e.target.value })} aria-label={T.simbolos.simbolo} /></td>
               <td><input className="input mono" style={{ height: 24, width: 86 }} value={s.dir} disabled={readOnly}
-                onChange={(e) => upd(i, { dir: e.target.value, tipo: s.tipo && s.tipo !== guessTipo(s.dir) ? s.tipo : guessTipo(e.target.value) })} aria-label="Dirección" /></td>
+                onChange={(e) => upd(i, { dir: e.target.value, tipo: s.tipo && s.tipo !== guessTipo(s.dir) ? s.tipo : guessTipo(e.target.value) })} aria-label={T.simbolos.direccion} /></td>
               <td>
-                <Desplegable style={{ height: 24, padding: '0 6px' }} value={s.tipo} options={OPCIONES_TIPO} disabled={readOnly} onChange={(tipo) => upd(i, { tipo })} aria-label="Tipo" />
+                <Desplegable style={{ height: 24, padding: '0 6px' }} value={s.tipo} options={OPCIONES_TIPO} disabled={readOnly} onChange={(tipo) => upd(i, { tipo })} aria-label={T.simbolos.tipo} />
               </td>
-              <td><input className="input" style={{ height: 24, width: '100%' }} value={s.comentario ?? ''} disabled={readOnly} onChange={(e) => upd(i, { comentario: e.target.value })} aria-label="Comentario" /></td>
-              <td>{!readOnly && <button className="btn small ghost icon" onClick={() => onChange(simbolos.filter((_, j) => j !== i))} aria-label="Quitar símbolo"><Icon name="x" size={13} /></button>}</td>
+              <td><input className="input" style={{ height: 24, width: '100%' }} value={s.comentario ?? ''} disabled={readOnly} onChange={(e) => upd(i, { comentario: e.target.value })} aria-label={T.simbolos.comentario} /></td>
+              <td>{!readOnly && <button className="btn small ghost icon" onClick={() => onChange(simbolos.filter((_, j) => j !== i))} aria-label={T.simbolos.quitar}><Icon name="x" size={13} /></button>}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {!readOnly && <div style={{ padding: 10 }}><button className="btn small" onClick={() => onChange([...simbolos, { nombre: '', dir: '', tipo: 'BOOL' }])}><Icon name="plus" size={13} />Añadir símbolo</button></div>}
+      {!readOnly && <div style={{ padding: 10 }}><button className="btn small" onClick={() => onChange([...simbolos, { nombre: '', dir: '', tipo: 'BOOL' }])}><Icon name="plus" size={13} />{T.simbolos.anadir}</button></div>}
       {errors.length > 0 && <div className="panel-sec err-text" style={{ fontSize: 12 }}>{errors.map((e, i) => <div key={i}>{e}</div>)}</div>}
-      <div className="panel-sec faint" style={{ fontSize: 11.5 }}>En el código se escribe el símbolo entre comillas: <span className="mono">U "Nombre"</span>. Son opcionales: puedes programar directamente con direcciones (<span className="mono">U E 124.0</span>).</div>
+      <div className="panel-sec faint simbolos-nota" style={{ fontSize: 11.5 }}><Rico t={T.simbolos.nota} /></div>
     </div>
   );
 }

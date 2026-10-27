@@ -7,6 +7,7 @@ import { type Area, type Op, type Symbols } from './operands';
 import { s5timeDecode } from './constants';
 import { bcdDecode, bcdEncode, bitsF32, f32Bits, roundHalfEven, s16, s32, S5_BASES_MS, u16, u32 } from './num';
 import { BITLOGIC, CMP, CONV, FLOATFN, JUMPS, NEST_OPEN, SHIFTS, TSTART, WORDLOG } from './mnemonics';
+import { T } from '../i18n';
 
 export type TimerMode = 'SI' | 'SV' | 'SE' | 'SS' | 'SA' | null;
 
@@ -216,7 +217,7 @@ export class CPU {
     const cp = typeof program === 'string' || !(program as CompiledProgram).blocks || !((program as CompiledProgram).blocks instanceof Map)
       ? compileProgramText(program as string | Record<string, string>, symbols, lang)
       : (program as CompiledProgram);
-    if (!cp.blocks.has('OB1')) throw new CompileError('Falta el OB1');
+    if (!cp.blocks.has('OB1')) throw new CompileError(T.motor.faltaOb1);
     this.blocks = cp.blocks;
     this.cycleMs = cycleMs;
     this.M = new Uint8Array(mSize);
@@ -232,8 +233,8 @@ export class CPU {
   // ───────────── programa ─────────────
   /** Cambia el programa (solo entre ciclos). La memoria, T y Z se conservan. */
   setProgram(cp: CompiledProgram) {
-    if (this.phase !== 'IDLE') throw new Error('No se puede cargar el programa en mitad de un ciclo');
-    if (!cp.blocks.has('OB1')) throw new CompileError('Falta el OB1');
+    if (this.phase !== 'IDLE') throw new Error(T.motor.cargarEnCiclo);
+    if (!cp.blocks.has('OB1')) throw new CompileError(T.motor.faltaOb1);
     this.blocks = cp.blocks;
     this.rebuildObserve();
   }
@@ -360,7 +361,7 @@ export class CPU {
       this.stopLoc = { block: f.name, pc: f.pc, origin: ins?.origin, line: ins?.line ?? 0, src: ins?.src ?? '' };
     } else this.stopLoc = null;
     this.state = 'STOP';
-    this.stopReason = `${e.message} → OB${e.ob} no cargado → STOP`;
+    this.stopReason = T.motor.obNoCargado(e.message, e.ob);
     this.PAA.fill(0);
     this.periphOut.fill(0);
     this.frames = [];
@@ -410,8 +411,8 @@ export class CPU {
   // _run_block (entrada): crea el marco del bloque
   private enterBlock(name: string, isOb: boolean, depth: number) {
     const blk = this.blocks.get(name);
-    if (!blk) throw new PLCError(`Llamada a un bloque que no existe: ${name}`);
-    if (depth > 16) throw new PLCError('Desbordamiento de la pila de bloques (demasiadas llamadas anidadas)', 121);
+    if (!blk) throw new PLCError(T.motor.bloqueNoExiste(name));
+    if (depth > 16) throw new PLCError(T.motor.pilaBloques, 121);
     const L = new Uint8Array(L_SIZE);
     if (this.randomLocals) for (let i = 0; i < L_SIZE; i++) L[i] = this.rand() & 0xFF;
     this.L = L;
@@ -470,7 +471,7 @@ export class CPU {
 
   private execOne() {
     this.icount += 1;
-    if (this.icount > this.instrLimit) throw new PLCError('Tiempo de ciclo excedido (¿bucle infinito?)', 80);
+    if (this.icount > this.instrLimit) throw new PLCError(T.motor.cicloExcedido, 80);
     const f = this.frames[this.frames.length - 1];
     const ins = f.blk.instrs[f.pc];
     const snap: PendSnap = { er: this.fc, rlo: this.rlo, orb: this.orb, acc1: this.acc1, acc2: this.acc2 };
@@ -517,7 +518,7 @@ export class CPU {
 
   // ───────────── memoria ─────────────
   db(n: number): Uint8Array {
-    if (!n) throw new PLCError('No hay ningún bloque de datos abierto (falta AUF DB n)');
+    if (!n) throw new PLCError(T.motor.sinDb);
     let d = this.dbs.get(n);
     if (!d) {
       d = new Uint8Array(DB_SIZE);
@@ -537,7 +538,7 @@ export class CPU {
       case 'DB': return this.db(db || this.openDb);
       case 'DI': return this.db(db || this.openDi);
     }
-    throw new PLCError(`Área desconocida: ${area}`);
+    throw new PLCError(T.motor.areaDesconocida(area));
   }
 
   // resultado de _resolve (sin reservar memoria)
@@ -559,13 +560,13 @@ export class CPU {
     }
     const byte = Math.floor(ptr / 8) & 0xFFFF;
     const bit = ptr & 7;
-    if (op.kind === 'mem' && bit !== 0) throw new PLCError('Puntero no válido: para byte/palabra/doble palabra el bit debe ser 0');
+    if (op.kind === 'mem' && bit !== 0) throw new PLCError(T.motor.punteroBit0);
     this.rByte = byte;
     this.rBit = bit;
   }
 
   private check(buf: Uint8Array, byte: number, size: number, area: string) {
-    if (byte < 0 || byte + size > buf.length) throw new PLCError(`Error de acceso al área ${area}: la dirección ${byte} está fuera de rango`);
+    if (byte < 0 || byte + size > buf.length) throw new PLCError(T.motor.fueraDeRango(area, byte));
   }
 
   rbit(op: Op): number {
@@ -615,7 +616,7 @@ export class CPU {
       case 'counter': return this.counters[op.n!].value > 0 ? 1 : 0;
       case 'status': return this.statusVal(op.name!);
     }
-    throw new PLCError(`Operando no booleano: ${op.text}`);
+    throw new PLCError(T.motor.noBooleano(op.text));
   }
 
   statusVal(name: string): number {
@@ -660,7 +661,7 @@ export class CPU {
         return d ? d.length : 0;
       }
     }
-    throw new PLCError(`No se puede cargar ${op.text}`);
+    throw new PLCError(T.motor.noCargar(op.text));
   }
 
   private mcrOk(): boolean {
@@ -748,7 +749,7 @@ export class CPU {
         return NEXT;
       case ')': {
         const nest = f.nest;
-        if (!nest.length) throw new PLCError("')' sin paréntesis abierto");
+        if (!nest.length) throw new PLCError(T.motor.cierraSinAbrir);
         const e = nest.pop()!;
         if (this.tracing) this.extra.nest = e;
         const inner = this.rlo;
@@ -816,7 +817,7 @@ export class CPU {
       }
     }
     if (NEST_OPEN.has(mn)) {
-      if (f.nest.length >= 7) throw new PLCError('Desbordamiento de la pila de anidamiento (máximo 7 niveles de paréntesis)');
+      if (f.nest.length >= 7) throw new PLCError(T.motor.pilaAnidamiento);
       f.nest.push({ kind: mn.slice(0, -1), rlo: this.rlo, orb: this.orb, fc: this.fc });
       this.fc = 0; this.orb = 0; this.sta = 1;
       return NEXT;
@@ -1261,12 +1262,12 @@ export class CPU {
         this.mcra = false;
         return NEXT;
       case 'MCR(':
-        if (this.mcrStack.length >= 8) throw new PLCError('Desbordamiento de la pila MCR (máximo 8 niveles)');
+        if (this.mcrStack.length >= 8) throw new PLCError(T.motor.pilaMcr);
         this.mcrStack.push(this.rlo);
         this.endChain();
         return NEXT;
       case ')MCR':
-        if (!this.mcrStack.length) throw new PLCError(')MCR sin MCR( previo');
+        if (!this.mcrStack.length) throw new PLCError(T.motor.mcrSinAbrir);
         this.mcrStack.pop();
         this.endChain();
         return NEXT;
@@ -1274,7 +1275,7 @@ export class CPU {
       case 'BLD':
         return NEXT;
     }
-    throw new PLCError(`Instrucción no implementada: ${mn}`);
+    throw new PLCError(T.motor.noImplementada(mn));
   }
 
   // _set_real

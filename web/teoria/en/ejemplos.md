@@ -1,6 +1,6 @@
 # Ladder and STL examples
 
-> English translation of the examples from `src/content/ejemplos_KOP_AWL.md` that appear on the website.
+> English translation of the examples from `src/content/ejemplos_KOP_AWL.md`: the ones on the website and the 31 examples of the app («Examples»).
 > - Keep the same codes (E01, Q01…): the pages are built from them (`web/teoria/paginas.ts`).
 > - Code blocks (```awl) keep the German mnemonics, like the app; the generator converts them to English.
 > - The tests (```yaml) are not repeated here: the interactive panels always read them from the Spanish file.
@@ -353,6 +353,17 @@ Same inputs as in Q01. What is the value of Q4.0?
       =     A 4.0
 ```
 
+### E11b — Toggle relay with exclusive OR (STL only)
+
+```awl
+      U     E 0.0
+      FP    M 10.0
+      =     M 10.1
+      U     M 10.1
+      X     A 4.0       // pulse XOR current state
+      =     A 4.0
+```
+
 ### E12 — On-delay (SD / S_ODT)
 
 **Task**: Q4.0 turns on 5 s after I0.0 is activated, and only if I0.0 is still 1. I0.1 resets the timer. MW10 holds the remaining time in binary and MW12 in BCD.
@@ -401,6 +412,73 @@ Same inputs as in Q01. What is the value of Q4.0?
       SA    T 2
       U     T 2
       =     A 4.1
+```
+
+### E14 — Pulse (SP / S_PULSE)
+
+**Task**: Q4.2 = 1 for at most 2 s while I0.3 is pressed.
+
+```text
+                 T3
+             +-----------+
+   I0.3      | S_PULSE   |                       Q4.2
+ |---| |-----|S         Q|-----------------------( )
+ S5T#2S -----|TV         |
+             +-----------+
+```
+
+```awl
+      U     E 0.3
+      L     S5T#2S
+      SI    T 3
+      U     T 3
+      =     A 4.2
+```
+
+### E15 — Extended pulse (SE / S_PEXT)
+
+**Task**: a short pulse on I0.4 keeps Q4.3 on for 2 s. A new pulse restarts the time.
+
+```text
+                 T4
+             +-----------+
+   I0.4      | S_PEXT    |                       Q4.3
+ |---| |-----|S         Q|-----------------------( )
+ S5T#2S -----|TV         |
+             +-----------+
+```
+
+```awl
+      U     E 0.4
+      L     S5T#2S
+      SV    T 4
+      U     T 4
+      =     A 4.3
+```
+
+### E16 — Retentive on-delay (SS / S_ODTS)
+
+**Task**: a pulse on I0.5 switches Q4.4 on after 3 s, and it stays on until the reset I0.6 is pressed.
+
+```text
+                 T5
+             +-----------+
+   I0.5      | S_ODTS    |                       Q4.4
+ |---| |-----|S         Q|-----------------------( )
+ S5T#3S -----|TV         |
+   I0.6      |           |
+ |---| |-----|R          |
+             +-----------+
+```
+
+```awl
+      U     E 0.5
+      L     S5T#3S
+      SS    T 5
+      U     E 0.6
+      R     T 5
+      U     T 5
+      =     A 4.4
 ```
 
 ### E17 — Flasher (1 s on / 1 s off) with two timers

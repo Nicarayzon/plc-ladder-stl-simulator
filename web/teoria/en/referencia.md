@@ -1,9 +1,22 @@
 # Ladder (LAD) and Statement List (STL) reference
 
-> English translation of `src/content/referencia_KOP_AWL.md` for the website (`npm run web:teoria`).
-> - Keep the same section numbers: the pages are built from them (`web/teoria/paginas.ts`).
-> - Code blocks (```awl) keep the German mnemonics, like the app; the generator converts them to English. Inline code is already in English.
-> - Chapters 9 and 10 of the original are not used on the website.
+<!--
+English translation of `src/content/referencia_KOP_AWL.md`, used by the website (`npm run web:teoria`) and by the app («Learn»).
+- Keep the same section numbers: the web pages are built from them (`web/teoria/paginas.ts`).
+- Code blocks (```awl) keep the German mnemonics, like the app; the website and the app convert them to English. Inline code is already in English.
+- Chapters 9 and 10 are only used by the app.
+-->
+
+> **What this document is for**
+> - Study material for the exam.
+> - Functional specification of the simulator in the practice app. Everything described here as *behaviour* is what the simulator must reproduce.
+>
+> **Conventions**
+> - **English** mnemonics (IEC): `A`, `O`, `I`, `Q`, `M`, `C`... The German equivalents are in §11.
+> - Reference CPU: a **CPU with 2 accumulators**. The differences with 4-accumulator CPUs are pointed out where they matter.
+> - "LAD" = ladder logic (Kontaktplan, KOP, in German).
+> - "STL" = statement list (Anweisungsliste, AWL, in German).
+> - In the ASCII ladder diagrams, `|` is the left power rail.
 
 ---
 
@@ -1092,6 +1105,51 @@ _001: U     BIE             // ENO = BR
 ```
 
 > Not all STL code can be converted to Ladder. For example: jumps inside a network, accumulator operations (`TAK`, standalone `+I`), indirect addressing or `O` without an operand in unusual positions. Those networks stay in STL.
+
+---
+
+## 9. Typical mistakes and exam pitfalls
+
+1. **Double assignment**: `= Q4.0` in two places. Only the last one counts. To combine conditions use `O` or `S`/`R`.
+2. **STL is sequential**: `A a / O b / A c` = (a ∨ b) ∧ c. For a ∨ (b ∧ c) you need `O` without operand or brackets.
+3. **The comparison replaces the RLO**: in series with contacts, always inside `A( … )`.
+4. **`T` is unconditional**: it does not depend on the RLO.
+5. **A `JC` that is not taken leaves RLO = 1.**
+6. **NC stop → NO contact in the program** (§1.3).
+7. **The timer needs an edge**: if the condition is already 1 when a reset ends, it does not restart until it goes back to 0 and then to 1 again.
+8. **`L 500` is not a time**: use `S5T#5S`. A value that is not BCD gives an error and the CPU goes to STOP.
+9. **Byte order**: `I0.0` is bit 8 of `IW0`; `MW10` = MB10 (high) + MB11 (low).
+10. **Overlapping**: `MW10` and `MW11` share `MB11`.
+11. **`L MW` does not extend the sign**: to go to DINT use `ITD`.
+12. **`INC`/`DEC` only act on the low byte**: `L 255 / INC 1` gives 0, not 256.
+13. **`*I` leaves a DINT in ACCU 1**; **`/I` leaves the remainder in ACCU 1-H**.
+14. **Overflow**: 30000 + 10000 = −25536, with OV = 1.
+15. **Counters**: holding the input at 1 does not count several times. The range is 0..999.
+16. **Shared edge memory bit**: using the same memory bit for two `FP` makes both fail.
+17. **Uninitialized temporary data (L)**: it contains garbage values.
+18. **Order of the networks**: a memory bit calculated after it is used arrives one cycle late.
+19. **`LOOP` with counter 0**: it makes 65535 extra loops.
+20. **Set/Reset**: the priority comes from the order of execution, not from the type of coil.
+
+---
+
+## 10. Memory convention for the exercises
+
+So that all the exercises in the app are consistent:
+
+| Range | Use |
+|---|---|
+| I0.0..I3.7 | Push buttons and switches (I0.1 = **NC stop** in the start/stop examples) |
+| IW2 | BCD thumbwheel (conversion examples) |
+| Q4.0..Q7.7 | Lamps, motors and displays (QW6 = BCD display) |
+| PIW256 | Analog input 0..27648 |
+| M0.0..M9.7 | Auxiliary memory bits |
+| M10.0..M19.7 | Edge memory bits |
+| M20.0..M29.7 | Step memory bits (sequences) |
+| MW30..MW98 | INT values |
+| MD100.. | DINT or REAL values |
+| MB200 | Clock memory (if it is enabled in the simulator) |
+| T1..T20, C1..C10 | Timers and counters of the exercises |
 
 ---
 

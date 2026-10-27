@@ -1,7 +1,7 @@
 {
   "name": "automatizacion",
   "productName": "Automatizacion",
-  "version": "0.22.0",
+  "version": "0.25.0",
   "description": "Práctica de programación de autómatas en KOP y AWL con mini simulador de PLC",
   "author": "Arzath",
   "license": "MIT",

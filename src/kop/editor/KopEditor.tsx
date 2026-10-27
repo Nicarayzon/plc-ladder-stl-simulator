@@ -18,6 +18,7 @@ import { makeReader, readRaw } from '../../sim/readers';
 import { s16, s32 } from '../../core/num';
 import { normAddr } from '../../ui/workbench/symbols';
 import { askText } from '../../ui/common/ask';
+import { T } from '../../i18n';
 
 export interface KopEditorProps {
   seg: SegmentoKOP;
@@ -247,24 +248,24 @@ export function KopEditor(props: KopEditorProps) {
   const ctxItems = (id: string): MenuItem[] => {
     const n = E.findNode(seg, id);
     const items: MenuItem[] = [];
-    if (n && E.operandFields(n).length) items.push({ label: 'Editar operando', hint: '↵', onClick: () => startEditFirst(seg, id) });
-    if (n && (n.k === 'NA' || n.k === 'NC')) items.push({ label: n.k === 'NA' ? 'Cambiar a contacto NC' : 'Cambiar a contacto NA', onClick: () => apply(E.replaceNode(seg, id, { ...n, k: n.k === 'NA' ? 'NC' : 'NA' } as Elem)) });
+    if (n && E.operandFields(n).length) items.push({ label: T.kopEd.editarOperando, hint: '↵', onClick: () => startEditFirst(seg, id) });
+    if (n && (n.k === 'NA' || n.k === 'NC')) items.push({ label: n.k === 'NA' ? T.kopEd.aNc : T.kopEd.aNa, onClick: () => apply(E.replaceNode(seg, id, { ...n, k: n.k === 'NA' ? 'NC' : 'NA' } as Elem)) });
     if (n && (n.k === 'BOB' || n.k === 'S' || n.k === 'R')) {
-      for (const k of ['BOB', 'S', 'R'] as const) if (k !== n.k) items.push({ label: `Cambiar a bobina ${k === 'BOB' ? '( )' : `(${k})`}`, onClick: () => apply(E.replaceNode(seg, id, Object.assign({}, n, { k }) as Salida)) });
+      for (const k of ['BOB', 'S', 'R'] as const) if (k !== n.k) items.push({ label: T.kopEd.aBobina(k === 'BOB' ? '( )' : `(${k})`), onClick: () => apply(E.replaceNode(seg, id, Object.assign({}, n, { k }) as Salida)) });
     }
     if (n && n.k === 'CMP') {
-      items.push({ label: 'Cambiar comparación…', onClick: async () => {
-        const fn = (await askText({ title: 'Cambiar comparación', label: 'Comparación (==I, <>I, >I, <I, >=I, <=I; …D para DINT, …R para REAL):', value: n.fn,
-          validate: (v) => (/^(==|<>|>=|<=|>|<)[IDR]$/.test(v.trim().toUpperCase()) ? null : 'Por ejemplo: >I, ==D, <=R') }))?.toUpperCase();
+      items.push({ label: T.kopEd.cambiarCmp, onClick: async () => {
+        const fn = (await askText({ title: T.kopEd.cambiarCmpTitulo, label: T.kopEd.cmpEtiqueta, value: n.fn,
+          validate: (v) => (/^(==|<>|>=|<=|>|<)[IDR]$/.test(v.trim().toUpperCase()) ? null : T.kopEd.cmpEjemplo) }))?.toUpperCase();
         if (fn) apply(E.replaceNode(seg, id, { ...n, fn: fn as typeof n.fn }));
       } });
     }
     items.push({ sep: true, label: '' });
-    items.push({ label: 'Insertar contacto NA detrás', hint: 'F2', onClick: () => { setSelected(id); apply(E.insertSeries(seg, id, E.makeNode('NA') as Elem, 'after')); } });
-    items.push({ label: 'Insertar contacto NA delante', onClick: () => apply(E.insertSeries(seg, id, E.makeNode('NA') as Elem, 'before')) });
-    items.push({ label: n && !E.isElemKind(n) ? 'Añadir salida en paralelo' : 'Abrir rama paralela', hint: 'F8', onClick: () => apply(E.wrapParallel(seg, id)) });
+    items.push({ label: T.kopEd.naDetras, hint: 'F2', onClick: () => { setSelected(id); apply(E.insertSeries(seg, id, E.makeNode('NA') as Elem, 'after')); } });
+    items.push({ label: T.kopEd.naDelante, onClick: () => apply(E.insertSeries(seg, id, E.makeNode('NA') as Elem, 'before')) });
+    items.push({ label: n && !E.isElemKind(n) ? T.kopEd.salidaParalelo : T.kopEd.ramaParalela, hint: 'F8', onClick: () => apply(E.wrapParallel(seg, id)) });
     items.push({ sep: true, label: '' });
-    items.push({ label: 'Borrar', hint: '⌫', onClick: () => apply(E.deleteNode(seg, id)) });
+    items.push({ label: T.kopEd.borrar, hint: '⌫', onClick: () => apply(E.deleteNode(seg, id)) });
     return items;
   };
 
@@ -279,33 +280,33 @@ export function KopEditor(props: KopEditorProps) {
         if (e.key === 'Escape') { e.preventDefault(); setEditing(null); host.current?.focus(); }
         if (e.key === 'Tab') { e.preventDefault(); commitEdit(e.shiftKey ? 'shiftTab' : 'tab'); }
       }}
-      list={`kop-sym-${seg.id}`} aria-label="Operando" />
+      list={`kop-sym-${seg.id}`} aria-label={T.kopEd.operando} />
   );
 
   return (
     <div className="kop-editor" onFocus={props.onFocus}>
       {!readOnly && (
-        <div className="kop-tools" role="toolbar" aria-label="Elementos KOP">
-          <button className="btn small" onClick={() => ins('NA')} title="Contacto NA (F2 o ⌥1)"><span className="mono">-| |-</span></button>
-          <button className="btn small" onClick={() => ins('NC')} title="Contacto NC (F3 o ⌥2)"><span className="mono">-|/|-</span></button>
-          <button className="btn small" onClick={() => (node && !E.isElemKind(node) ? apply(E.wrapParallel(seg, node.id)) : ins('BOB'))} title="Bobina (F7 o ⌥7)"><span className="mono">-( )</span></button>
-          <button className="btn small" onClick={() => apply(E.wrapParallel(seg, selected))} title="Abrir rama paralela sobre la selección (F8 o ⌥8)"><Icon name="ladder" size={13} />Rama</button>
-          <button className="btn small" disabled={!selected} onClick={() => selected && apply(E.addBranchToEnclosing(seg, selected))} title="Añadir otra rama al paralelo (F9 o ⌥9)">+ Rama</button>
-          <button className="btn small" disabled={!node || (node.k !== 'NA' && node.k !== 'NC')} onClick={toggleNANC} title="Cambiar NA ↔ NC">NA↔NC</button>
-          <button className="btn small" onClick={() => setCatalog(true)} title="Catálogo de elementos (⌘K)"><Icon name="plus" size={13} />Catálogo</button>
-          <button className="btn small ghost" disabled={!selected} onClick={() => selected && apply(E.deleteNode(seg, selected))} title="Borrar (⌫)"><Icon name="trash" size={13} /></button>
+        <div className="kop-tools" role="toolbar" aria-label={T.kopEd.elementos}>
+          <button className="btn small" onClick={() => ins('NA')} title={T.kopEd.contactoNa}><span className="mono">-| |-</span></button>
+          <button className="btn small" onClick={() => ins('NC')} title={T.kopEd.contactoNc}><span className="mono">-|/|-</span></button>
+          <button className="btn small" onClick={() => (node && !E.isElemKind(node) ? apply(E.wrapParallel(seg, node.id)) : ins('BOB'))} title={T.kopEd.bobina}><span className="mono">-( )</span></button>
+          <button className="btn small" onClick={() => apply(E.wrapParallel(seg, selected))} title={T.kopEd.ramaTitulo}><Icon name="ladder" size={13} />{T.kopEd.rama}</button>
+          <button className="btn small" disabled={!selected} onClick={() => selected && apply(E.addBranchToEnclosing(seg, selected))} title={T.kopEd.otraRamaTitulo}>{T.kopEd.otraRama}</button>
+          <button className="btn small" disabled={!node || (node.k !== 'NA' && node.k !== 'NC')} onClick={toggleNANC} title={T.kopEd.naNcTitulo}>{T.kopEd.naNc}</button>
+          <button className="btn small" onClick={() => setCatalog(true)} title={T.kopEd.catalogoTitulo}><Icon name="plus" size={13} />{T.kopEd.catalogo}</button>
+          <button className="btn small ghost" disabled={!selected} onClick={() => selected && apply(E.deleteNode(seg, selected))} title={T.kopEd.borrarTitulo}><Icon name="trash" size={13} /></button>
           <span className="sep" />
-          <label className="row faint" style={{ fontSize: 11.5, gap: 4 }} title="Meta (LABEL) al principio del segmento, para saltar aquí con JMP">
-            Meta
+          <label className="row faint" style={{ fontSize: 11.5, gap: 4 }} title={T.kopEd.metaTitulo}>
+            {T.kopEd.meta}
             <input className="input mono" style={{ height: 22, width: 64 }} value={seg.meta ?? ''} placeholder="—" maxLength={4}
-              onChange={(e) => onChange(E.setField(seg, seg.id, 'meta', e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '')))} aria-label="Meta del segmento" />
+              onChange={(e) => onChange(E.setField(seg, seg.id, 'meta', e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '')))} aria-label={T.kopEd.metaSegmento} />
           </label>
           <span className="spacer" />
-          <span className="faint" style={{ fontSize: 11 }}>Doble clic: operando · Tab: siguiente</span>
+          <span className="faint" style={{ fontSize: 11 }}>{T.kopEd.pista}</span>
         </div>
       )}
       <div className="kop-canvas" ref={host} tabIndex={0} onKeyDown={onKey} onMouseDown={() => { if (!editing) setSelected(null); }}
-        aria-label="Editor KOP: F2 contacto NA, F3 NC, F7 bobina, F8 rama, Supr borrar">
+        aria-label={T.kopEd.lienzo}>
         <div style={{ position: 'relative', transform: `scale(${zoom})`, transformOrigin: '0 0', width: 'fit-content' }}>
           <KopSvg layout={layout} flow={flow} selected={selected} issues={issues} showOp={showOp} live={live} lang={lang}
             onSelect={(id) => { setSelected(id); host.current?.focus(); }}

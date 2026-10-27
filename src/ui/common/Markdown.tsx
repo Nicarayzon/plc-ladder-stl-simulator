@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import { AwlHighlight } from './AwlHighlight';
 import { Icon } from './Icon';
+import { T } from '../../i18n';
 
 export function Markdown({ text, onTry, className }: { text: string; onTry?: (code: string) => void; className?: string }) {
   const components: Components = {
@@ -18,7 +19,7 @@ export function Markdown({ text, onTry, className }: { text: string; onTry?: (co
         return (
           <div className="code-block">
             <AwlHighlight code={code} />
-            {onTry && <button className="btn small try" onClick={() => onTry(code)} title="Abrir este código en el simulador"><Icon name="play" size={11} />Probar</button>}
+            {onTry && <button className="btn small try" onClick={() => onTry(code)} title={T.markdown.probarTitulo}><Icon name="play" size={11} />{T.markdown.probar}</button>}
           </div>
         );
       }

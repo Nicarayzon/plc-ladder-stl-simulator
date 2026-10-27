@@ -1,8 +1,21 @@
 # Referenz KOP und AWL
 
-> Deutsche Übersetzung von `src/content/referencia_KOP_AWL.md` für die Website (`npm run web:teoria`).
-> - Die Nummerierung der Abschnitte bleibt gleich: Die Seiten werden daraus erzeugt (`web/teoria/paginas.ts`).
-> - Die Kapitel 9 und 10 des Originals werden auf der Website nicht verwendet.
+<!--
+Deutsche Übersetzung von `src/content/referencia_KOP_AWL.md`, für die Website (`npm run web:teoria`) und für die App („Lernen“).
+- Die Nummerierung der Abschnitte bleibt gleich: Die Seiten der Website werden daraus erzeugt (`web/teoria/paginas.ts`).
+- Die Kapitel 9 und 10 verwendet nur die App.
+-->
+
+> **Wozu dieses Dokument dient**
+> - Lernstoff für die Prüfung.
+> - Funktionale Spezifikation des Simulators der Übungs-App. Alles, was hier als *Verhalten* beschrieben ist, muss der Simulator nachbilden.
+>
+> **Konventionen**
+> - **Deutsche** Mnemonik: `U`, `O`, `E`, `A`, `M`, `Z`... Die englischen Entsprechungen stehen in §11.
+> - Referenz-CPU: eine **CPU mit 2 Akkumulatoren**. Die Unterschiede zu CPUs mit 4 Akkumulatoren werden genannt, wo sie wichtig sind.
+> - „KOP“ = Kontaktplan. Im Englischen heißt er LAD.
+> - „AWL“ = Anweisungsliste. Im Englischen heißt sie STL.
+> - In den KOP-Plänen in ASCII ist `|` die linke Stromschiene.
 
 ---
 
@@ -1091,6 +1104,51 @@ _001: U     BIE             // ENO = BIE
 ```
 
 > Nicht jede AWL lässt sich in KOP umwandeln. Zum Beispiel: Sprünge innerhalb eines Netzwerks, Akkumulatoroperationen (`TAK`, ein einzelnes `+I`), indirekte Adressierung oder `O` ohne Operand an ungewöhnlichen Stellen. Diese Netzwerke bleiben in AWL.
+
+---
+
+## 9. Typische Fehler und Prüfungsfallen
+
+1. **Doppelzuweisung**: `= A4.0` an zwei Stellen. Nur die letzte zählt. Um Bedingungen zusammenzufassen, verwende `O` oder `S`/`R`.
+2. **AWL ist sequenziell**: `U a / O b / U c` = (a ∨ b) ∧ c. Für a ∨ (b ∧ c) brauchst du `O` ohne Operand oder Klammern.
+3. **Der Vergleich ersetzt das VKE**: in Reihe mit Kontakten immer innerhalb von `U( … )`.
+4. **`T` ist unbedingt**: Es hängt nicht vom VKE ab.
+5. **Ein nicht ausgeführtes `SPB` lässt VKE = 1.**
+6. **Aus-Öffner → Schließerkontakt im Programm** (§1.3).
+7. **Die Zeit braucht eine Flanke**: Ist die Bedingung schon 1, wenn ein Rücksetzen endet, startet sie erst wieder, wenn die Bedingung auf 0 und dann wieder auf 1 geht.
+8. **`L 500` ist keine Zeit**: Verwende `S5T#5S`. Ein Wert, der kein BCD ist, ergibt einen Fehler, und die CPU geht in STOP.
+9. **Bytereihenfolge**: `E0.0` ist Bit 8 von `EW0`; `MW10` = MB10 (höherwertig) + MB11 (niederwertig).
+10. **Überlappung**: `MW10` und `MW11` teilen sich `MB11`.
+11. **`L MW` erweitert das Vorzeichen nicht**: Um nach DINT zu wandeln, verwende `ITD`.
+12. **`INC`/`DEC` wirken nur auf das niederwertige Byte**: `L 255 / INC 1` ergibt 0, nicht 256.
+13. **`*I` lässt einen DINT in AKKU1**; **`/I` lässt den Rest in AKKU1-H**.
+14. **Überlauf**: 30000 + 10000 = −25536, mit OV = 1.
+15. **Zähler**: Hält man den Eingang auf 1, wird nicht mehrfach gezählt. Der Bereich ist 0..999.
+16. **Gemeinsamer Flankenmerker**: Verwenden zwei `FP` denselben Merker, funktionieren beide nicht.
+17. **Nicht initialisierte Lokaldaten (L)**: Sie enthalten zufällige Werte.
+18. **Reihenfolge der Netzwerke**: Ein Merker, der erst nach seiner Verwendung berechnet wird, kommt einen Zyklus zu spät an.
+19. **`LOOP` mit Zähler 0**: Die Schleife läuft 65535 Mal zu oft.
+20. **Setzen/Rücksetzen**: Den Vorrang bestimmt die Reihenfolge der Bearbeitung, nicht die Art der Spule.
+
+---
+
+## 10. Speicherkonvention für die Übungen
+
+Damit alle Übungen der App einheitlich sind:
+
+| Bereich | Verwendung |
+|---|---|
+| E0.0..E3.7 | Taster und Schalter (E0.1 = **Aus-Öffner** in den Beispielen mit Ein und Aus) |
+| EW2 | BCD-Ziffernrad (Beispiele zur Umwandlung) |
+| A4.0..A7.7 | Leuchten, Motoren und Anzeigen (AW6 = BCD-Anzeige) |
+| PEW256 | Analogeingang 0..27648 |
+| M0.0..M9.7 | Hilfsmerker |
+| M10.0..M19.7 | Flankenmerker |
+| M20.0..M29.7 | Schrittmerker (Ablaufsteuerungen) |
+| MW30..MW98 | INT-Werte |
+| MD100.. | DINT- oder REAL-Werte |
+| MB200 | Taktmerker (wenn er im Simulator aktiviert ist) |
+| T1..T20, Z1..Z10 | Zeiten und Zähler der Übungen |
 
 ---
 

@@ -1,5 +1,6 @@
 // Utilidades numéricas (equivalentes a u16/u32/s16/s32/f32_bits/bits_f32 de tools/interprete_referencia.py)
 import { PLCError } from './errors';
+import { T } from '../i18n';
 
 export const u16 = (x: number): number => x & 0xFFFF;
 export const u32 = (x: number): number => x >>> 0;
@@ -38,7 +39,7 @@ export function bcdDecode(value: number, ndigits: number): number {
   let v = 0;
   for (let i = ndigits - 1; i >= 0; i--) {
     const d = Math.floor(value / 2 ** (4 * i)) & 0xF;
-    if (d > 9) throw new PLCError(`Error de conversión BCD: la cifra ${hex(d)} no es válida (valor 16#${hex(value)})`);
+    if (d > 9) throw new PLCError(T.motor.bcd(hex(d), hex(value)));
     v = v * 10 + d;
   }
   return v;

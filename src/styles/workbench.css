@@ -255,3 +255,6 @@
 .vatw-status .cpu.run { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 600; }
 .vatw-status .cpu.stop { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); font-weight: 600; }
 .vatw-mdi-vacia { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-faint); font-size: 12.5px; pointer-events: none; text-align: center; padding: 20px; }
+
+/* nota de Símbolos: el código va en **…** en el diccionario y se ve en monoespaciada */
+.simbolos-nota b { font-family: var(--mono); font-size: 12px; font-weight: normal; }

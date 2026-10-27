@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
+import { T } from '../../i18n';
 
 /** Escucha Escape en la ventana del propio diálogo, que puede ser una ventana aparte (portal a otro documento). */
 export function Modal({ title, onClose, children, footer, width = 560 }: { title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; width?: number }) {
@@ -17,7 +18,7 @@ export function Modal({ title, onClose, children, footer, width = 560 }: { title
         <div className="modal-head">
           <h3>{title}</h3>
           <span className="spacer" />
-          <button className="btn ghost icon" onClick={onClose} aria-label="Cerrar"><Icon name="x" /></button>
+          <button className="btn ghost icon" onClick={onClose} aria-label={T.comun.cerrar}><Icon name="x" /></button>
         </div>
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-foot">{footer}</div>}

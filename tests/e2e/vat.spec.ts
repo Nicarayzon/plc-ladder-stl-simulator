@@ -9,7 +9,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 
 async function arrancar(nombre: string, codigo: string) {
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'automatizacion-vat-'));
-  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_USER_DATA: userData } });
+  const app = await electron.launch({ args: ['.'], cwd: path.resolve(HERE, '../..'), env: { ...process.env, AUTOMATIZACION_IDIOMA: 'es', AUTOMATIZACION_USER_DATA: userData } });
   const win = await app.firstWindow();
   await win.setViewportSize({ width: 1440, height: 900 });
   const errores: string[] = [];
