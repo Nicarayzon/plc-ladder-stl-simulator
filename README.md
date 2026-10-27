@@ -170,8 +170,6 @@ npx playwright test   # de extremo a extremo, sobre la app compilada (después d
 | `tools/` | Intérprete de referencia en Python |
 | `docs/` | Web del proyecto (GitHub Pages) |
 
-Más detalle en [`00_LEEME.md`](00_LEEME.md) y en la especificación de partida, [`03_especificacion_simulador.md`](03_especificacion_simulador.md).
-
 ## Contacto
 
 Hecho por **Adrian**, Ing. de Datos en Procesos Industriales ([@Nicarayzon](https://github.com/Nicarayzon) en GitHub).

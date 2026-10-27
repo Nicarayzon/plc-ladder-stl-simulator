@@ -48,6 +48,8 @@ npm-debug.log*
 DESARROLLO.md
 CLAUDE.md
 .claude/
+00_LEEME.md
+03_especificacion_simulador.md
 
 # Referencias locales que no se publican
 docs/ventana_tabla_variables.png
