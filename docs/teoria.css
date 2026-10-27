@@ -15,13 +15,6 @@
 
 .menu a.activo { color: var(--text); background: var(--bg-elev2); }
 
-.idiomas { display: flex; gap: 2px; padding: 3px; margin-right: 4px; border: 1px solid var(--border); border-radius: 10px; }
-.idiomas a {
-  padding: 3px 8px; border-radius: 7px;
-  font: 600 0.75rem/1.4 var(--mono); color: var(--text-dim); text-decoration: none;
-}
-.idiomas a:hover { color: var(--text); background: var(--bg-elev2); }
-.idiomas a[aria-current] { color: var(--accent); background: var(--accent-bg); }
 
 /* ───────── Distribución: índice a la izquierda y artículo ───────── */
 

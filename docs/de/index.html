@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="de" data-raiz="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kostenloser SPS-Simulator zum Lernen von KOP und AWL</title>
+  <meta name="description" content="Kostenloser SPS-Simulator zum Lernen von Kontaktplan (KOP) und Anweisungsliste (AWL), mit Theorie und 31 gelösten Beispielen. Für Windows, macOS und Linux. Die Oberfläche der App ist auf Spanisch.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:title" content="Kostenloser SPS-Simulator zum Lernen von KOP und AWL">
+  <meta property="og:description" content="SPS-Programmierung mit einem Simulator auf deinem Computer lernen: KOP, AWL, Zyklus, Zeiten und Zähler. Kostenlos und Open Source.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta property="og:image:alt" content="Der SPS-Simulator Automatizacion mit einem AWL-Programm in RUN">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Automatizacion",
+    "alternateName": "SPS-Simulator für KOP und AWL",
+    "description": "Simulator einer speicherprogrammierbaren Steuerung (SPS) zum Lernen von Kontaktplan (KOP) und Anweisungsliste (AWL), mit Theorie, gelösten Beispielen, Zeiten, Zählern und Logikanalysator. Die Oberfläche ist auf Spanisch.",
+    "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/de/",
+    "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
+    "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
+    "applicationCategory": "EducationalApplication",
+    "applicationSubCategory": "SPS-Simulator",
+    "operatingSystem": "Windows 10, Windows 11, macOS (Apple Silicon), Linux (Wine)",
+    "inLanguage": "es",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+    "author": { "@type": "Person", "name": "Arzath" },
+    "keywords": "SPS-Simulator, SPS Simulator kostenlos, KOP Simulator, AWL Simulator, SPS-Programmierung, Kontaktplan, Anweisungsliste, KOP, AWL, Automatisierungstechnik"
+  }
+  </script>
+  <link rel="stylesheet" href="../estilos.css">
+  <script>
+    // Design vor dem Zeichnen wählen, damit nichts flackert
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../web.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-portatil" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19h20" /></symbol>
+    <symbol id="i-pantalla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M9 20h6M12 16v4" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-birrete" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Z" /><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6" /></symbol>
+    <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4" /></symbol>
+    <symbol id="i-pizarra" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="m8 20 4-4 4 4M7 9h6m-6 3h10" /></symbol>
+    <symbol id="i-libro" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Zm0 15A2.5 2.5 0 0 0 6.5 23H20v-5" /></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></symbol>
+    <symbol id="i-charla" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5Z" /><path d="M8 9h8m-8 3h5" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="#inicio" aria-label="Automatizacion, Startseite">
+        <img src="../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu menu-portada" aria-label="Abschnitte">
+        <a href="#funciones">Funktionen</a>
+        <a href="#como-funciona">So funktioniert’s</a>
+        <a href="#usos" class="menu-extra">Einsatz</a>
+        <a href="#preguntas">Fragen</a>
+        <a href="theorie/">Theorie</a>
+        <a href="#sobre-mi" class="menu-extra">Über mich</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Sprache"><a href="../" hreflang="es" lang="es" title="Español">ES</a><a href="../en/" hreflang="en" lang="en" title="English">EN</a><a href="./" hreflang="de" lang="de" title="Deutsch" aria-current="page">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Zwischen hellem und dunklem Design wechseln">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code auf GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="#descargar">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <!-- ───────── Startbereich: die App und darunter die Downloads ───────── -->
+    <section class="portada">
+      <div class="contenedor portada-texto">
+        <a class="pildora" href="#descargar">
+          <span class="led-run" aria-hidden="true"></span>
+          <span>RUN</span>
+          <span class="pildora-sep" aria-hidden="true"></span>
+          <span data-rel="pildora-texto">Neueste Version herunterladen</span>
+        </a>
+        <h1>SPS-Simulator zum Lernen von KOP und AWL</h1>
+        <p class="entradilla">
+          Automatizacion ist ein kostenloser Simulator einer speicherprogrammierbaren Steuerung für deinen Computer.
+          Programmiere in Kontaktplan (KOP) und Anweisungsliste (AWL), drücke RUN
+          und sieh zu, wie die CPU den Zyklus durchläuft, die Zeiten ablaufen lässt und die Ausgänge einschaltet, ganz ohne Hardware.
+          Die Oberfläche der App ist auf Spanisch; die Theorie auf dieser Website gibt es auch auf Deutsch.
+        </p>
+      </div>
+
+      <div class="contenedor">
+        <figure class="captura captura-portada" data-captura="img5">
+          <div class="captura-marco">
+            <img alt="SPS-Simulator Automatizacion: ein AWL-Programm in RUN mit Status, Ein- und Ausgängen und Signal-Zeitdiagramm" width="1304" height="951">
+          </div>
+        </figure>
+      </div>
+
+      <div class="contenedor bloque-descargas" id="descargar">
+        <div class="descargas-cabeza">
+          <h2>Den SPS-Simulator kostenlos herunterladen</h2>
+          <p class="version" data-rel="version">Die Schaltflächen führen immer zur neuesten Version.</p>
+        </div>
+
+        <div class="descargas">
+          <article class="descarga" data-so="mac">
+            <span class="descarga-sello">Dein System</span>
+            <svg class="icono icono-so"><use href="#i-portatil" /></svg>
+            <h3>macOS</h3>
+            <p class="descarga-req">Apple Silicon: M1 oder neuer</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="mac-dmg" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Herunterladen <span class="ext">.dmg</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">Öffne die <code>.dmg</code> und ziehe Automatizacion in den Ordner Programme. Auf Macs mit Intel-Prozessor läuft sie nicht.</p>
+          </article>
+
+          <article class="descarga" data-so="win">
+            <span class="descarga-sello">Dein System</span>
+            <svg class="icono icono-so"><use href="#i-pantalla" /></svg>
+            <h3>Windows / Linux</h3>
+            <p class="descarga-req">Windows 10 und 11, 64 Bit · Linux mit Wine</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="win-exe" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Installer <span class="ext">.exe</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+              <a class="btn btn-secundario" data-fichero="win-zip" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Portabel <span class="ext">.zip</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">Die portable Version braucht keine Installation: entpacken und <code>Automatizacion.exe</code> öffnen. Unter Linux läuft sie mit Wine (<a href="#linux">getestet unter Arch Linux</a>).</p>
+          </article>
+        </div>
+
+        <p class="descarga-otras">
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases" data-rel="notas">Versionshinweise und frühere Versionen</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">Quellcode</a>
+          <span aria-hidden="true">·</span>
+          <a href="#preguntas">Probleme beim Öffnen</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Rundgang durch die App (Bildschirmfotos img1…img17, außer img5 oben) ───────── -->
+    <section class="seccion seccion-alterna" id="funciones">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Funktionen</p>
+          <h2>Die Funktionen des Simulators, Bildschirm für Bildschirm</h2>
+          <p>Von der Theorie und den Beispielen bis zu deinen eigenen Projekten mit Ein- und Ausgängen, Merkern und Zeitdiagrammen. Die Bildschirmfotos zeigen die App auf Spanisch.</p>
+        </div>
+
+        <div class="pasos">
+          <!-- img1 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">01</p>
+                <h3>Drei Bereiche für den Einstieg</h3>
+                <p>Der Startbildschirm fasst zusammen, was die App enthält: den freien Simulator zum Schreiben und Testen deiner Programme, «Aprender» (Lernen) mit der Theorie und «Ejemplos» (Beispiele) mit gelösten Programmen.</p>
+              </div>
+              <ul class="lista">
+                <li>Beim Öffnen startet die App direkt im freien Simulator.</li>
+                <li>Die Seitenleiste führt zu jedem Bereich, zu den Einstellungen und zur Hilfe.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img1">
+              <div class="captura-marco"><img alt="Startbildschirm mit den Bereichen freier Simulator, Lernen und Beispiele" width="756" height="180" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img2 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">02</p>
+                <h3>«Aprender»: die ganze Theorie, mit Suche</h3>
+                <p>Ein in Kapitel gegliederter Lehrstoff mit Inhaltsverzeichnis und Suche: wie die SPS und ihr Zyklus funktionieren, Speicherbereiche, Datentypen und Konstanten, symbolische Adressierung, Bausteinstruktur, KOP, AWL und die Entsprechungen zwischen beiden.</p>
+              </div>
+              <ul class="lista">
+                <li>Schemas und Tabellen mit den praktischen Folgen, die am häufigsten vorkommen.</li>
+                <li>Kapitel zu typischen Fehlern und Prüfungsfallen, deutsche und englische Mnemonik und ein Glossar.</li>
+                <li>Du kannst sie auch hier auf Deutsch lesen, mit interaktiven Beispielen: <a href="theorie/">Theorie zu KOP und AWL</a>.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img2">
+              <div class="captura-marco"><img alt="Bereich Lernen: Kapitelliste und der SPS-Zyklus mit einem Schema erklärt" width="1289" height="399" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img3 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">03</p>
+                <h3>31 gelöste Beispiele</h3>
+                <p>Nach Themen geordnete Beispiele, von Verknüpfungslogik über Selbsthaltung bis zu Flanken und mehr. Jedes öffnet sich startbereit, damit du die Eingänge betätigen und es ändern kannst.</p>
+              </div>
+              <ul class="lista">
+                <li>Die Kennzeichnung KOP bedeutet, dass die Lösung auch im Kontaktplan gezeichnet ist.</li>
+                <li>Wenn du seine Tests bestehst, wird das Beispiel mit ✔ 100 % markiert.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img3">
+              <div class="captura-marco"><img alt="Liste der Beispiele nach Themen, mit der Kennzeichnung KOP und einem zu 100 % bestandenen" width="1024" height="742" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img4 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">04</p>
+                <h3>Ein Beispiel öffnen und laufen sehen</h3>
+                <p>Links die Aufgabe mit der Lösung in KOP und in AWL und den Tests, die sie prüfen. Rechts die Arbeitsfläche in RUN: die KOP-Netzwerke mit ihrer Werkzeugleiste, die Ein- und Ausgänge und darunter der Logikanalysator.</p>
+              </div>
+              <ul class="lista">
+                <li>«Comprobar» (Prüfen) führt die Tests mit deiner Version aus, und «Restaurar» (Wiederherstellen) kehrt zum Original zurück.</li>
+                <li>RUN, STOP und MRES; Zyklus für Zyklus oder Anweisung für Anweisung; mit ×1, ×10 oder ×100.</li>
+                <li>Im KOP führt die durchgezogene grüne Leitung Strom, die gestrichelte blaue nicht.</li>
+                <li>Schließer und Öffner, Spulen, Parallelzweige und ein Elementkatalog, auch über Tasten (<kbd>F2</kbd>, <kbd>F3</kbd>, <kbd>F7</kbd>…).</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img4">
+              <div class="captura-marco"><img alt="Geöffnetes Beispiel: Aufgabe, KOP-Netzwerke in RUN, Ein-/Ausgabe-Feld und Logikanalysator" width="1304" height="793" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img6, img7, img8, img9 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">05</p>
+                <h3>Deine Projekte, in Ordnern organisiert</h3>
+                <p>Im freien Simulator ist jedes Projekt ein Ordner mit seinen Bausteinen. Du legst es in vier Schritten an und kannst danach hinzufügen, was du brauchst.</p>
+              </div>
+              <ul class="lista">
+                <li>Projekte umbenennen, duplizieren und exportieren (<code>.json</code>) oder ihre AWL-Quelle (<code>.awl</code>), und auf einem anderen Computer importieren.</li>
+                <li>Alles wird auf deinem Computer gespeichert: ohne Konto und ohne Verbindung.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-4">
+              <figure class="captura" data-captura="img6">
+                <div class="captura-marco"><img alt="Schaltfläche «Nuevo» (Neu) im Projektexplorer" width="220" height="48" loading="lazy"></div>
+                <figcaption><b>1</b>Im Projektexplorer auf «Nuevo» (Neu) klicken.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img7">
+                <div class="captura-marco"><img alt="Dialog für ein neues Projekt zur Eingabe des Ordnernamens" width="419" height="184" loading="lazy"></div>
+                <figcaption><b>2</b>Dem Ordner einen Namen geben.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img8">
+                <div class="captura-marco"><img alt="Rechtsklickmenü eines Projekts: OB1, FC1, OB100 oder eine Variablentabelle anlegen" width="425" height="227" loading="lazy"></div>
+                <figcaption><b>3</b>Mit Rechtsklick den OB1, eine Funktion FC, den Anlaufbaustein OB100 oder eine Variablentabelle anlegen.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img9">
+                <div class="captura-marco"><img alt="Leeres Projekt mit dem Hinweis, dass der OB1 fehlt, und einer Schaltfläche zum Anlegen" width="520" height="293" loading="lazy"></div>
+                <figcaption><b>4</b>Ein leeres Projekt erinnert dich daran, dass der OB1 fehlt: der Baustein, den die CPU in jedem Zyklus bearbeitet.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img10, img11 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">06</p>
+                <h3>AWL-Editor mit «Observar» (Status)</h3>
+                <p>Das Programm wird in Netzwerken geschrieben, jedes mit eigenem Titel. In RUN zeigt «Observar» neben jeder Zeile das VKE (in der App: RLO), das STA und beide Akkus, und neben jedem Operanden seinen aktuellen Wert.</p>
+              </div>
+              <ul class="lista">
+                <li>Syntaxhervorhebung, Autovervollständigung und Fehlermarkierung während des Schreibens.</li>
+                <li>Deutsche (<code>U</code>, <code>E</code>, <code>A</code>) oder englische (<code>A</code>, <code>I</code>, <code>Q</code>) Mnemonik, mit der Schaltfläche DE/EN.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img10">
+                <div class="captura-marco"><img alt="AWL-Netzwerk mit Titel und den Spalten RLO, STA, AKKU1 und AKKU2 je Zeile" width="491" height="491" loading="lazy"></div>
+                <figcaption>Jede Zeile mit VKE, STA, AKKU1 und AKKU2, und daneben der Wert jedes Operanden.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img11">
+                <div class="captura-marco"><img alt="Titelfeld eines AWL-Netzwerks in Bearbeitung" width="479" height="504" loading="lazy"></div>
+                <figcaption>Auf den Netzwerktitel klicken, um ihn zu schreiben.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img12 -->
+          <article class="paso">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">07</p>
+                <h3>Ein- und Ausgänge von Hand</h3>
+                <p>Die Eingänge sind Kippschalter und die Ausgänge Leuchtmelder, die aufleuchten. <code>E 124.0</code>–<code>E 125.7</code> und <code>A 124.0</code>–<code>A 125.7</code> sind immer sichtbar, dazu die, die dein Programm verwendet, mit Symbol, falls vorhanden.</p>
+              </div>
+              <ul class="lista">
+                <li><code>E 124.0</code>–<code>E 124.7</code> auch mit den Tasten <kbd>1</kbd>–<kbd>8</kbd>; <code>E 125</code> mit der Maus.</li>
+                <li><kbd>Umschalt</kbd> + Klick oder <kbd>Umschalt</kbd> + Taste: ein Taster, der nur 1 ist, solange du ihn hältst.</li>
+                <li>Mit Rechtsklick die Art eines Eingangs ändern oder ihn aus dem Feld entfernen, und mit «Añadir entrada» (Eingang hinzufügen) jede andere Adresse.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img12">
+              <div class="captura-marco"><img alt="E/A-Feld mit Schaltern für Byte 124 und 125 und Leuchtmeldern für die Bytes 4, 124 und 125" width="564" height="687" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img13, img14 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">08</p>
+                <h3>Merker nach Bytes und Taktmerker</h3>
+                <p>Die Merker, die das Programm verwendet, sind nach Bytes gruppiert, mit ihren acht Bits in einer Reihe; die unbenutzten erscheinen abgeblendet.</p>
+              </div>
+              <ul class="lista">
+                <li>Aktiviere den Taktmerker unter «Hardware», und sein Byte erscheint oben: Jedes Bit schwingt von selbst, von 0,1 s bis 2 s, mit seiner Periode darunter.</li>
+                <li>Ideal für Blinklichter: <code>U M 0.5</code> / <code>= A 124.7</code> lässt einen Ausgang mit 1 s Periode blinken.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img13">
+                <div class="captura-marco"><img alt="Merkerbytes M 10 und M 20 Bit für Bit, mit den unbenutzten Bits abgeblendet" width="552" height="200" loading="lazy"></div>
+                <figcaption>Die Merkerbytes M 10 und M 20, Bit für Bit.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img14">
+                <div class="captura-marco"><img alt="Taktmerker in M 0 mit der Periode jedes Bits und mehreren eingeschalteten Bits" width="558" height="303" loading="lazy"></div>
+                <figcaption>Der Taktmerker in M 0: Die eingeschalteten Bits blinken.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">09</p>
+                <h3>E/A-Signale: das Zeitdiagramm</h3>
+                <p>Im unteren Feld zeichnet ein Zeitdiagramm, wie sich die gewählten Eingänge, Ausgänge, Merker, Zeiten und Zähler mit der Zeit ändern. Hier ist <code>M 0.2</code> das 0,4-s-Bit des Taktmerkers.</p>
+              </div>
+              <ul class="lista">
+                <li>«Seguir» (Folgen) in Echtzeit, Zoom und die Cursor A und B zum Messen von Δt.</li>
+                <li>Ein Trigger, um den richtigen Moment festzuhalten, und Export als CSV oder PNG.</li>
+                <li>In derselben Leiste: Meldungen, das aus dem KOP erzeugte AWL, die Zyklusverfolgung und die Variablentabellen, die du dort andockst.</li>
+                <li>Die Schaltfläche ⧉ öffnet es in einem anderen Fenster, damit du es auf einen anderen Bildschirm schieben kannst.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img15">
+              <div class="captura-marco"><img alt="Signal-Zeitdiagramm mit Eingängen, einem Zähler und dem schwingenden Taktmerkerbit M 0.2" width="1085" height="322" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img16 · img17 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
+                <h3>Variablentabelle: beobachten und steuern</h3>
+                <p>Rechtsklick auf OB1 → «Insertar nuevo objeto» → «Tabla de variables» (Neues Objekt einfügen → Variablentabelle) öffnet <code>VAT_1</code> in einem Fenster innerhalb der App, das oben bleibt, während du weiterprogrammierst. Die Brille liest die Werte der CPU live.</p>
+              </div>
+              <ul class="lista">
+                <li>Jede Zeile mit ihrem Format: BOOL, BIN, HEX, DEC, REAL, S5TIME, TIME oder CHAR, nur die, die zum Operanden passen.</li>
+                <li>«Valor de forzado» (Steuerwert), um einen Wert einmal zu schreiben oder ihn in jedem Zyklus zu forcieren.</li>
+                <li>Sie lässt sich verschieben und minimieren oder unten neben den Signalen andocken. Sie wird mit dem Projekt gespeichert.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img16">
+                <div class="captura-marco"><img alt="Variablentabelle VAT_1 schwebend über dem AWL-Editor, mit MW 110 in HEX und MD 30 und MD 100 in REAL" width="1021" height="656" loading="lazy"></div>
+                <figcaption>In einem Fenster innerhalb der App, über dem Code.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img17">
+                <div class="captura-marco"><img alt="Variablentabelle VAT_1 unten im Feld neben den E/A-Signalen angedockt, mit MD 30 und MD 100 in REAL" width="702" height="184" loading="lazy"></div>
+                <figcaption>Oder unten angedockt, neben «Señales E/S» (E/A-Signale).</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── So funktioniert’s (interaktive Demo) ───────── -->
+    <section class="seccion" id="como-funciona">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">So funktioniert’s</p>
+          <h2>Wie eine SPS arbeitet: KOP, AWL und der Zyklus</h2>
+          <p>
+            Der KOP-Editor übersetzt jedes Netzwerk in gleichwertiges AWL, und beide laufen auf derselben Engine.
+            Probiere hier ein einfaches Netzwerk aus: Betätige die Schalter (oder drücke die Tasten <kbd>1</kbd> und <kbd>2</kbd>, wie in der App).
+          </p>
+        </div>
+
+        <div class="demo" id="demo">
+          <div class="demo-panel demo-kop">
+            <p class="demo-titulo">KOP · Netzwerk 1</p>
+            <svg class="escalera" viewBox="0 0 640 150" role="img" aria-label="KOP-Netzwerk: Schließer E 124.0 in Reihe mit Öffner E 124.1, die die Spule A 124.0 ansteuern">
+              <line class="barra" x1="20" y1="20" x2="20" y2="130" />
+              <line class="barra" x1="620" y1="20" x2="620" y2="130" />
+              <line class="cable" data-p="0" x1="22" y1="85" x2="150" y2="85" />
+              <g class="elem" data-p="1">
+                <line x1="150" y1="62" x2="150" y2="108" />
+                <line x1="190" y1="62" x2="190" y2="108" />
+              </g>
+              <text x="170" y="46">E 124.0</text>
+              <line class="cable" data-p="1" x1="190" y1="85" x2="330" y2="85" />
+              <g class="elem" data-p="2">
+                <line x1="330" y1="62" x2="330" y2="108" />
+                <line x1="370" y1="62" x2="370" y2="108" />
+                <line x1="336" y1="104" x2="364" y2="66" />
+              </g>
+              <text x="350" y="46">E 124.1</text>
+              <line class="cable" data-p="2" x1="370" y1="85" x2="476" y2="85" />
+              <g class="elem" data-p="2">
+                <path d="M486 64 Q470 85 486 106" />
+                <path d="M514 64 Q530 85 514 106" />
+              </g>
+              <text x="500" y="46">A 124.0</text>
+              <line class="cable" data-p="2" x1="524" y1="85" x2="618" y2="85" />
+            </svg>
+            <p class="demo-leyenda">
+              <span><i class="muestra muestra-on"></i>Strom fließt</span>
+              <span><i class="muestra muestra-off"></i>kein Strom</span>
+            </p>
+          </div>
+
+          <div class="demo-panel demo-awl">
+            <p class="demo-titulo">AWL · Status</p>
+            <table class="awl">
+              <thead><tr><th>Anweisung</th><th>VKE</th><th>STA</th></tr></thead>
+              <tbody>
+                <tr><td><b>U</b>&nbsp;&nbsp;E 124.0</td><td data-v="rlo1">0</td><td data-v="sta1">0</td></tr>
+                <tr><td><b>UN</b>&nbsp;E 124.1</td><td data-v="rlo2">0</td><td data-v="sta2">0</td></tr>
+                <tr><td><b>=</b>&nbsp;&nbsp;A 124.0</td><td data-v="rlo3">0</td><td data-v="sta3">0</td></tr>
+              </tbody>
+            </table>
+            <p class="demo-nota">VKE (in der App: RLO): Verknüpfungsergebnis nach jeder Zeile. STA: Zustand des gelesenen oder geschriebenen Bits.</p>
+          </div>
+
+          <div class="demo-es">
+            <div class="palancas">
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="0">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">E 124.0 <kbd>1</kbd></span>
+              </button>
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="1">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">E 124.1 <kbd>2</kbd></span>
+              </button>
+            </div>
+            <div class="flecha-es" aria-hidden="true"><svg class="icono"><use href="#i-flecha" /></svg></div>
+            <div class="salida">
+              <span class="piloto" id="piloto" aria-hidden="true"></span>
+              <span class="palanca-etiqueta">A 124.0</span>
+              <span class="sr-only" id="piloto-estado" aria-live="polite">A 124.0 aus</span>
+            </div>
+            <p class="demo-pista">Mit <kbd>Umschalt</kbd> + Taste wirkt der Eingang als Taster: Er ist nur 1, solange du ihn hältst.</p>
+          </div>
+        </div>
+
+        <ol class="ciclo" aria-label="SPS-Zyklus">
+          <li style="--i:0"><span class="ciclo-num">1</span><b>Zeiten</b><span>Sie laufen mit der Zykluszeit weiter.</span></li>
+          <li style="--i:1"><span class="ciclo-num">2</span><b>Eingänge lesen</b><span>Die Peripherieeingänge werden ins Prozessabbild der Eingänge kopiert.</span></li>
+          <li style="--i:2"><span class="ciclo-num">3</span><b>OB1 bearbeiten</b><span>Und den OB100 im ersten Zyklus nach dem Wechsel in RUN.</span></li>
+          <li style="--i:3"><span class="ciclo-num">4</span><b>Ausgänge schreiben</b><span>Das Prozessabbild der Ausgänge geht an die Leuchtmelder.</span></li>
+        </ol>
+        <p class="ciclo-pie">
+          Die Engine ist in TypeScript geschrieben und bildet eine CPU mit zwei Akkus nach: Statuswort, Zeiten,
+          Zähler, Sprünge und Arithmetik. Sie wird mit automatischen Tests gegen einen Referenzinterpreter geprüft,
+          Anweisung für Anweisung.
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Einsatz ───────── -->
+    <section class="seccion seccion-alterna" id="usos">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Einsatz</p>
+          <h2>Für wen dieser SPS-Simulator gedacht ist</h2>
+        </div>
+        <div class="usos">
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-birrete" /></svg>
+            <h3>SPS-Prüfungen vorbereiten</h3>
+            <p>Für Auszubildende, Techniker- und Ingenieurstudierende in Automatisierung und Instandhaltung: Übe die typischen Aufgaben mit VKE und Akkus im Blick.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-chip" /></svg>
+            <h3>Vor dem Labor testen</h3>
+            <p>Prüfe dein Programm mit echten Adressen wie <code>E 124.0</code> oder <code>A 124.0</code>, bevor du es in die SPS lädst.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-pizarra" /></svg>
+            <h3>Im Unterricht zeigen</h3>
+            <p>Für Lehrkräfte der Automatisierungstechnik: Zeige den Zyklus, den Stromfluss und die Zeitdiagramme, während du eine Zeit oder einen Zähler erklärst.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-libro" /></svg>
+            <h3>In die Automatisierung einsteigen</h3>
+            <p>Wenn du Automatisierungstechnik selbst lernen willst: vollständige Theorie und lauffähige Beispiele, ohne Hardware, ohne Lizenzen und ohne Verbindung.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Fragen ───────── -->
+    <section class="seccion" id="preguntas">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">Fragen</p>
+          <h2>Häufige Fragen</h2>
+        </div>
+        <div class="preguntas">
+          <details>
+            <summary>Was ist eine SPS (speicherprogrammierbare Steuerung)?</summary>
+            <p>Eine SPS ist der Industriecomputer, der Maschinen und Anlagen steuert: Sie liest Taster und Sensoren über ihre Eingänge, bearbeitet das Programm in einem Zyklus, der sich ständig wiederholt, und steuert über ihre Ausgänge Motoren, Ventile oder Leuchtmelder. Dieser Simulator bildet dieses Verhalten auf deinem Computer nach.</p>
+          </details>
+          <details>
+            <summary>Was ist der Unterschied zwischen KOP und AWL?</summary>
+            <p>Es sind zwei Arten, dasselbe Programm zu schreiben. KOP (Kontaktplan, englisch Ladder oder LAD) ist grafisch und sieht aus wie ein Stromlaufplan. AWL (Anweisungsliste, englisch STL) ist Text und näher an der Arbeitsweise der CPU. In der App siehst du das AWL, das aus jedem KOP-Netzwerk erzeugt wird.</p>
+          </details>
+          <details>
+            <summary>Brauche ich eine echte SPS zum Üben?</summary>
+            <p>Nein. Der Simulator übernimmt die Rolle der CPU: Du betätigst die Eingänge mit Schaltern oder der Tastatur, siehst Ausgänge, Merker, Zeiten und Zähler und kannst das Programm Anweisung für Anweisung durchgehen. Wenn du dann an einer echten SPS arbeitest, kommst du mit einem bereits getesteten Programm.</p>
+          </details>
+          <details>
+            <summary>macOS sagt, dass sich die App nicht öffnen lässt</summary>
+            <p>Die App ist nicht von Apple signiert. Öffne beim ersten Mal <b>Systemeinstellungen → Datenschutz &amp; Sicherheit</b> und klicke neben dem Hinweis zu Automatizacion auf <b>«Dennoch öffnen»</b>. Du kannst auch im Terminal ausführen:</p>
+            <div class="comando">
+              <code id="cmd-xattr">xattr -dr com.apple.quarantine /Applications/Automatizacion.app</code>
+              <button type="button" class="copiar" data-copiar="cmd-xattr">Kopieren</button>
+            </div>
+          </details>
+          <details>
+            <summary>Windows zeigt eine SmartScreen-Warnung</summary>
+            <p>Die ausführbare Datei ist nicht von Microsoft signiert. Klicke auf <b>«Weitere Informationen»</b> und dann auf <b>«Trotzdem ausführen»</b>.</p>
+          </details>
+          <details id="linux">
+            <summary>Läuft sie unter Linux?</summary>
+            <p>Es gibt keine native Linux-Version, aber die Windows-Version läuft mit der Kompatibilitätsschicht <b>Wine</b>: Lade den Installer <code>.exe</code> oder die portable <code>.zip</code> herunter und öffne sie mit Wine. Ein Nutzer verwendet sie mit dieser Konfiguration:</p>
+            <ul class="ficha">
+              <li><span>Distribution</span>Arch Linux</li>
+              <li><span>Kernel</span>Linux 7.2.9-arch1-1</li>
+              <li><span>Shell</span>bash 5.3.20</li>
+              <li><span>Wine</span>11.19</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Wo werden meine Projekte gespeichert?</summary>
+            <p>Auf deinem Computer, nie im Internet: unter macOS in <code>~/Library/Application Support/Automatizacion</code>, unter Windows in <code>%APPDATA%\Automatizacion</code>. Sie bleiben beim Aktualisieren der App erhalten, und du kannst jedes Projekt als <code>.json</code> oder als <code>.awl</code>-Quelle exportieren.</p>
+          </details>
+          <details>
+            <summary>Wie aktualisiere ich auf eine neue Version?</summary>
+            <p>Seit Version 0.22.0 sagt dir das Menü <b>Automatizacion ▸ Buscar actualizaciones…</b> (Nach Updates suchen; unter Windows <b>Ayuda ▸ Buscar actualizaciones…</b>), ob es eine neue Version gibt, und öffnet ihre Seite. Du kannst sie auch hier herunterladen. Unter macOS beendest du die App mit <kbd>⌘Q</kbd> und ziehst sie erneut in den Ordner Programme (Ersetzen). Unter Windows führst du den neuen Installer aus: Er ersetzt die vorherige Version, ohne deine Projekte anzurühren.</p>
+          </details>
+          <details>
+            <summary>Läuft sie auf einem Mac mit Intel-Prozessor?</summary>
+            <p>Nein. Die macOS-Version ist für Apple Silicon (M1, M2, M3 und neuer) gebaut.</p>
+          </details>
+          <details>
+            <summary>In welcher Sprache ist sie?</summary>
+            <p>Die Oberfläche und die eingebaute Theorie sind auf Spanisch. Der Code lässt sich mit deutscher oder englischer Mnemonik schreiben, und die Theorie auf dieser Website gibt es auch auf Deutsch und Englisch.</p>
+          </details>
+          <details>
+            <summary>Ist sie kostenlos?</summary>
+            <p>Ja. Sie ist Open Source unter der MIT-Lizenz: ohne Werbung und ohne Konten. Sie funktioniert offline; sie verbindet sich nur mit dem Internet, wenn du nach Updates suchen lässt.</p>
+          </details>
+        </div>
+        <p class="preguntas-pie">Deine Frage ist nicht dabei? <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">Stell sie in den Discussions</a>.</p>
+      </div>
+    </section>
+
+    <!-- ───────── Über mich ───────── -->
+    <section class="seccion seccion-alterna" id="sobre-mi">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">Über mich</p>
+          <h2>Wer dahintersteckt</h2>
+        </div>
+        <article class="autor">
+          <div class="autor-avatar" aria-hidden="true">A</div>
+          <div class="autor-texto">
+            <h3>Adrian</h3>
+            <p class="autor-cargo">Data Engineer für industrielle Prozesse</p>
+            <p>Ich habe Automatizacion entwickelt, um die SPS-Programmierung in KOP und AWL zu üben, und teile sie kostenlos und als Open Source, damit sie auch anderen beim Lernen hilft.</p>
+            <p>Hast du eine Frage, eine Idee oder ein Programm, das du zeigen möchtest? Schreib mir in den Discussions. Wenn etwas nicht funktioniert, eröffne ein Issue.</p>
+            <div class="autor-enlaces">
+              <a class="btn btn-primario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">
+                <svg class="icono"><use href="#i-charla" /></svg>
+                Discussions
+              </a>
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/issues">Vorschläge und Fehler</a>
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon">
+                <svg class="icono"><use href="#i-github" /></svg>
+                GitHub-Profil
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Kostenloser SPS-Simulator zum Lernen von KOP und AWL. © 2026 Arzath · MIT-Lizenz · Unabhängiges Lernprojekt, mit keinem SPS-Hersteller verbunden.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+
+  <dialog class="visor" id="visor" aria-label="Vergrößertes Bildschirmfoto">
+    <img alt="">
+    <button type="button" class="visor-cerrar" aria-label="Schließen">×</button>
+  </dialog>
+</body>
+</html>

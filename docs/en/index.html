@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en" data-raiz="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Free PLC Simulator to Learn Ladder Logic (LAD) and STL</title>
+  <meta name="description" content="Free PLC simulator to learn Ladder logic (LAD) and Statement List (STL) programming, with theory and 31 worked examples. For Windows, macOS and Linux. The app’s interface is in Spanish.">
+  <meta name="author" content="Arzath">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0e1013">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/">
+  <link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/">
+  <link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/">
+  <link rel="alternate" hreflang="x-default" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Automatizacion">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Free PLC Simulator to Learn Ladder Logic (LAD) and STL">
+  <meta property="og:description" content="Learn to program PLCs with a simulator on your computer: Ladder, STL, the scan cycle, timers and counters. Free and open source.">
+  <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/">
+  <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
+  <meta property="og:image:alt" content="The Automatizacion PLC simulator running an STL program">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Automatizacion",
+    "alternateName": "PLC simulator for Ladder and STL",
+    "description": "Programmable logic controller (PLC) simulator to learn Ladder logic (LAD, KOP) and Statement List (STL, AWL) programming, with theory, worked examples, timers, counters and a logic analyzer. The interface is in Spanish.",
+    "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/en/",
+    "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
+    "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
+    "applicationCategory": "EducationalApplication",
+    "applicationSubCategory": "PLC simulator",
+    "operatingSystem": "Windows 10, Windows 11, macOS (Apple Silicon), Linux (Wine)",
+    "inLanguage": "es",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+    "author": { "@type": "Person", "name": "Arzath" },
+    "keywords": "PLC simulator, ladder logic simulator, ladder simulator, STL simulator, PLC programming, Ladder, LAD, STL, statement list, industrial automation"
+  }
+  </script>
+  <link rel="stylesheet" href="../estilos.css">
+  <script>
+    // theme chosen before painting, so that it does not flicker
+    try { const t = localStorage.getItem('automatizacion-web-tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../web.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-descarga" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></symbol>
+    <symbol id="i-portatil" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19h20" /></symbol>
+    <symbol id="i-pantalla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M9 20h6M12 16v4" /></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+    <symbol id="i-birrete" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Z" /><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6" /></symbol>
+    <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4" /></symbol>
+    <symbol id="i-pizarra" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="m8 20 4-4 4 4M7 9h6m-6 3h10" /></symbol>
+    <symbol id="i-libro" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Zm0 15A2.5 2.5 0 0 0 6.5 23H20v-5" /></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></symbol>
+    <symbol id="i-charla" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5Z" /><path d="M8 9h8m-8 3h5" /></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="#inicio" aria-label="Automatizacion, home">
+        <img src="../favicon.svg" alt="" width="30" height="30">
+        <span>Automatizacion</span>
+      </a>
+      <nav class="menu menu-portada" aria-label="Sections">
+        <a href="#funciones">Features</a>
+        <a href="#como-funciona">How it works</a>
+        <a href="#usos" class="menu-extra">Uses</a>
+        <a href="#preguntas">Questions</a>
+        <a href="theory/">Theory</a>
+        <a href="#sobre-mi" class="menu-extra">About me</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <nav class="idiomas" aria-label="Language"><a href="../" hreflang="es" lang="es" title="Español">ES</a><a href="./" hreflang="en" lang="en" title="English" aria-current="page">EN</a><a href="../de/" hreflang="de" lang="de" title="Deutsch">DE</a></nav>
+        <button class="boton-icono" id="cambiar-tema" type="button" aria-label="Switch between light and dark theme">
+          <svg class="icono icono-sol"><use href="#i-sol" /></svg>
+          <svg class="icono icono-luna"><use href="#i-luna" /></svg>
+        </button>
+        <a class="boton-icono" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator" aria-label="Code on GitHub">
+          <svg class="icono"><use href="#i-github" /></svg>
+        </a>
+        <a class="btn btn-primario btn-pequeno" href="#descargar">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <!-- ───────── Hero: the app and, below it, the downloads ───────── -->
+    <section class="portada">
+      <div class="contenedor portada-texto">
+        <a class="pildora" href="#descargar">
+          <span class="led-run" aria-hidden="true"></span>
+          <span>RUN</span>
+          <span class="pildora-sep" aria-hidden="true"></span>
+          <span data-rel="pildora-texto">Download the latest version</span>
+        </a>
+        <h1>PLC simulator to learn Ladder logic and STL</h1>
+        <p class="entradilla">
+          Automatizacion is a free programmable logic controller simulator for your computer.
+          Program in Ladder (LAD) and Statement List (STL), press RUN
+          and watch the CPU go through the scan cycle, run the timers and switch on the outputs, with no hardware at all.
+          The app’s interface is in Spanish; the theory on this website is also in English.
+        </p>
+      </div>
+
+      <div class="contenedor">
+        <figure class="captura captura-portada" data-captura="img5">
+          <div class="captura-marco">
+            <img alt="Automatizacion PLC simulator: an STL program in RUN with monitoring, inputs and outputs and a signal timing chart" width="1304" height="951">
+          </div>
+        </figure>
+      </div>
+
+      <div class="contenedor bloque-descargas" id="descargar">
+        <div class="descargas-cabeza">
+          <h2>Download the PLC simulator for free</h2>
+          <p class="version" data-rel="version">The buttons always take you to the latest release.</p>
+        </div>
+
+        <div class="descargas">
+          <article class="descarga" data-so="mac">
+            <span class="descarga-sello">Your system</span>
+            <svg class="icono icono-so"><use href="#i-portatil" /></svg>
+            <h3>macOS</h3>
+            <p class="descarga-req">Apple Silicon: M1 or later</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="mac-dmg" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Download <span class="ext">.dmg</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">Open the <code>.dmg</code> and drag Automatizacion to Applications. It does not work on Macs with an Intel processor.</p>
+          </article>
+
+          <article class="descarga" data-so="win">
+            <span class="descarga-sello">Your system</span>
+            <svg class="icono icono-so"><use href="#i-pantalla" /></svg>
+            <h3>Windows / Linux</h3>
+            <p class="descarga-req">Windows 10 and 11, 64-bit · Linux with Wine</p>
+            <div class="descarga-botones">
+              <a class="btn btn-primario" data-fichero="win-exe" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Installer <span class="ext">.exe</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+              <a class="btn btn-secundario" data-fichero="win-zip" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest">
+                <svg class="icono"><use href="#i-descarga" /></svg>
+                <span>Portable <span class="ext">.zip</span></span>
+                <span class="tam" data-tam></span>
+              </a>
+            </div>
+            <p class="descarga-pie">The portable version needs no installation: unzip it and open <code>Automatizacion.exe</code>. On Linux it runs with Wine (<a href="#linux">tested on Arch Linux</a>).</p>
+          </article>
+        </div>
+
+        <p class="descarga-otras">
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases" data-rel="notas">Release notes and previous versions</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">Source code</a>
+          <span aria-hidden="true">·</span>
+          <a href="#preguntas">Trouble opening it</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Tour of the app (screenshots img1…img17, except img5 in the hero) ───────── -->
+    <section class="seccion seccion-alterna" id="funciones">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Features</p>
+          <h2>Simulator features, screen by screen</h2>
+          <p>From the theory and the examples to your own projects with inputs, outputs, memory bits and timing charts. The screenshots show the app in Spanish.</p>
+        </div>
+
+        <div class="pasos">
+          <!-- img1 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">01</p>
+                <h3>Three sections to get started</h3>
+                <p>The start screen brings together what the app includes: the free simulator to write and test your programs, «Aprender» (Learn) with the theory and «Ejemplos» (Examples) with solved programs.</p>
+              </div>
+              <ul class="lista">
+                <li>When you open it, the app goes straight to the free simulator.</li>
+                <li>The sidebar takes you to each section, the settings and the help.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img1">
+              <div class="captura-marco"><img alt="Start screen with the free simulator, Learn and Examples sections" width="756" height="180" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img2 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">02</p>
+                <h3>«Aprender»: all the theory, with search</h3>
+                <p>A syllabus organized in chapters, with a table of contents and search: how the PLC and its scan cycle work, memory areas, data types and constants, symbolic addressing, block structure, Ladder, STL and the equivalences between them.</p>
+              </div>
+              <ul class="lista">
+                <li>Diagrams and tables with the practical consequences that come up most often.</li>
+                <li>Chapters on typical mistakes and exam pitfalls, German and English mnemonics, and a glossary.</li>
+                <li>You can also read it here in English, with interactive examples: <a href="theory/">Ladder and STL theory</a>.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img2">
+              <div class="captura-marco"><img alt="Learn section: list of chapters and the scan cycle explained with a diagram" width="1289" height="399" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img3 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">03</p>
+                <h3>31 worked examples</h3>
+                <p>Examples grouped by topic, from combinational logic to latching, edges and more. Each one opens ready to run, so you can change the inputs and modify it.</p>
+              </div>
+              <ul class="lista">
+                <li>The KOP label means that the solution is also drawn in Ladder.</li>
+                <li>When you pass its tests, the example is marked with ✔ 100 %.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img3">
+              <div class="captura-marco"><img alt="List of examples grouped by topic, with the KOP label and one passed at 100 %" width="1024" height="742" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img4 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">04</p>
+                <h3>Open an example and watch it run</h3>
+                <p>On the left, the task with the solution in Ladder and in STL and the tests that check it. On the right, the workbench in RUN: the Ladder networks with their toolbar, the inputs and outputs and, below, the logic analyzer.</p>
+              </div>
+              <ul class="lista">
+                <li>«Comprobar» (Check) runs the tests on your version and «Restaurar» (Restore) goes back to the original.</li>
+                <li>RUN, STOP and MRES; cycle by cycle or instruction by instruction; at ×1, ×10 or ×100.</li>
+                <li>In Ladder, the solid green wire carries power; the dashed blue one does not.</li>
+                <li>NO and NC contacts, coils, parallel branches and an element catalog, also with keys (<kbd>F2</kbd>, <kbd>F3</kbd>, <kbd>F7</kbd>…).</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img4">
+              <div class="captura-marco"><img alt="Open example: task, Ladder networks in RUN, input and output panel and logic analyzer" width="1304" height="793" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img6, img7, img8, img9 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">05</p>
+                <h3>Your projects, organized in folders</h3>
+                <p>In the free simulator, each project is a folder with its blocks. You create it in four steps, and then you can add whatever you need.</p>
+              </div>
+              <ul class="lista">
+                <li>Rename, duplicate and export projects (<code>.json</code>) or their STL source (<code>.awl</code>), and import them on another computer.</li>
+                <li>Everything is saved on your computer: no accounts and no connection.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-4">
+              <figure class="captura" data-captura="img6">
+                <div class="captura-marco"><img alt="«Nuevo» (New) button in the project explorer" width="220" height="48" loading="lazy"></div>
+                <figcaption><b>1</b>Press «Nuevo» (New) in the project explorer.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img7">
+                <div class="captura-marco"><img alt="New project dialog to type the folder name" width="419" height="184" loading="lazy"></div>
+                <figcaption><b>2</b>Give the folder a name.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img8">
+                <div class="captura-marco"><img alt="Right-click menu of a project: create OB1, FC1, OB100 or a variable table" width="425" height="227" loading="lazy"></div>
+                <figcaption><b>3</b>Right-click to create OB1, an FC function, the OB100 startup block or a variable table.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img9">
+                <div class="captura-marco"><img alt="Empty project with the warning that OB1 is missing and a button to create it" width="520" height="293" loading="lazy"></div>
+                <figcaption><b>4</b>An empty project reminds you that OB1 is missing: the block the CPU runs in every cycle.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img10, img11 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">06</p>
+                <h3>STL editor with «Observar» (Monitor)</h3>
+                <p>The program is written in networks, each with its own title. In RUN, «Observar» shows the RLO, the STA and both accumulators next to each line, and the current value next to each operand.</p>
+              </div>
+              <ul class="lista">
+                <li>Syntax highlighting, autocompletion and errors marked as you type.</li>
+                <li>German (<code>U</code>, <code>E</code>, <code>A</code>) or English (<code>A</code>, <code>I</code>, <code>Q</code>) mnemonics, with the DE/EN button.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img10">
+                <div class="captura-marco"><img alt="STL network with a title and RLO, STA, ACCU1 and ACCU2 columns for each line" width="491" height="491" loading="lazy"></div>
+                <figcaption>Each line with its RLO, STA, ACCU1 and ACCU2, and the value of each operand next to it.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img11">
+                <div class="captura-marco"><img alt="Title field of an STL network being edited" width="479" height="504" loading="lazy"></div>
+                <figcaption>Click the network title to type it.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img12 -->
+          <article class="paso">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">07</p>
+                <h3>Inputs and outputs by hand</h3>
+                <p>Inputs are toggle switches and outputs are lamps that light up. <code>I 124.0</code>–<code>I 125.7</code> and <code>Q 124.0</code>–<code>Q 125.7</code> are always visible (<code>E</code> and <code>A</code> with the German mnemonics), plus the ones your program uses, with their symbol if they have one.</p>
+              </div>
+              <ul class="lista">
+                <li><code>I 124.0</code>–<code>I 124.7</code> also with keys <kbd>1</kbd>–<kbd>8</kbd>; <code>I 125</code>, with the mouse.</li>
+                <li><kbd>Shift</kbd> + click or <kbd>Shift</kbd> + key: a push button, which is 1 only while you hold it.</li>
+                <li>Right-click to change the type of an input or remove it from the panel, and «Añadir entrada» (Add input) for any other address.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img12">
+              <div class="captura-marco"><img alt="I/O panel with switches for byte 124 and 125 and lamps for bytes 4, 124 and 125" width="564" height="687" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img13, img14 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">08</p>
+                <h3>Memory bits by byte and clock memory</h3>
+                <p>The memory bits used by the program are grouped by byte, with their eight bits in a row; the ones it does not use are dimmed.</p>
+              </div>
+              <ul class="lista">
+                <li>Enable the clock memory in «Hardware» and its byte appears at the top: each bit oscillates by itself, from 0.1 s to 2 s, with its period below it.</li>
+                <li>Perfect for flashing lights: <code>A M 0.5</code> / <code>= Q 124.7</code> makes an output flash with a 1 s period.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img13">
+                <div class="captura-marco"><img alt="Memory bytes M 10 and M 20 bit by bit, with the unused bits dimmed" width="552" height="200" loading="lazy"></div>
+                <figcaption>Memory bytes M 10 and M 20, bit by bit.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img14">
+                <div class="captura-marco"><img alt="Clock memory in M 0 with the period of each bit and several bits on" width="558" height="303" loading="lazy"></div>
+                <figcaption>The clock memory in M 0: the bits that are on flash.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">09</p>
+                <h3>I/O signals: the timing chart</h3>
+                <p>In the bottom panel, a timing chart draws how the inputs, outputs, memory bits, timers and counters you choose change over time. Here, <code>M 0.2</code> is the 0.4 s clock memory bit.</p>
+              </div>
+              <ul class="lista">
+                <li>«Seguir» (Follow) in real time, zoom, and A and B cursors to measure Δt.</li>
+                <li>A trigger to freeze the right moment, and export to CSV or PNG.</li>
+                <li>In the same strip: messages, the STL generated from the Ladder, the cycle trace and the variable tables you dock there.</li>
+                <li>The ⧉ button opens it in another window, so you can move it to another monitor.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img15">
+              <div class="captura-marco"><img alt="Signal timing chart with inputs, a counter and the clock memory bit M 0.2 oscillating" width="1085" height="322" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img16 · img17 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
+                <h3>Variable table: monitor and modify</h3>
+                <p>Right-click OB1 → «Insertar nuevo objeto» → «Tabla de variables» (Insert new object → Variable table) to open <code>VAT_1</code> in a window inside the app, which stays on top while you keep programming. The glasses read the CPU values live.</p>
+              </div>
+              <ul class="lista">
+                <li>Each row with its format: BOOL, BIN, HEX, DEC, REAL, S5TIME, TIME or CHAR, only the ones that fit the operand.</li>
+                <li>«Valor de forzado» (Modify value) to write a value once or keep it forced on every cycle.</li>
+                <li>It can be moved and minimized, or docked at the bottom next to the signals. It is saved with the project.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-pila">
+              <figure class="captura" data-captura="img16">
+                <div class="captura-marco"><img alt="Variable table VAT_1 floating over the STL editor, with MW 110 in HEX and MD 30 and MD 100 in REAL" width="1021" height="656" loading="lazy"></div>
+                <figcaption>In a window inside the app, on top of the code.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img17">
+                <div class="captura-marco"><img alt="Variable table VAT_1 docked in the bottom panel, next to the I/O signals, with MD 30 and MD 100 in REAL" width="702" height="184" loading="lazy"></div>
+                <figcaption>Or docked at the bottom, next to «Señales E/S» (I/O signals).</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── How it works (interactive demo) ───────── -->
+    <section class="seccion" id="como-funciona">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">How it works</p>
+          <h2>How a PLC works: Ladder, STL and the scan cycle</h2>
+          <p>
+            The Ladder editor translates each network into equivalent STL, and both run on the same engine.
+            Try a simple network here: operate the switches (or press keys <kbd>1</kbd> and <kbd>2</kbd>, as in the app).
+          </p>
+        </div>
+
+        <div class="demo" id="demo">
+          <div class="demo-panel demo-kop">
+            <p class="demo-titulo">LAD · Network 1</p>
+            <svg class="escalera" viewBox="0 0 640 150" role="img" aria-label="Ladder network: normally open contact I 124.0 in series with normally closed contact I 124.1, driving coil Q 124.0">
+              <line class="barra" x1="20" y1="20" x2="20" y2="130" />
+              <line class="barra" x1="620" y1="20" x2="620" y2="130" />
+              <line class="cable" data-p="0" x1="22" y1="85" x2="150" y2="85" />
+              <g class="elem" data-p="1">
+                <line x1="150" y1="62" x2="150" y2="108" />
+                <line x1="190" y1="62" x2="190" y2="108" />
+              </g>
+              <text x="170" y="46">I 124.0</text>
+              <line class="cable" data-p="1" x1="190" y1="85" x2="330" y2="85" />
+              <g class="elem" data-p="2">
+                <line x1="330" y1="62" x2="330" y2="108" />
+                <line x1="370" y1="62" x2="370" y2="108" />
+                <line x1="336" y1="104" x2="364" y2="66" />
+              </g>
+              <text x="350" y="46">I 124.1</text>
+              <line class="cable" data-p="2" x1="370" y1="85" x2="476" y2="85" />
+              <g class="elem" data-p="2">
+                <path d="M486 64 Q470 85 486 106" />
+                <path d="M514 64 Q530 85 514 106" />
+              </g>
+              <text x="500" y="46">Q 124.0</text>
+              <line class="cable" data-p="2" x1="524" y1="85" x2="618" y2="85" />
+            </svg>
+            <p class="demo-leyenda">
+              <span><i class="muestra muestra-on"></i>power flow</span>
+              <span><i class="muestra muestra-off"></i>no power flow</span>
+            </p>
+          </div>
+
+          <div class="demo-panel demo-awl">
+            <p class="demo-titulo">STL · Monitor</p>
+            <table class="awl">
+              <thead><tr><th>Instruction</th><th>RLO</th><th>STA</th></tr></thead>
+              <tbody>
+                <tr><td><b>A</b>&nbsp;&nbsp;I 124.0</td><td data-v="rlo1">0</td><td data-v="sta1">0</td></tr>
+                <tr><td><b>AN</b>&nbsp;I 124.1</td><td data-v="rlo2">0</td><td data-v="sta2">0</td></tr>
+                <tr><td><b>=</b>&nbsp;&nbsp;Q 124.0</td><td data-v="rlo3">0</td><td data-v="sta3">0</td></tr>
+              </tbody>
+            </table>
+            <p class="demo-nota">RLO: result of the logic after each line. STA: state of the bit read or written.</p>
+          </div>
+
+          <div class="demo-es">
+            <div class="palancas">
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="0">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">I 124.0 <kbd>1</kbd></span>
+              </button>
+              <button class="palanca" type="button" role="switch" aria-checked="false" data-entrada="1">
+                <span class="palanca-pista"><span class="palanca-bola"></span></span>
+                <span class="palanca-etiqueta">I 124.1 <kbd>2</kbd></span>
+              </button>
+            </div>
+            <div class="flecha-es" aria-hidden="true"><svg class="icono"><use href="#i-flecha" /></svg></div>
+            <div class="salida">
+              <span class="piloto" id="piloto" aria-hidden="true"></span>
+              <span class="palanca-etiqueta">Q 124.0</span>
+              <span class="sr-only" id="piloto-estado" aria-live="polite">Q 124.0 off</span>
+            </div>
+            <p class="demo-pista">With <kbd>Shift</kbd> + key, the input works as a push button: it is 1 only while you hold it.</p>
+          </div>
+        </div>
+
+        <ol class="ciclo" aria-label="Scan cycle">
+          <li style="--i:0"><span class="ciclo-num">1</span><b>Timers</b><span>They advance with the cycle time.</span></li>
+          <li style="--i:1"><span class="ciclo-num">2</span><b>Read inputs</b><span>The peripheral inputs are copied to the input image.</span></li>
+          <li style="--i:2"><span class="ciclo-num">3</span><b>Run OB1</b><span>And OB100 in the first cycle after switching to RUN.</span></li>
+          <li style="--i:3"><span class="ciclo-num">4</span><b>Write outputs</b><span>The output image goes to the lamps.</span></li>
+        </ol>
+        <p class="ciclo-pie">
+          The engine is written in TypeScript and reproduces a CPU with two accumulators: status word, timers,
+          counters, jumps and arithmetic. It is checked with automated tests against a reference interpreter,
+          instruction by instruction.
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Uses ───────── -->
+    <section class="seccion seccion-alterna" id="usos">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">Uses</p>
+          <h2>Who this PLC simulator is for</h2>
+        </div>
+        <div class="usos">
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-birrete" /></svg>
+            <h3>Preparing for PLC exams</h3>
+            <p>For vocational and engineering students in automation and maintenance: practice the typical exercises with the RLO and the accumulators in view.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-chip" /></svg>
+            <h3>Testing before the lab</h3>
+            <p>Check your program with real addresses, such as <code>I 124.0</code> or <code>Q 124.0</code>, before you load it into the PLC.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-pizarra" /></svg>
+            <h3>Teaching in class</h3>
+            <p>For automation teachers: show the scan cycle, the power flow and the timing charts while you explain a timer or a counter.</p>
+          </article>
+          <article class="uso">
+            <svg class="icono icono-uso"><use href="#i-libro" /></svg>
+            <h3>Getting started in automation</h3>
+            <p>If you want to learn industrial automation on your own: complete theory and examples that run, with no hardware, no licenses and no connection.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Questions ───────── -->
+    <section class="seccion" id="preguntas">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">Questions</p>
+          <h2>Frequently asked questions</h2>
+        </div>
+        <div class="preguntas">
+          <details>
+            <summary>What is a PLC (programmable logic controller)?</summary>
+            <p>A PLC (programmable logic controller) is the industrial computer that controls machines and installations: it reads push buttons and sensors through its inputs, runs the program in a cycle that repeats without stopping, and drives motors, valves or lamps through its outputs. This simulator reproduces that behavior on your computer.</p>
+          </details>
+          <details>
+            <summary>What is the difference between Ladder and STL?</summary>
+            <p>They are two ways of writing the same program. Ladder (LAD, called KOP in German) is graphical and looks like an electrical diagram. STL (Statement List, called AWL in German) is text, closer to how the CPU works. In the app you can see the STL generated by each Ladder network.</p>
+          </details>
+          <details>
+            <summary>Do I need a real PLC to practice?</summary>
+            <p>No. The simulator acts as the CPU: you operate the inputs with switches or the keyboard, you see the outputs, memory bits, timers and counters, and you can step through the program instruction by instruction. When you work with a real PLC, you will arrive with the program already tested.</p>
+          </details>
+          <details>
+            <summary>macOS says it cannot open the app</summary>
+            <p>The app is not signed by Apple. The first time, open <b>System Settings → Privacy &amp; Security</b> and click <b>«Open Anyway»</b> next to the Automatizacion warning. You can also run this in Terminal:</p>
+            <div class="comando">
+              <code id="cmd-xattr">xattr -dr com.apple.quarantine /Applications/Automatizacion.app</code>
+              <button type="button" class="copiar" data-copiar="cmd-xattr">Copy</button>
+            </div>
+          </details>
+          <details>
+            <summary>Windows shows a SmartScreen warning</summary>
+            <p>The executable is not signed by Microsoft. Click <b>«More info»</b> and then <b>«Run anyway»</b>.</p>
+          </details>
+          <details id="linux">
+            <summary>Does it work on Linux?</summary>
+            <p>There is no native Linux version, but the Windows one works with the <b>Wine</b> compatibility layer: download the <code>.exe</code> installer or the portable <code>.zip</code> and open it with Wine. One user runs it with this setup:</p>
+            <ul class="ficha">
+              <li><span>Distribution</span>Arch Linux</li>
+              <li><span>Kernel</span>Linux 7.2.9-arch1-1</li>
+              <li><span>Shell</span>bash 5.3.20</li>
+              <li><span>Wine</span>11.19</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Where are my projects saved?</summary>
+            <p>On your computer, never online: on macOS, in <code>~/Library/Application Support/Automatizacion</code>; on Windows, in <code>%APPDATA%\Automatizacion</code>. They are kept when you update the app, and you can export each project as <code>.json</code> or as <code>.awl</code> source.</p>
+          </details>
+          <details>
+            <summary>How do I update to a new version?</summary>
+            <p>Since version 0.22.0, the <b>Automatizacion ▸ Buscar actualizaciones…</b> menu (Check for updates; on Windows, <b>Ayuda ▸ Buscar actualizaciones…</b>) tells you if there is a new version and opens its page. You can also download it from here. On macOS, quit the app with <kbd>⌘Q</kbd> and drag it to Applications again (Replace). On Windows, run the new installer: it replaces the previous one without touching your projects.</p>
+          </details>
+          <details>
+            <summary>Does it work on a Mac with an Intel processor?</summary>
+            <p>No. The macOS version is built for Apple Silicon (M1, M2, M3 and later).</p>
+          </details>
+          <details>
+            <summary>What language is it in?</summary>
+            <p>The interface and the built-in theory are in Spanish. Code can be written with German or English mnemonics, and the theory on this website is also available in English and German.</p>
+          </details>
+          <details>
+            <summary>Is it free?</summary>
+            <p>Yes. It is open source under the MIT license: no ads and no accounts. It works offline; it only connects to the internet if you ask it to check for updates.</p>
+          </details>
+        </div>
+        <p class="preguntas-pie">Can’t find your question? <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">Ask it in Discussions</a>.</p>
+      </div>
+    </section>
+
+    <!-- ───────── About me ───────── -->
+    <section class="seccion seccion-alterna" id="sobre-mi">
+      <div class="contenedor contenedor-estrecho">
+        <div class="encabezado">
+          <p class="antetitulo">About me</p>
+          <h2>Who is behind it</h2>
+        </div>
+        <article class="autor">
+          <div class="autor-avatar" aria-hidden="true">A</div>
+          <div class="autor-texto">
+            <h3>Adrian</h3>
+            <p class="autor-cargo">Data Engineer in Industrial Processes</p>
+            <p>I developed Automatizacion to practice PLC programming in Ladder and STL, and I share it for free and as open source so that it can help others learn too.</p>
+            <p>Do you have a question, an idea or a program you want to show? Write to me in Discussions. If something goes wrong, open an issue.</p>
+            <div class="autor-enlaces">
+              <a class="btn btn-primario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">
+                <svg class="icono"><use href="#i-charla" /></svg>
+                Discussions
+              </a>
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/issues">Suggestions and bugs</a>
+              <a class="btn btn-secundario btn-pequeno" href="https://github.com/Nicarayzon">
+                <svg class="icono"><use href="#i-github" /></svg>
+                GitHub profile
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-fila">
+      <div class="marca marca-pie">
+        <img src="../favicon.svg" alt="" width="24" height="24">
+        <span>Automatizacion</span>
+      </div>
+      <p>Free PLC simulator to learn Ladder and STL. © 2026 Arzath · MIT License · Independent educational project, not affiliated with any PLC manufacturer.</p>
+      <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
+    </div>
+  </footer>
+
+  <dialog class="visor" id="visor" aria-label="Enlarged screenshot">
+    <img alt="">
+    <button type="button" class="visor-cerrar" aria-label="Close">×</button>
+  </dialog>
+</body>
+</html>

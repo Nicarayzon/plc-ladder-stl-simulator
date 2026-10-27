@@ -11,7 +11,7 @@ import { cronogramas } from './cronogramas';
 import { figuras } from './figuras';
 import { ejemplo, preguntasDe, seccion, type Bloque } from './fuentes';
 import { ancla, enLinea, esc, kop, markdown } from './html';
-import { pagina, WEB, type Alternativa } from './plantilla';
+import { pagina, rutaPortada, WEB, type Alternativa } from './plantilla';
 import { datosDePruebas, type DatosVivo } from './vivo-datos';
 
 const IDIOMAS: Idioma[] = ['es', 'en', 'de'];
@@ -159,13 +159,14 @@ function lista(pags: Pagina[], idioma: Idioma, actual: Pagina | null, prefijo: s
     `<li><a href="${prefijo}${p.slug[idioma]}/"${p === actual ? ' aria-current="page"' : ''}>${esc(p.corto[idioma]!)}</a></li>`).join('')}</ol>`;
 }
 
-function practica(t: Textos, raiz: string): string {
+/** inicio: la portada del idioma, donde están las descargas */
+function practica(t: Textos, inicio: string): string {
   return `<aside class="practica">
       <div>
         <h2>${esc(t.practicaTitulo)}</h2>
         <p>${esc(t.practicaTexto)}</p>
       </div>
-      <a class="btn btn-primario" href="${raiz}#descargar"><svg class="icono"><use href="#i-descarga" /></svg>${esc(t.practicaBoton)}</a>
+      <a class="btn btn-primario" href="${inicio}#descargar"><svg class="icono"><use href="#i-descarga" /></svg>${esc(t.practicaBoton)}</a>
     </aside>`;
 }
 
@@ -272,7 +273,7 @@ function articulo(c: Contexto, p: Pagina, k: number): { ruta: string; html: stri
       <div class="articulo-cuerpo">
 ${partes.join('\n')}
       </div>
-      ${practica(t, raiz)}
+      ${practica(t, raiz + rutaPortada(idioma))}
       <nav class="paginacion" aria-label="${esc(t.indice)}">
         ${enlacePag(ant, 'pag-ant', `← ${t.anterior}`)}
         ${enlacePag(sig, 'pag-sig', `${t.siguiente} →`)}
@@ -342,7 +343,7 @@ function portadaTeoria(c: Contexto): { ruta: string; html: string } {
     <ol class="temas">
         ${temas}
     </ol>
-    ${practica(t, raiz)}
+    ${practica(t, raiz + rutaPortada(idioma))}
   </main>`;
   const html = pagina({
     idioma, t, raiz, ruta,
@@ -365,8 +366,7 @@ function portadaTeoria(c: Contexto): { ruta: string; html: string } {
 
 // ───────── Sitemap ─────────
 
-function sitemap(viejo: string, urls: { ruta: string; lastmod: string; alternos: Alternativa[] }[]): string {
-  const portada = /<loc>[^<]*\/plc-ladder-stl-simulator\/<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/.exec(viejo)?.[1] ?? hoy();
+function sitemap(urls: { ruta: string; lastmod: string; alternos: Alternativa[] }[]): string {
   const filas = urls.map((u) => {
     const alt = u.alternos.length > 1
       ? u.alternos.map((a) => `\n    <xhtml:link rel="alternate" hreflang="${a.idioma}" href="${WEB}${a.ruta}"/>`).join('')
@@ -375,10 +375,6 @@ function sitemap(viejo: string, urls: { ruta: string; lastmod: string; alternos:
   });
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>${WEB}</loc>
-    <lastmod>${portada}</lastmod>
-  </url>
 ${filas.join('\n')}
 </urlset>
 `;
@@ -397,6 +393,15 @@ export function generar(raiz: string): void {
   const idiomas = IDIOMAS.filter((i) => TEXTOS[i] && leerFuentes(raiz, i));
   const salida = new Map<string, string>();
   const urls: { ruta: string; lastmod: string; alternos: Alternativa[] }[] = [];
+
+  // Las portadas (docs/index.html, docs/en/index.html…) se escriben a mano: su fecha es la de la última modificación
+  const portadas: Alternativa[] = IDIOMAS
+    .filter((i) => TEXTOS[i] && fs.existsSync(path.join(docs, rutaPortada(i), 'index.html')))
+    .map((i) => ({ idioma: i, nombre: TEXTOS[i]!.nombre, ruta: rutaPortada(i) }));
+  for (const a of portadas) {
+    const lastmod = fs.statSync(path.join(docs, a.ruta, 'index.html')).mtime.toISOString().slice(0, 10);
+    urls.push({ ruta: a.ruta, lastmod, alternos: portadas });
+  }
 
   const alternativas = (p: Pagina | null): Alternativa[] => idiomas
     .filter((i) => !p || completa(p, i))
@@ -433,6 +438,6 @@ export function generar(raiz: string): void {
     fs.mkdirSync(path.dirname(fichero), { recursive: true });
     fs.writeFileSync(fichero, html);
   }
-  fs.writeFileSync(ficheroSitemap, sitemap(viejoSitemap, urls));
-  console.log(`sitemap.xml: ${urls.length + 1} direcciones`);
+  fs.writeFileSync(ficheroSitemap, sitemap(urls));
+  console.log(`sitemap.xml: ${urls.length} direcciones`);
 }

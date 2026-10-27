@@ -6,6 +6,9 @@ import { esc } from './html';
 export const WEB = 'https://nicarayzon.github.io/plc-ladder-stl-simulator/';
 const REPO = 'https://github.com/Nicarayzon/plc-ladder-stl-simulator';
 
+/** Portada de cada idioma, relativa a la raíz de la web: la española está en la raíz y las otras en «en/» y «de/» */
+export const rutaPortada = (idioma: Idioma) => (idioma === 'es' ? '' : `${idioma}/`);
+
 export interface Alternativa {
   idioma: Idioma;
   nombre: string;
@@ -38,6 +41,7 @@ export function pagina(p: DatosPagina): string {
   const { t, raiz } = p;
   const url = WEB + p.ruta;
   const indice = `${raiz}${p.idioma}/${t.carpeta}/`;
+  const inicio = raiz + rutaPortada(p.idioma);
   const alternos = p.alternativas.map((a) => `  <link rel="alternate" hreflang="${a.idioma}" href="${WEB}${a.ruta}">`);
   const porDefecto = p.alternativas.find((a) => a.idioma === 'es');
   if (porDefecto) alternos.push(`  <link rel="alternate" hreflang="x-default" href="${WEB}${porDefecto.ruta}">`);
@@ -83,12 +87,12 @@ ${alternos.join('\n')}
 
   <header class="cabecera">
     <div class="contenedor cabecera-fila">
-      <a class="marca" href="${raiz}" aria-label="Automatizacion">
+      <a class="marca" href="${inicio}" aria-label="Automatizacion">
         <img src="${raiz}favicon.svg" alt="" width="30" height="30">
         <span>Automatizacion</span>
       </a>
       <nav class="menu" aria-label="${esc(t.teoria)}">
-        <a href="${raiz}">${esc(t.simulador)}</a>
+        <a href="${inicio}">${esc(t.simulador)}</a>
         <a href="${indice}" class="activo">${esc(t.teoria)}</a>
       </nav>
       <div class="cabecera-acciones">
@@ -100,7 +104,7 @@ ${alternos.join('\n')}
         <a class="boton-icono" href="${REPO}" aria-label="${esc(t.codigoGitHub)}">
           <svg class="icono"><use href="#i-github" /></svg>
         </a>
-        <a class="btn btn-primario btn-pequeno" href="${raiz}#descargar">${esc(t.descargar)}</a>
+        <a class="btn btn-primario btn-pequeno" href="${inicio}#descargar">${esc(t.descargar)}</a>
       </div>
     </div>
   </header>

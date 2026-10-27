@@ -2,7 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/"/>
+  </url>
+  <url>
+    <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/"/>
+  </url>
+  <url>
+    <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/</loc>
@@ -153,294 +170,294 @@
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/what-is-a-plc/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/what-is-a-plc/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/was-ist-eine-sps/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/scan-cycle/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/ciclo-de-scan/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/scan-cycle/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/sps-zyklus/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/memory-areas/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/areas-de-memoria/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/memory-areas/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/data-types/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/data-types/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/datentypen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/blocks-ob-fc-fb-db/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/blocks-ob-fc-fb-db/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-contacts-and-coils/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/kop-contactos-y-bobinas/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-contacts-and-coils/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/stl-rlo-and-bit-logic/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/stl-rlo-and-bit-logic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/latching-set-reset/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/enclavamiento-set-reset/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/latching-set-reset/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/selbsthaltung-setzen-ruecksetzen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/edge-detection/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/flancos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/edge-detection/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/timers/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/timers/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zeiten/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/counters/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/contadores/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/counters/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zaehler/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/clock-memory/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/marca-de-ciclo/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/clock-memory/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/taktmerker/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/sequences-grafcet/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/secuencias-grafcet/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/sequences-grafcet/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/ablaufsteuerung-grafcet/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/compare-and-arithmetic/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/comparacion-y-aritmetica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/compare-and-arithmetic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/conversions-and-word-logic/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/conversions-and-word-logic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/umwandlung-und-wortverknuepfung/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/jumps-and-loops/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/saltos-y-bucles/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/jumps-and-loops/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/spruenge-und-schleifen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/indirect-addressing-and-mcr/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/direccionamiento-indirecto-y-mcr/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/indirect-addressing-and-mcr/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-stl-equivalences/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/equivalencias-kop-awl/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-stl-equivalences/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-awl-entsprechungen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/solved-exercises/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/ejercicios-resueltos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/solved-exercises/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/geloeste-aufgaben/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/mnemonics-and-glossary/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/mnemonics-and-glossary/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/was-ist-eine-sps/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/que-es-un-plc/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/what-is-a-plc/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/was-ist-eine-sps/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/sps-zyklus/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/ciclo-de-scan/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/scan-cycle/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/sps-zyklus/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/areas-de-memoria/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/memory-areas/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/speicherbereiche/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/datentypen/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/tipos-de-datos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/data-types/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/datentypen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/blocks-ob-fc-fb-db/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/kop-contactos-y-bobinas/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-contacts-and-coils/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-kontakte-und-spulen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/awl-rlo-y-logica-de-bits/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/stl-rlo-and-bit-logic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/awl-vke-und-bitverknuepfung/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/selbsthaltung-setzen-ruecksetzen/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/enclavamiento-set-reset/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/latching-set-reset/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/selbsthaltung-setzen-ruecksetzen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/flancos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/edge-detection/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/flanken/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zeiten/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/temporizadores/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/timers/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zeiten/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zaehler/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/contadores/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/counters/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/zaehler/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/taktmerker/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/marca-de-ciclo/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/clock-memory/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/taktmerker/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/ablaufsteuerung-grafcet/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/secuencias-grafcet/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/sequences-grafcet/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/ablaufsteuerung-grafcet/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/comparacion-y-aritmetica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/compare-and-arithmetic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/vergleich-und-arithmetik/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/umwandlung-und-wortverknuepfung/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/conversiones-y-logica-de-palabras/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/conversions-and-word-logic/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/umwandlung-und-wortverknuepfung/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/spruenge-und-schleifen/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/saltos-y-bucles/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/jumps-and-loops/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/spruenge-und-schleifen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/direccionamiento-indirecto-y-mcr/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/indirect-addressing-and-mcr/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/indirekte-adressierung-und-mcr/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-awl-entsprechungen/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/equivalencias-kop-awl/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/ladder-stl-equivalences/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/kop-awl-entsprechungen/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/geloeste-aufgaben/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/ejercicios-resueltos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/solved-exercises/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/geloeste-aufgaben/"/>
   </url>
   <url>
     <loc>https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/nemotecnica-y-glosario/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/theory/mnemonics-and-glossary/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/mnemonik-und-glossar/"/>

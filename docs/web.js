@@ -1,4 +1,6 @@
 // Web de Automatizacion: descargas de la última release, capturas, demo KOP/AWL y tema.
+// La misma para las tres portadas (docs/index.html, docs/en/ y docs/de/): los textos salen del idioma de la página
+// (<html lang>) y las rutas, de data-raiz (la portada en español está en la raíz; las otras, una carpeta más abajo).
 
 const REPO = 'Nicarayzon/plc-ladder-stl-simulator';
 const API_ULTIMA = `https://api.github.com/repos/${REPO}/releases/latest`;
@@ -11,6 +13,42 @@ const FICHEROS = {
   'win-exe': /setup.*\.exe$/i,
   'win-zip': /win\.zip$/i,
 };
+
+const RAIZ = document.documentElement.dataset.raiz || '';
+
+const TEXTOS = {
+  es: {
+    locale: 'es-ES',
+    sinApi: 'Los botones llevan a la página de la última versión en GitHub.',
+    version: (v, f) => `Versión ${v} · publicada el ${f}`,
+    disponible: (v) => `Versión ${v} disponible`,
+    faltaCaptura: 'Falta la captura',
+    encendida: (op) => `${op} encendida`,
+    apagada: (op) => `${op} apagada`,
+    copiar: 'Copiar', copiado: 'Copiado', copiaMano: 'Cópialo a mano',
+  },
+  en: {
+    locale: 'en-US',
+    sinApi: 'The buttons take you to the page of the latest version on GitHub.',
+    version: (v, f) => `Version ${v} · released on ${f}`,
+    disponible: (v) => `Version ${v} available`,
+    faltaCaptura: 'Screenshot missing',
+    encendida: (op) => `${op} on`,
+    apagada: (op) => `${op} off`,
+    copiar: 'Copy', copiado: 'Copied', copiaMano: 'Copy it by hand',
+  },
+  de: {
+    locale: 'de-DE',
+    sinApi: 'Die Schaltflächen führen zur Seite der neuesten Version auf GitHub.',
+    version: (v, f) => `Version ${v} · veröffentlicht am ${f}`,
+    disponible: (v) => `Version ${v} verfügbar`,
+    faltaCaptura: 'Bildschirmfoto fehlt',
+    encendida: (op) => `${op} an`,
+    apagada: (op) => `${op} aus`,
+    copiar: 'Kopieren', copiado: 'Kopiert', copiaMano: 'Bitte von Hand kopieren',
+  },
+};
+const T = TEXTOS[document.documentElement.lang] || TEXTOS.es;
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const $$ = (sel, raiz = document) => [...raiz.querySelectorAll(sel)];
@@ -25,8 +63,8 @@ function sistema() {
   return null;
 }
 
-const mb = (bytes) => `${Math.round(bytes / 1048576).toLocaleString('es-ES')}\u00a0MB`;
-const fecha = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const mb = (bytes) => `${Math.round(bytes / 1048576).toLocaleString(T.locale)}\u00a0MB`;
+const fecha = (iso) => new Date(iso).toLocaleDateString(T.locale, { day: 'numeric', month: 'long', year: 'numeric' });
 
 async function ultimaRelease() {
   try {
@@ -49,7 +87,7 @@ async function prepararDescargas() {
     rel = await ultimaRelease();
   } catch (e) {
     // Sin API (límite de peticiones, sin conexión…): los botones ya llevan a la página de la última release
-    $('[data-rel="version"]').textContent = 'Los botones llevan a la página de la última versión en GitHub.';
+    $('[data-rel="version"]').textContent = T.sinApi;
     return;
   }
 
@@ -65,8 +103,8 @@ async function prepararDescargas() {
   }
 
   const version = rel.tag_name.replace(/^v/i, '');
-  $('[data-rel="version"]').textContent = `Versión ${version} · publicada el ${fecha(rel.published_at)}`;
-  $('[data-rel="pildora-texto"]').textContent = `Versión ${version} disponible`;
+  $('[data-rel="version"]').textContent = T.version(version, fecha(rel.published_at));
+  $('[data-rel="pildora-texto"]').textContent = T.disponible(version);
   $('[data-rel="notas"]').href = rel.html_url;
 }
 
@@ -83,10 +121,10 @@ function prepararCapturas() {
     if (img.getAttribute('width')) marco.style.width = `${img.getAttribute('width')}px`;
     let i = 0;
     const siguiente = () => {
-      if (i < EXTENSIONES.length) { img.src = `images/${fig.dataset.captura}.${EXTENSIONES[i++]}`; return; }
+      if (i < EXTENSIONES.length) { img.src = `${RAIZ}images/${fig.dataset.captura}.${EXTENSIONES[i++]}`; return; }
       const aviso = document.createElement('div');
       aviso.className = 'captura-vacia';
-      aviso.innerHTML = `<b>Falta la captura</b><code>images/${fig.dataset.captura}.png</code>`;
+      aviso.innerHTML = `<b>${T.faltaCaptura}</b><code>images/${fig.dataset.captura}.png</code>`;
       marco.append(aviso);
       marco.style.width = '';
       fig.classList.add('sin-imagen');
@@ -136,7 +174,9 @@ function prepararDemo() {
     }
     $$('.palanca', demo).forEach((b, i) => b.setAttribute('aria-checked', String(entradas[i])));
     $('#piloto').classList.toggle('on', rlo2);
-    $('#piloto-estado').textContent = rlo2 ? 'A 124.0 encendida' : 'A 124.0 apagada';
+    // el nombre de la salida, como lo rotula la página (A 124.0 o Q 124.0)
+    const salida = $('.salida .palanca-etiqueta', demo).textContent.trim();
+    $('#piloto-estado').textContent = rlo2 ? T.encendida(salida) : T.apagada(salida);
   };
 
   $$('.palanca', demo).forEach((b, i) => {
@@ -178,11 +218,11 @@ function prepararCopiar() {
     b.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(document.getElementById(b.dataset.copiar).textContent);
-        b.textContent = 'Copiado';
+        b.textContent = T.copiado;
       } catch (e) {
-        b.textContent = 'Cópialo a mano';
+        b.textContent = T.copiaMano;
       }
-      setTimeout(() => { b.textContent = 'Copiar'; }, 1800);
+      setTimeout(() => { b.textContent = T.copiar; }, 1800);
     });
   }
 }

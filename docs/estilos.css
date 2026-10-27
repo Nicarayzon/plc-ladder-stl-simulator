@@ -181,11 +181,12 @@ kbd {
   display: inline-flex; align-items: center; gap: 10px;
   color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: -0.01em;
 }
+.marca { flex-shrink: 0; }
 .marca img { display: block; }
 
 .menu { display: flex; gap: 4px; margin-left: 12px; }
 .menu a {
-  padding: 6px 12px; border-radius: 8px;
+  padding: 6px 10px; border-radius: 8px; white-space: nowrap;
   color: var(--text-dim); text-decoration: none; font-size: 0.93rem; font-weight: 500;
 }
 .menu a:hover { color: var(--text); background: var(--bg-elev2); }
@@ -193,8 +194,23 @@ kbd {
 .cabecera-acciones { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .cabecera-acciones .btn { margin-left: 6px; }
 
+/* selector de idioma (portada y teoría) */
+.idiomas { display: flex; gap: 2px; padding: 3px; margin-right: 4px; border: 1px solid var(--border); border-radius: 10px; }
+.idiomas a {
+  padding: 3px 8px; border-radius: 7px;
+  font: 600 0.75rem/1.4 var(--mono); color: var(--text-dim); text-decoration: none;
+}
+.idiomas a:hover { color: var(--text); background: var(--bg-elev2); }
+.idiomas a[aria-current] { color: var(--accent); background: var(--accent-bg); }
+
 @media (max-width: 860px) { .menu { display: none; } }
-@media (max-width: 420px) { .marca span { display: none; } }
+/* la portada tiene seis enlaces (y en alemán son largos): primero se quitan los menos importantes y luego el menú */
+@media (max-width: 1139px) { .menu .menu-extra { display: none; } }
+@media (max-width: 1000px) { .menu-portada { display: none; } }
+/* en el móvil, con el selector de idioma no cabe todo: primero se quita el nombre y luego el icono de GitHub (está también en el pie) */
+@media (max-width: 560px) { .marca span { display: none; } }
+@media (max-width: 420px) { .cabecera-fila { gap: 12px; } .cabecera-acciones a.boton-icono { display: none; } }
+@media (max-width: 340px) { .cabecera-acciones .btn { display: none; } }
 
 /* ───────── Portada ───────── */
 
