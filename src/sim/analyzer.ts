@@ -18,7 +18,7 @@ export interface Signal {
 
 export interface Marker { t: number; label: string }
 
-const COLORS = ['#3ddc84', '#5aa0e6', '#f2b84b', '#e2667a', '#b48cf2', '#4fd1c5', '#f08a4b', '#9bd35a', '#e57ad6', '#8fa3bf'];
+export const COLORS = ['#3ddc84', '#5aa0e6', '#f2b84b', '#e2667a', '#b48cf2', '#4fd1c5', '#f08a4b', '#9bd35a', '#e57ad6', '#8fa3bf'];
 
 export class AnalyzerBuffer {
   cap: number;

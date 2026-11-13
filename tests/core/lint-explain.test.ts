@@ -22,6 +22,27 @@ describe('avisos didácticos', () => {
     expect(ids('U E 0.0\nUN E 0.1\n= A 4.0', ['E0.1'])).toContain('L08');
     expect(ids('L MW 0\nSIG: T MW 2\nL MW 2\nLOOP SIG')).toContain('L09');
   });
+  it('L07: palabras que se pisan en cualquier zona (cada palabra ocupa 2 bytes), con la dirección libre', () => {
+    const avisos = (awl: string) => {
+      const p = programFromAwl(awl, 'x');
+      return lintProgram(p, compileProgram(p)).filter((i) => i.msg.startsWith('L07')).map((i) => i.msg);
+    };
+    // el programa del usuario: PEW 128 y PEW 129 comparten el byte 129, y PAW 128 y PAW 129 también
+    expect(avisos('L PEW 128\nT PAW 128\nT MW 100\nL PEW 129\nT PAW 129')).toEqual([
+      'L07: PAW 128 y PAW 129 se solapan: comparten el byte 129. Cada palabra ocupa 2 bytes (y una doble palabra, 4): usa PAW 130 para que no se pisen.',
+      'L07: PEW 128 y PEW 129 se solapan: comparten el byte 129. Cada palabra ocupa 2 bytes (y una doble palabra, 4): usa PEW 130 para que no se pisen.',
+    ]);
+    // de dos en dos bytes, bien; entradas y salidas son zonas distintas
+    expect(avisos('L PEW 128\nT PAW 128\nL PEW 130\nT PAW 130')).toEqual([]);
+    expect(avisos('L PEW 128\nT PAW 129')).toEqual([]);
+    // dobles palabras y bloques de datos (cada DB por separado)
+    expect(avisos('L MD 100\nT MW 102')).toEqual([
+      'L07: MD 100 y MW 102 se solapan: comparten los bytes 102 y 103. Cada palabra ocupa 2 bytes (y una doble palabra, 4): usa MW 104 para que no se pisen.',
+    ]);
+    expect(avisos('L DB1.DBW 0\nT DB1.DBW 1')).toHaveLength(1);
+    expect(avisos('L DB1.DBW 0\nT DB2.DBW 1')).toEqual([]);
+  });
+
   it('las soluciones del banco no dan avisos salvo los intencionados', () => {
     const intended: Record<string, string[]> = { E09: ['L01'], Q04: ['L02'], Q06: ['L07'], Q10: ['L05'], Q12: ['L01'] };
     for (const e of (banco as any).ejercicios.filter((x: any) => x.awl)) {

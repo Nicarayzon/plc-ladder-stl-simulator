@@ -1,0 +1,134 @@
+/* ───────── Acabado (0.34.0) ─────────
+   Detalles de aspecto que valen para todos los temas: relieve de botones y tarjetas, la sección abierta de la barra
+   lateral, pilotos e interruptores con brillo, avisos de foco y la entrada de ventanas y menús.
+   Solo usa las variables de color de theme.css/paletas.ts, así que no hay que tocarlo al añadir un tema.
+   No cambia tamaños ni posiciones (nada se desplaza al pasar el ratón) y no hay animaciones continuas:
+   solo transiciones cortas al pasar el ratón, al pulsar y al abrir una ventana. */
+
+/* sombras y brillo según el fondo: oscuro (por defecto) o claro */
+:root {
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sombra-2: 0 6px 18px rgba(0, 0, 0, 0.38);
+  --brillo: rgba(255, 255, 255, 0.055);
+  --t: 0.14s ease;
+}
+:root[data-theme='light'] {
+  --sombra-1: 0 1px 2px rgba(20, 30, 50, 0.09);
+  --sombra-2: 0 6px 18px rgba(20, 30, 50, 0.13);
+  --brillo: rgba(255, 255, 255, 0.75);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --sombra-1: 0 1px 2px rgba(20, 30, 50, 0.09);
+    --sombra-2: 0 6px 18px rgba(20, 30, 50, 0.13);
+    --brillo: rgba(255, 255, 255, 0.75);
+  }
+}
+
+::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); }
+::-webkit-scrollbar-thumb:hover { background-color: var(--text-faint); }
+input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
+
+/* ───────── botones y campos ───────── */
+.btn { box-shadow: var(--sombra-1), inset 0 1px 0 var(--brillo); transition: box-shadow var(--t), transform 0.06s ease; }
+.btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong)); }
+.btn:active:not(:disabled) { transform: translateY(0.5px); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18); }
+.btn:disabled, .btn.ghost { box-shadow: none; }
+.btn.ghost:hover:not(:disabled) { border-color: transparent; }
+.panel-sec .io-accion:hover:not(:disabled), .wb-toolbar .abrir-proyectos:hover:not(:disabled) { border-color: var(--accent); }
+.btn.primary { box-shadow: var(--sombra-1), 0 2px 10px color-mix(in srgb, var(--accent) 34%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.btn.primary:hover:not(:disabled) { border-color: var(--accent); }
+.btn.primary:disabled { box-shadow: none; }
+.btn.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+/* en un grupo, el relieve es del grupo entero */
+.btn-group { border-radius: 6px; box-shadow: var(--sombra-1); }
+.btn-group .btn { box-shadow: inset 0 1px 0 var(--brillo); }
+.btn-group .btn:hover:not(:disabled), .btn-group .btn.active { position: relative; z-index: 1; }
+.btn-group .btn.active { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.input { transition: box-shadow var(--t); }
+.input:focus, .input.desplegable:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.input.error:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 22%, transparent); }
+.kbd { background: var(--bg-elev); }
+
+/* ───────── barra lateral ───────── */
+.nav-item { position: relative; }
+.nav-item.active { font-weight: 600; }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 7px; bottom: 7px; width: 3px; border-radius: 0 2px 2px 0; background: var(--accent); }
+.nav-item.active svg { color: var(--accent); opacity: 1; }
+.nav-item.toc-item.active::before { top: 5px; bottom: 5px; }
+.brand img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)); }
+
+/* ───────── páginas, tarjetas y pestañas ───────── */
+.page h1 { letter-spacing: -0.015em; }
+.card, .tile { box-shadow: var(--sombra-1); }
+.tile { transition: box-shadow var(--t), border-color var(--t); }
+.tile:hover { box-shadow: var(--sombra-2); }
+.tab { transition: color var(--t); }
+.list-row .id { transition: none; }
+.badge.accent { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* ───────── ventanas, menús y avisos ───────── */
+.modal-back { backdrop-filter: blur(3px); animation: acabado-aparecer 0.12s ease-out; }
+.modal { border-radius: 12px; animation: acabado-subir 0.16s cubic-bezier(0.2, 0.8, 0.3, 1); }
+.menu { animation: acabado-aparecer 0.09s ease-out; }
+.menu button:hover, .menu button.open { background: var(--accent-bg); }
+.toast { animation: acabado-aviso 0.18s cubic-bezier(0.2, 0.8, 0.3, 1); border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong)); }
+@keyframes acabado-aparecer { from { opacity: 0; } }
+@keyframes acabado-subir { from { opacity: 0; transform: translateY(8px) scale(0.985); } }
+@keyframes acabado-aviso { from { opacity: 0; transform: translate(-50%, 8px); } }
+
+/* ───────── simulador ───────── */
+.run-switch { box-shadow: var(--sombra-1); }
+.run-switch button.on { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.14); }
+.seg { box-shadow: var(--sombra-1); transition: box-shadow var(--t), border-color var(--t); }
+.seg.focused { box-shadow: var(--sombra-1), 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent); }
+.seg.has-error.focused { box-shadow: var(--sombra-1), 0 0 0 3px color-mix(in srgb, var(--err) 13%, transparent); }
+.lang-badge { box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 28%, transparent); }
+/* franja de estado y avisos: una marca del color del estado a la izquierda (la altura no cambia) */
+.load-status, .stop-banner, .info-banner { box-shadow: inset 3px 0 0 currentColor; }
+.block-tab.active { box-shadow: inset 0 2px 0 var(--accent); }
+.vatf { box-shadow: var(--sombra-2), 0 14px 44px rgba(0, 0, 0, 0.3); }
+
+/* explorador: el bloque abierto, con la marca del acento */
+.ex-block.cur { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* LED de estado (RUN, STOP, SF, FRCE): con un punto de brillo, como una lente */
+.led.on, .lamp.on .lamp-led { background-image: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0) 46%); }
+.led:not(.on), .lamp:not(.on) .lamp-led { background-image: radial-gradient(circle at 34% 30%, var(--brillo) 0, transparent 55%); }
+
+/* salidas: el piloto encendido lleva un halo y su tarjeta, un poco de su color */
+.lamp, .io-out, .io-in, .sw { transition: box-shadow var(--t), border-color var(--t); }
+.lamp { box-shadow: var(--sombra-1); }
+.lamp.on { background: color-mix(in srgb, var(--power) 9%, var(--bg-elev)); }
+.lamp-led { box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+.lamp.on .lamp-led { box-shadow: 0 0 0 3px color-mix(in srgb, var(--power) 22%, transparent), 0 0 10px var(--power); }
+
+/* entradas: interruptores con carril hundido y mando con relieve */
+.sw { box-shadow: var(--sombra-1), inset 0 1px 0 var(--brillo); }
+.sw:hover, .io-in:hover { box-shadow: var(--sombra-1), 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); }
+.sw.on { box-shadow: var(--sombra-1), inset 0 0 0 1px color-mix(in srgb, var(--power) 30%, transparent); }
+.sw-body { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.sw.on .sw-body { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 8px color-mix(in srgb, var(--power) 55%, transparent); }
+.sw-knob { background: linear-gradient(#ffffff, #dde2e8); }
+
+/* indicador de tensión */
+.volt { box-shadow: var(--sombra-1); }
+.stw .bit { box-shadow: inset 0 0 0 1px var(--border); }
+.stw .bit.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--power) 55%, transparent); }
+
+/* ───────── pantalla Temas ───────── */
+.temas-pagina h2 { display: flex; align-items: center; gap: 8px; }
+.temas-pagina h2::before { content: ''; flex: none; width: 3px; height: 15px; border-radius: 2px; background: var(--accent); }
+.temas-pagina h2 .cuenta { font-size: 11px; font-weight: 600; color: var(--text-dim); background: var(--bg-elev3); border-radius: 9px; padding: 1px 7px; }
+.tema-card, .papel-card { box-shadow: var(--sombra-1); transition: box-shadow var(--t), border-color var(--t); }
+.tema-card:hover, .papel-card:hover { box-shadow: var(--sombra-2); border-color: color-mix(in srgb, var(--accent) 50%, var(--border-strong)); }
+.tema-card.activo, .papel-card.visto { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent); }
+/* los colores del tema, en tres puntos junto al nombre */
+.tema-muestras { display: inline-flex; gap: 3px; flex: none; }
+.tema-muestras i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18); }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-back, .modal, .menu, .toast { animation: none; }
+  .btn, .input, .seg, .tile, .lamp, .io-out, .io-in, .sw, .tema-card, .papel-card { transition: none; }
+}

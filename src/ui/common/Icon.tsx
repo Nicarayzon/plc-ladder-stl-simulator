@@ -64,6 +64,8 @@ const P: Record<string, string> = {
   rayo: 'M3 19l5-7 4 3 6-9M14 6h4v4',
   rayo1: 'M2 16l4-5 3 2 5-7M11 6h3v3M19 16l2-1.5V22',
   forzado: 'M5 20 11 4M10 20l6-16M15 20l6-16',
+  paleta: 'M12 22a10 10 0 1 1 10-10c0 2.6-2 3.6-4 3.6h-2.2a1.9 1.9 0 0 0-1.4 3.2A1.9 1.9 0 0 1 12 22zM7.5 12h.01M9.5 7.5h.01M14.5 7.5h.01M17 11.5h.01',
+  papel: 'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',
 };
 
 export function Icon({ name, size = 16, stroke = 1.8, className, title }: { name: keyof typeof P | string; size?: number; stroke?: number; className?: string; title?: string }) {

@@ -150,6 +150,60 @@ function prepararCapturas() {
   visor.addEventListener('click', () => visor.close());
 }
 
+// ───────── Carrusel de temas: una captura cada vez; botones, puntos, flechas del teclado o deslizar ─────────
+// Los nombres de los temas salen de data-nombre de cada diapositiva (así van en el idioma de la página).
+
+function prepararCarrusel() {
+  for (const car of $$('[data-carrusel]')) {
+    const diapos = $$('.carrusel-diapo', car);
+    if (!diapos.length) continue;
+    const nombre = $('[data-rel="carrusel-nombre"]', car);
+    const cuenta = $('[data-rel="carrusel-cuenta"]', car);
+    let actual = 0;
+    const puntos = diapos.map((d, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'carrusel-punto';
+      b.setAttribute('aria-label', d.dataset.nombre);
+      b.addEventListener('click', () => ir(i));
+      $('.carrusel-puntos', car).append(b);
+      return b;
+    });
+    const ir = (i) => {
+      actual = (i + diapos.length) % diapos.length;
+      diapos.forEach((d, k) => { d.hidden = k !== actual; });
+      puntos.forEach((b, k) => b.setAttribute('aria-current', String(k === actual)));
+      nombre.textContent = diapos[actual].dataset.nombre;
+      cuenta.textContent = `${actual + 1} / ${diapos.length}`;
+    };
+    for (const b of $$('[data-paso]', car)) b.addEventListener('click', () => ir(actual + Number(b.dataset.paso)));
+    car.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowLeft') ir(actual - 1);
+      else if (ev.key === 'ArrowRight') ir(actual + 1);
+      else return;
+      ev.preventDefault();
+    });
+    // deslizar con el dedo; si se ha deslizado, ese toque no abre la captura en grande
+    let x0 = null;
+    let deslizado = false;
+    car.addEventListener('pointerdown', (ev) => { x0 = ev.pointerType === 'mouse' ? null : ev.clientX; deslizado = false; });
+    car.addEventListener('pointerup', (ev) => {
+      if (x0 === null) return;
+      const dx = ev.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 40) { deslizado = true; ir(actual + (dx < 0 ? 1 : -1)); }
+    });
+    car.addEventListener('click', (ev) => { if (deslizado) { ev.stopPropagation(); deslizado = false; } }, true);
+    // las capturas ocultas no se cargan solas (loading="lazy"): se piden al acercarse al carrusel, para que no tarde al pasar
+    new IntersectionObserver((entradas, obs) => {
+      if (!entradas.some((e) => e.isIntersecting)) return;
+      for (const img of $$('img', car)) img.loading = 'eager';
+      obs.disconnect();
+    }, { rootMargin: '600px' }).observe(car);
+    ir(0);
+  }
+}
+
 // ───────── Demo: U E 124.0 / UN E 124.1 / = A 124.0 ─────────
 
 function prepararDemo() {
@@ -228,6 +282,7 @@ function prepararCopiar() {
 }
 
 prepararCapturas();
+prepararCarrusel();
 prepararDemo();
 prepararTema();
 prepararCopiar();

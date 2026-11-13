@@ -60,7 +60,7 @@ export function AprenderScreen({ cap }: { cap?: string }) {
         ))}
       </aside>
       <div ref={content} style={{ flex: 1, overflowY: 'auto', padding: '26px 40px 60px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        <div className="lectura" style={{ maxWidth: 900, margin: '0 auto' }}>
           <Markdown text={c.md} onTry={(code) => setProbar(code)} />
           <div className="row" style={{ marginTop: 30 }}>
             {idx > 0 && <button className="btn" onClick={() => go(`aprender/${CAPS[idx - 1].n}`)}><Icon name="left" size={14} />{CAPS[idx - 1].titulo}</button>}

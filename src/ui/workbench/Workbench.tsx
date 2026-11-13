@@ -185,6 +185,20 @@ export function Workbench(props: WorkbenchProps) {
   const symByAddr = useMemo(() => symbolsByAddr(programa), [programa.simbolos]); // eslint-disable-line react-hooks/exhaustive-deps
   const symbolNames = useMemo(() => programa.simbolos.map((s) => s.nombre).filter(Boolean), [programa.simbolos]);
   const warnings: ProgramIssue[] = useMemo(() => [...sim.compiled.warnings, ...(sim.compiled.cp ? lintProgram(programa, sim.compiled, { ncInputs: props.ncInputs }) : [])], [sim.compiled, programa, props.ncInputs]);
+  // los avisos de cada segmento, para subrayarlos en su editor; la misma lista mientras no cambien,
+  // para que los demás segmentos no se repinten con cada tecla (SegmentCard es memo)
+  const avisosCache = useRef(new Map<string, ProgramIssue[]>());
+  const avisosDe = useMemo(() => {
+    const nuevos = new Map<string, ProgramIssue[]>();
+    for (const w of warnings) if (w.seg && w.line > 0) nuevos.set(w.seg, [...(nuevos.get(w.seg) ?? []), w]);
+    const out = new Map<string, ProgramIssue[]>();
+    for (const [k, lista] of nuevos) {
+      const prev = avisosCache.current.get(k);
+      out.set(k, prev && prev.length === lista.length && prev.every((p, i) => p.line === lista[i].line && p.msg === lista[i].msg) ? prev : lista);
+    }
+    avisosCache.current = out;
+    return out;
+  }, [warnings]);
 
   const segOps = (s: Segmento) => {
     const id = segId(s);
@@ -314,7 +328,7 @@ export function Workbench(props: WorkbenchProps) {
             {blk?.segmentos.map((s, i) => (
               <SegmentCard key={segId(s)} sim={sim} block={block} seg={s} index={i} total={blk.segmentos.length} observe={observe && sim.cpu.state === 'RUN'}
                 readOnly={readOnly} lang={nemo} symbols={symbolNames} symByAddr={symByAddr} focused={focusSeg === segId(s)} onFocus={() => setFocusSeg(segId(s))}
-                onChange={(ns) => change(ops.updateSegment(programa, block, segId(s), () => ns), ns.lang === 'KOP')} ops={segOps(s)} />
+                onChange={(ns) => change(ops.updateSegment(programa, block, segId(s), () => ns), ns.lang === 'KOP')} ops={segOps(s)} avisos={avisosDe.get(segId(s))} />
             ))}
             {!readOnly && blk && (
               <div className="add-seg">

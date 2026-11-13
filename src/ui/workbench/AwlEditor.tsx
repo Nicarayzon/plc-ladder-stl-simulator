@@ -8,6 +8,8 @@ import { linter, setDiagnostics, type Diagnostic } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 import { awlCompletion, awlStream } from './awlLang';
 import { T } from '../../i18n';
+import { useSettings } from '../../store/settings';
+import { LETRA_AWL } from './zoomAwl';
 
 export interface ObsLine { line: number; cells: string[]; dim: boolean; count: number }
 /** Valor en vivo de un operando, mostrado justo detrás del código de la línea */
@@ -210,9 +212,10 @@ export function AwlEditor(props: Props) {
         if (u.docChanged) propsRef.current.onChange?.(u.state.doc.toString());
         if (u.focusChanged && u.view.hasFocus) propsRef.current.onFocus?.();
       }),
+      // la letra va con el zoom del AWL (Ajustes; variable --awl-zoom en <html>); la altura mínima, en em para que crezca con ella
       EditorView.theme({
-        '&': { fontSize: '13px' },
-        '.cm-content': { fontFamily: 'var(--mono)', minHeight: `${(props.minLines ?? 3) * 19}px` },
+        '&': { fontSize: `calc(${LETRA_AWL}px * var(--awl-zoom, 1))` },
+        '.cm-content': { fontFamily: 'var(--mono)', minHeight: `${((props.minLines ?? 3) * 19) / LETRA_AWL}em` },
       }),
     ];
     const v = new EditorView({ parent: host.current!, state: EditorState.create({ doc: props.value, extensions: exts }) });
@@ -257,6 +260,10 @@ export function AwlEditor(props: Props) {
   useEffect(() => {
     view.current?.dispatch({ effects: setBps.of(new Set(props.breakpoints ?? [])) });
   }, [props.breakpoints]);
+
+  // al cambiar el zoom, el editor vuelve a medir la altura de las líneas
+  const zoom = useSettings((s) => s.awlZoom);
+  useEffect(() => { view.current?.requestMeasure(); }, [zoom]);
 
   return <div ref={host} className={`awl-editor${props.observe ? ' observing' : ''}`} style={props.observe ? ({ '--obs-w': `${props.observeWidth ?? 300}px` } as React.CSSProperties) : undefined} />;
 }

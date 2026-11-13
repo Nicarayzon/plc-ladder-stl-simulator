@@ -461,6 +461,35 @@ kbd {
   background: var(--power); box-shadow: 0 0 0 3px color-mix(in srgb, var(--power) 22%, transparent);
 }
 
+/* ───────── Temas (novedad): carrusel con el simulador en otros temas ───────── */
+
+.carrusel-temas { margin-top: clamp(72px, 9vw, 120px); text-align: center; }
+.carrusel-titulo { font-size: clamp(1.4rem, 2.4vw, 1.8rem); font-weight: 700; margin-bottom: 28px; }
+.carrusel { border-radius: var(--radius); }
+.carrusel:focus-visible { outline-offset: 8px; }
+.carrusel-diapo[hidden] { display: none; }
+/* debajo de la imagen: anterior · nombre del tema y número · siguiente */
+.carrusel-mandos { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 20px; }
+.carrusel-btn {
+  display: inline-grid; place-items: center; flex: none;
+  width: 46px; height: 46px; padding: 0;
+  border: 1px solid var(--border-strong); border-radius: 50%;
+  background: var(--bg-elev2); color: var(--text); cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s;
+}
+.carrusel-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.carrusel-btn .icono { width: 20px; height: 20px; }
+.carrusel-ant .icono { transform: scaleX(-1); }
+.carrusel-nombre { display: grid; gap: 2px; min-width: 9.5em; margin: 0; }
+.carrusel-nombre b { font-size: 1.05rem; }
+.carrusel-nombre span { color: var(--text-faint); font: 0.82rem var(--mono); }
+.carrusel-puntos { display: flex; justify-content: center; gap: 2px; margin-top: 10px; }
+.carrusel-punto { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; background: none; cursor: pointer; }
+.carrusel-punto::before { content: ''; width: 9px; height: 9px; border-radius: 999px; background: var(--border-strong); transition: width 0.2s, background 0.2s; }
+.carrusel-punto:hover::before { background: var(--text-faint); }
+.carrusel-punto[aria-current='true']::before { width: 22px; background: var(--accent); }
+.carrusel-mas { margin-top: 30px; font-size: clamp(1.1rem, 1.8vw, 1.3rem); font-weight: 650; }
+
 /* ───────── Usos ───────── */
 
 .usos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
@@ -518,6 +547,8 @@ kbd {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
   margin-top: 30px; color: var(--text-faint); font-size: 0.93rem;
 }
+/* aviso de que la descarga oficial es solo esta (licencia PolyForm Strict: nadie puede redistribuirla) */
+.descarga-oficial { margin-top: 10px; text-align: center; color: var(--text-faint); font-size: 0.88rem; }
 
 /* ───────── Preguntas ───────── */
 

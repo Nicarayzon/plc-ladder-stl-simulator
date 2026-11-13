@@ -41,15 +41,19 @@ export function prepararDocumento(w: Window, titulo: string, rootId: string): ()
   const root = doc.createElement('div');
   root.id = rootId;
   doc.body.appendChild(root);
-  // tema claro/oscuro: el mismo atributo que la principal, también si cambia después
+  // tema claro/oscuro y paleta (Temas ▸ Básicos): los mismos atributos que la principal, también si cambian después.
+  // El papel de fondo no hace falta: en estas ventanas todo son paneles.
+  const ATRIBUTOS = ['data-theme', 'data-paleta'];
   const copiarTema = () => {
-    const t = document.documentElement.getAttribute('data-theme');
-    if (t) doc.documentElement.setAttribute('data-theme', t);
-    else doc.documentElement.removeAttribute('data-theme');
+    for (const a of ATRIBUTOS) {
+      const t = document.documentElement.getAttribute(a);
+      if (t) doc.documentElement.setAttribute(a, t);
+      else doc.documentElement.removeAttribute(a);
+    }
   };
   copiarTema();
   const mo = new MutationObserver(copiarTema);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ATRIBUTOS });
   // teclas 1–8 (y Mayús) con esta ventana delante: las atiende la principal, salvo que las use la propia ventana
   const reenviar = (e: KeyboardEvent) => {
     if (e.defaultPrevented) return;

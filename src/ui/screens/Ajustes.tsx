@@ -1,9 +1,9 @@
-import { useSettings, type Settings, type Theme } from '../../store/settings';
+import { useSettings, type Settings } from '../../store/settings';
 import { T } from '../../i18n';
 import { Desplegable } from '../common/ui';
 import { SelectorIdioma } from '../common/idioma';
+import { ZOOM_AWL, limitarZoomAwl } from '../workbench/zoomAwl';
 
-const TEMAS: { value: Theme; label: string }[] = (['system', 'dark', 'light'] as const).map((value) => ({ value, label: T.ajustes.temas[value] }));
 const NEMOTECNIAS: { value: Settings['nemotecnia']; label: string }[] = (['de', 'en'] as const).map((value) => ({ value, label: T.ajustes.nemotecnias[value] }));
 const CLIC_ENTRADA: { value: Settings['entradaClic']; label: string }[] = (['NA', 'INT'] as const).map((value) => ({ value, label: T.ajustes.clicEntradas[value] }));
 
@@ -15,9 +15,6 @@ export function AjustesScreen() {
       <h1>{T.ajustes.titulo}</h1>
       <div className="card card-pad col" style={{ gap: 16 }}>
         <SelectorIdioma />
-        <div className="row">{T.ajustes.tema}
-          <Desplegable value={s.theme} options={TEMAS} onChange={(theme) => s.set({ theme })} aria-label={T.ajustes.tema} />
-        </div>
         <div className="row">{T.ajustes.nemotecnia}
           <Desplegable value={s.nemotecnia} options={NEMOTECNIAS} onChange={(nemotecnia) => s.set({ nemotecnia })} aria-label={T.ajustes.nemotecnia} />
         </div>
@@ -44,6 +41,9 @@ export function AjustesScreen() {
         <label className="check"><input type="checkbox" checked={s.teclasEntradas} onChange={(e) => s.set({ teclasEntradas: e.target.checked })} />{T.ajustes.teclas}</label>
         <label className="row">{T.ajustes.zoomKop}
           <input type="range" min={0.6} max={1.6} step={0.1} value={s.kopZoom} onChange={(e) => s.set({ kopZoom: +e.target.value })} /> {Math.round(s.kopZoom * 100)} %
+        </label>
+        <label className="row">{T.ajustes.zoomAwl}
+          <input type="range" min={ZOOM_AWL.min} max={ZOOM_AWL.max} step={ZOOM_AWL.paso} value={limitarZoomAwl(s.awlZoom)} onChange={(e) => s.set({ awlZoom: limitarZoomAwl(+e.target.value) })} /> {Math.round(limitarZoomAwl(s.awlZoom) * 100)} %
         </label>
       </div>
     </div></div>

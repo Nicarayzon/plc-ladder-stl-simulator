@@ -6,12 +6,12 @@
 
 <p align="center">
   <b>Simulador de PLC gratuito para aprender a programar autómatas en KOP (Ladder) y AWL (STL).</b><br>
-  Para macOS, Windows y Linux (con Wine). En español, inglés y alemán. Sin hardware, sin licencias y sin conexión.
+  Para macOS, Windows y Linux (con Wine). En español, inglés y alemán. Sin hardware, sin pagar licencias y sin conexión.
 </p>
 
 <p align="center">
   <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest"><img alt="Última versión" src="https://img.shields.io/github/v/release/Nicarayzon/plc-ladder-stl-simulator?label=versi%C3%B3n"></a>
-  <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-blue">
+  <img alt="Licencia PolyForm Strict 1.0.0" src="https://img.shields.io/badge/licencia-PolyForm%20Strict%201.0.0-blue">
   <img alt="macOS · Windows · Linux (Wine)" src="https://img.shields.io/badge/plataformas-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux%20(Wine)-lightgrey">
 </p>
 
@@ -180,6 +180,13 @@ Hecho por **Adrian**, Ing. de Datos en Procesos Industriales ([@Nicarayzon](http
 
 ## Licencia
 
-[MIT](LICENSE) © 2026 Arzath.
+[PolyForm Strict 1.0.0](LICENSE) © 2026 Arzath.
+
+- **Puedes** usar la app gratis para cualquier fin no comercial (estudio personal, clases, centros educativos) y leer su código.
+- **No puedes** modificarla, hacer versiones propias, redistribuirla ni venderla sin permiso del autor.
+
+**Descarga oficial:** solo desde las [Releases](https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases) de este repositorio o desde la [web del proyecto](https://nicarayzon.github.io/plc-ladder-stl-simulator/). Cualquier otra copia no es oficial.
+
+Las bibliotecas de terceros que usa (React, CodeMirror…) conservan sus propias licencias.
 
 Proyecto educativo independiente, sin relación con ningún fabricante de autómatas.

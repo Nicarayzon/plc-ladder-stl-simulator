@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import type { SimController } from '../../sim/SimController';
 import { originKeyLine, originKeySeg } from '../../sim/SimController';
-import { segId, type Segmento } from '../../core/program';
+import { segId, type ProgramIssue, type Segmento } from '../../core/program';
 import { AwlEditor, type ObsLine, type EditorDiag, type OperandValue } from './AwlEditor';
 import { KopEditor } from '../../kop/editor/KopEditor';
 import { Icon } from '../common/Icon';
@@ -40,6 +40,8 @@ interface Props {
   ops: SegOps;
   focused: boolean;
   onFocus: () => void;
+  /** Avisos del programa (L07…): los de este segmento salen subrayados en el editor AWL */
+  avisos?: ProgramIssue[];
 }
 
 const hex = (v: number) => (v >>> 0).toString(16).toUpperCase().padStart(8, '0');
@@ -131,7 +133,7 @@ function calcValues(sim: SimController, operands: { line: number; pos: number; r
   });
 }
 
-function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, onFocus }: Props & { seg: Extract<Segmento, { lang: 'AWL' }> }) {
+function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, onFocus, avisos }: Props & { seg: Extract<Segmento, { lang: 'AWL' }> }) {
   const id = seg.id;
   const observeHex = useSettings((s) => s.observeHex);
   const observeExtra = useSettings((s) => s.observeExtra);
@@ -149,9 +151,12 @@ function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, 
       : { key, obs: null, values: null };
   }
   const { obs, values } = vista.current;
-  const diags: EditorDiag[] = useMemo(() => sim.compiled.errors.filter((e) => e.seg === id && e.line > 0).map((e) => ({ line: e.line, msg: e.msg, severity: 'error' as const })),
+  const diags: EditorDiag[] = useMemo(() => [
+    ...sim.compiled.errors.filter((e) => e.seg === id && e.line > 0).map((e) => ({ line: e.line, msg: e.msg, severity: 'error' as const })),
+    ...(avisos ?? []).filter((w) => w.seg === id && w.line > 0).map((w) => ({ line: w.line, msg: w.msg, severity: 'warning' as const })),
+  ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sim.compiled, id]);
+    [sim.compiled, id, avisos]);
   const bps = useMemo(() => {
     const set = new Set<number>();
     const pre = `${block}|${id}|L`;

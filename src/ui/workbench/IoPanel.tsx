@@ -11,6 +11,9 @@ import { bitOf, byteOf, firmaIo, marcasDe, type Marcas } from './ioFirma';
 import { displayOperand } from '../../core/translate';
 import { T } from '../../i18n';
 import { Rico } from '../common/Rico';
+import { Voltimetro } from './Voltimetro';
+import { PEW_MAX, emparejar, esPaw } from './analogica';
+import { Icon } from '../common/Icon';
 
 const TIPO_LABEL: Record<InputTipo, string> = T.io.tipoCorto;
 const TIPO_NAME: Record<InputTipo, string> = T.io.tipoNombre;
@@ -62,12 +65,34 @@ const FIXED_OUT = [124, 125].flatMap((b) => Array.from({ length: 8 }, (_, i) => 
 /** Marcas que usa el programa (se recalcula solo cuando cambia el programa) */
 const useMarcas = (sim: SimController) => useMemo(() => marcasDe(sim.usage), [sim.usage]);
 
-function MarcasSec({ sim, symByAddr, clockByte = null, marcas }: { sim: SimController; symByAddr: Map<string, string>; clockByte?: number | null; marcas: Marcas }) {
+const MARCAS_OCULTAS_KEY = 'automatizacion-marcas-ocultas';
+const SIN_MARCAS = marcasDe(null);
+
+/** Sección de marcas oculta (solo queda su título): se recuerda, y mientras está oculta no repinta el panel */
+function useMarcasOcultas(): [boolean, (v: boolean) => void] {
+  const [oculta, setOculta] = useState(() => { try { return localStorage.getItem(MARCAS_OCULTAS_KEY) === '1'; } catch { return false; } });
+  const poner = (v: boolean) => {
+    setOculta(v);
+    try { localStorage.setItem(MARCAS_OCULTAS_KEY, v ? '1' : '0'); } catch { /* sin almacenamiento */ }
+  };
+  return [oculta, poner];
+}
+
+function MarcasSec({ sim, symByAddr, clockByte = null, marcas, oculta, onOculta }: { sim: SimController; symByAddr: Map<string, string>; clockByte?: number | null; marcas: Marcas; oculta: boolean; onOculta: (v: boolean) => void }) {
   const cpu = sim.cpu;
   if (!marcas.bits.length && !marcas.words.length) return null;
+  const titulo = (
+    <h4>
+      {T.io.marcas} <span className="faint" style={{ textTransform: 'none', letterSpacing: 0 }}>{T.io.marcasNota}</span>
+      <button type="button" className="btn small io-accion marcas-plegar" onClick={() => onOculta(!oculta)} title={oculta ? T.io.mostrarMarcas : T.io.ocultarMarcas} aria-expanded={!oculta}>
+        <Icon name={oculta ? 'right' : 'down'} size={12} />{oculta ? T.io.mostrar : T.io.ocultar}
+      </button>
+    </h4>
+  );
+  if (oculta) return <div className="panel-sec marcas-sec oculta">{titulo}</div>;
   return (
-    <div className="panel-sec">
-      <h4>{T.io.marcas} <span className="faint" style={{ textTransform: 'none', letterSpacing: 0 }}>{T.io.marcasNota}</span></h4>
+    <div className="panel-sec marcas-sec">
+      {titulo}
       {/* una fila por byte de marcas (M 0, M 10, M 20…) con sus 8 bits, como las filas de E y A;
           en la de la marca de ciclo solo salen los bits que usa el programa, cada uno en su columna */}
       {[...new Set(marcas.bits.map(byteOf))].sort((a, b) => a - b).map((b) => {
@@ -176,8 +201,10 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
   }, [usage, symByAddr, hid]);
   const analog = useMemo(() => (usage ? analogInputs(usage) : []), [usage]);
   const words = useMemo(() => (usage ? outputWords(usage) : []), [usage]);
+  const { pares, sueltas } = useMemo(() => emparejar(analog, words.filter(esPaw)), [analog, words]);
   const marcas = useMarcas(sim);
-  useSimTick(sim, 20, () => firmaIo(sim, ins, outs, marcas, analog, words, clockByte ?? null));
+  const [marcasOcultas, setMarcasOcultas] = useMarcasOcultas();
+  useSimTick(sim, 20, () => firmaIo(sim, ins, outs, marcasOcultas ? SIN_MARCAS : marcas, analog, words, clockByte ?? null));
 
   const down = (k: string, shift: boolean, src: string) => {
     if (shift) {
@@ -249,7 +276,7 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
   return (
     <div>
       <div className="panel-sec">
-        <h4>{T.io.entradas} <span className="mono" style={{ textTransform: 'none' }}>{R.e}</span><span className="spacer" /><button className="btn small ghost" style={{ textTransform: 'none', letterSpacing: 0 }} onClick={() => sim.resetInputs(true)} title={T.io.bajarTodos}>{T.io.todasA0}</button></h4>
+        <h4>{T.io.entradas} <span className="mono" style={{ textTransform: 'none' }}>{R.e}</span><span className="spacer" /><button className="btn small io-accion" onClick={() => sim.resetInputs(true)} title={T.io.bajarTodos}><Icon name="refresh" size={12} stroke={2.2} />{T.io.todasA0}</button></h4>
         {bytesOf(ins).map(([b, keys]) => (
           <div key={b}>
             <div className="sw-cap">{R.e} {b}{b === 124 && teclas ? T.io.teclas18 : b === 125 ? T.io.conRaton : ''}</div>
@@ -275,11 +302,17 @@ function SwitchIo({ sim, symByAddr, onInputsChanged, hidden = [], extra = [], on
         {!outs.length && <div className="faint" style={{ fontSize: 12 }}>{T.io.sinSalidas}</div>}
         {quitadasOut.length > 0 && <button className="btn small ghost" onClick={() => onIoState?.({ hidden: hidden.filter((k) => !k.startsWith('A')) })} title={quitadasOut.join(', ')}>{T.io.mostrarSalidasQuitadas(quitadasOut.length)}</button>}
       </div>
-      <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} />
+      <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} oculta={marcasOcultas} onOculta={setMarcasOcultas} />
       {(analog.length > 0 || words.length > 0) && (
         <div className="panel-sec">
+          {/* cada PAW con su indicador y, justo debajo, su PEW; las PEW sin PAW, debajo del título */}
+          {pares.length > 0 && (
+            <div className="volts">
+              {pares.map(({ paw, pew }) => <Voltimetro key={paw} sim={sim} addr={paw}>{pew && <AnalogIn sim={sim} addr={pew} />}</Voltimetro>)}
+            </div>
+          )}
           <h4>{T.io.analogicas}</h4>
-          {analog.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
+          {sueltas.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
           {words.map((w) => <WordOut key={w} sim={sim} addr={w} />)}
         </div>
       )}
@@ -327,8 +360,10 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte, lang }: IoPanel
 
   const analog = useMemo(() => (usage ? analogInputs(usage) : []), [usage]);
   const words = useMemo(() => (usage ? outputWords(usage) : []), [usage]);
+  const { pares, sueltas } = useMemo(() => emparejar(analog, words.filter(esPaw)), [analog, words]);
   const marcas = useMarcas(sim);
-  useSimTick(sim, 20, () => firmaIo(sim, ins, outs, marcas, analog, words, clockByte ?? null));
+  const [marcasOcultas, setMarcasOcultas] = useMarcasOcultas();
+  useSimTick(sim, 20, () => firmaIo(sim, ins, outs, marcasOcultas ? SIN_MARCAS : marcas, analog, words, clockByte ?? null));
 
   // teclas 1–8 → bits 0–7 del primer byte de entradas
   useEffect(() => {
@@ -367,7 +402,7 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte, lang }: IoPanel
             <button className={`btn small ${modo === 'INT' ? 'active' : ''}`} title={T.io.interruptorClicTitulo}
               onClick={() => { setSettings({ entradaClic: 'INT' }); sim.resetInputs(); }}>{T.io.interruptor}</button>
           </div>
-          <button className="btn small ghost" onClick={() => sim.resetInputs(true)} title={T.io.reposoTitulo}>{T.io.todasA0}</button>
+          <button className="btn small io-accion" onClick={() => sim.resetInputs(true)} title={T.io.reposoTitulo}><Icon name="refresh" size={12} stroke={2.2} />{T.io.todasA0}</button>
         </div>
         <div className="faint" style={{ fontSize: 11, marginBottom: 6 }}>
           {modo === 'NA' ? T.io.mantenPulsado : T.io.cadaClic}
@@ -419,11 +454,17 @@ function ClassicIo({ sim, symByAddr, onInputsChanged, clockByte, lang }: IoPanel
           </div>
         ))}
       </div>
-      <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} />
+      <MarcasSec sim={sim} symByAddr={symByAddr} clockByte={clockByte} marcas={marcas} oculta={marcasOcultas} onOculta={setMarcasOcultas} />
       {(analog.length > 0 || words.length > 0) && (
         <div className="panel-sec">
+          {/* cada PAW con su indicador y, justo debajo, su PEW; las PEW sin PAW, debajo del título */}
+          {pares.length > 0 && (
+            <div className="volts">
+              {pares.map(({ paw, pew }) => <Voltimetro key={paw} sim={sim} addr={paw}>{pew && <AnalogIn sim={sim} addr={pew} />}</Voltimetro>)}
+            </div>
+          )}
           <h4>{T.io.analogicas}</h4>
-          {analog.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
+          {sueltas.map((a) => <AnalogIn key={a} sim={sim} addr={a} />)}
           {words.map((w) => <WordOut key={w} sim={sim} addr={w} />)}
         </div>
       )}
@@ -460,7 +501,7 @@ function AnalogIn({ sim, addr }: { sim: SimController; addr: string }) {
   return (
     <div className="analog">
       <span className="mono">{addr}</span>
-      <input type="range" min={0} max={32767} step={1} value={v} onChange={(e) => sim.setWord(addr, +e.target.value)} aria-label={addr} />
+      <input type="range" min={0} max={PEW_MAX} step={1} value={v} onChange={(e) => sim.setWord(addr, +e.target.value)} aria-label={addr} />
       <input className="input mono" style={{ height: 24, width: 64 }} value={v} onChange={(e) => { const n = parseInt(e.target.value, 10); if (Number.isFinite(n)) sim.setWord(addr, n & 0xFFFF); }} aria-label={T.io.valor(addr)} />
     </div>
   );
@@ -469,12 +510,15 @@ function AnalogIn({ sim, addr }: { sim: SimController; addr: string }) {
 function WordOut({ sim, addr }: { sim: SimController; addr: string }) {
   const r = useMemo(() => makeReader(addr), [addr]);
   const raw = readRaw(sim.cpu, r);
-  const isBcd = !Number.isNaN(raw) && [12, 8, 4, 0].every((s) => ((raw >> s) & 0xF) <= 9);
+  // Display de 7 segmentos (BCD): desactivado porque al usuario no le gusta. Para volver a ponerlo,
+  // descomenta estas dos líneas y quita el <span /> que ocupa su columna (estilos `.seven` en workbench.css).
+  // const isBcd = !Number.isNaN(raw) && [12, 8, 4, 0].every((s) => ((raw >> s) & 0xF) <= 9);
+  // {isBcd ? <span className="seven" title={T.io.display}>{raw.toString(16).padStart(4, '0')}</span> : <span />}
   return (
     <div className="analog">
       <span className="mono">{addr}</span>
       <span className="mono">{Number.isNaN(raw) ? '—' : `${s16(raw)} · W#16#${raw.toString(16).toUpperCase().padStart(4, '0')}`}</span>
-      {isBcd ? <span className="seven" title={T.io.display}>{raw.toString(16).padStart(4, '0')}</span> : <span />}
+      <span />
     </div>
   );
 }

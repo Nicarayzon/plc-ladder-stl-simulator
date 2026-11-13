@@ -5,6 +5,14 @@
   --bg-elev2: #20242a;
   --bg-elev3: #282d34;
   --bg-hover: #2a3038;
+  /* zonas: barra de arriba (RUN/STOP, Hardware…), panel de E/S, programa y explorador de proyectos (con sus filas y los nombres); los temas de color les dan más o menos color */
+  --zona-barra: #191c21;
+  --zona-es: #191c21;
+  --zona-prog: #121418;
+  --zona-proy: #1d2c3f;
+  --proy-hover: #2b394b;
+  --proy-sel: #253e5b;
+  --proy-nombre: #ffffff;
   --border: #2c3139;
   --border-strong: #3a414b;
   --text: #e6e9ee;
@@ -27,6 +35,11 @@
   --kop-sel: #f2b84b;
   --code-bg: #15181c;
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  /* botones RUN y STOP de la barra (rellenos: RUN verde, STOP rojo) */
+  --run-bg: #22c55e;
+  --run-text: #03200d;
+  --stop-bg: #dc2626;
+  --stop-text: #ffffff;
   --radius: 8px;
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
   --mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
@@ -40,6 +53,14 @@
     --bg-elev2: #eef1f5;
     --bg-elev3: #e3e8ee;
     --bg-hover: #e6ebf1;
+    /* zonas: barra de arriba (RUN/STOP, Hardware…), panel de E/S, programa y explorador de proyectos (con sus filas y los nombres); los temas de color les dan más o menos color */
+    --zona-barra: #ffffff;
+    --zona-es: #ffffff;
+    --zona-prog: #f3f5f8;
+    --zona-proy: #d2e0f2;
+    --proy-hover: #e2ebf7;
+    --proy-sel: #edf3fb;
+    --proy-nombre: #0b0c0e;
     --border: #d8dde4;
     --border-strong: #c3cad3;
     --text: #1b1f24;
@@ -62,6 +83,11 @@
     --kop-sel: #d48806;
     --code-bg: #f8f9fb;
     --shadow: 0 6px 24px rgba(20, 30, 50, 0.15);
+    /* botones RUN y STOP de la barra (rellenos: RUN verde, STOP rojo) */
+    --run-bg: #15803d;
+    --run-text: #ffffff;
+    --stop-bg: #c81e1e;
+    --stop-text: #ffffff;
   }
 }
 
@@ -72,6 +98,14 @@
   --bg-elev2: #eef1f5;
   --bg-elev3: #e3e8ee;
   --bg-hover: #e6ebf1;
+  /* zonas: barra de arriba (RUN/STOP, Hardware…), panel de E/S, programa y explorador de proyectos (con sus filas y los nombres); los temas de color les dan más o menos color */
+  --zona-barra: #ffffff;
+  --zona-es: #ffffff;
+  --zona-prog: #f3f5f8;
+  --zona-proy: #d2e0f2;
+  --proy-hover: #e2ebf7;
+  --proy-sel: #edf3fb;
+  --proy-nombre: #0b0c0e;
   --border: #d8dde4;
   --border-strong: #c3cad3;
   --text: #1b1f24;
@@ -94,6 +128,11 @@
   --kop-sel: #d48806;
   --code-bg: #f8f9fb;
   --shadow: 0 6px 24px rgba(20, 30, 50, 0.15);
+  /* botones RUN y STOP de la barra (rellenos: RUN verde, STOP rojo) */
+  --run-bg: #15803d;
+  --run-text: #ffffff;
+  --stop-bg: #c81e1e;
+  --stop-text: #ffffff;
 }
 
 * { box-sizing: border-box; }

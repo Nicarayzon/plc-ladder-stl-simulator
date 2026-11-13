@@ -1,0 +1,38 @@
+/* ───────── Temas: papel de fondo ───────── */
+/* capa fija detrás de todo (z-index -1 dentro de <html>): solo se ve donde no hay paneles */
+.papel-capa { position: fixed; inset: 0; z-index: -1; pointer-events: none; background-repeat: repeat; background-position: 0 0; }
+/* con papel, el fondo del simulador deja verlo entre los segmentos */
+:root[data-papel] .wb { background: transparent; }
+/* y el texto de las páginas va sobre una hoja lisa, para que se lea bien */
+:root[data-papel] .page-narrow, :root[data-papel] .lectura { background: var(--bg); border-radius: 10px; box-shadow: 0 0 0 20px var(--bg), 0 0 0 21px var(--border); }
+
+/* ───────── pantalla Temas ───────── */
+.temas-modo { margin: 2px 0 6px; }
+.temas-modo .btn { height: 30px; padding: 0 14px; }
+.temas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.tema-card, .papel-card { display: flex; flex-direction: column; gap: 6px; padding: 7px 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); cursor: pointer; text-align: left; color: var(--text); }
+.tema-card:hover, .papel-card:hover { border-color: var(--border-strong); }
+.tema-card.activo, .papel-card.visto { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.tema-card .row { padding: 2px 3px 0; min-height: 20px; }
+.tema-card b { font-size: 13px; }
+.tema-card .desc { font-size: 11.5px; color: var(--text-dim); padding: 0 3px; }
+.tema-mini { position: relative; display: block; aspect-ratio: 5 / 3; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+.tema-mini svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tema-mini svg.mitad { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.tema-mini.grande { border-radius: 8px; border-color: var(--border-strong); box-shadow: var(--shadow); }
+
+.papel-vista { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(230px, 1fr); gap: 20px; padding: 16px; margin-top: 14px; align-items: start; }
+@media (max-width: 980px) { .papel-vista { grid-template-columns: 1fr; } }
+.papel-ctrl { gap: 12px; }
+.papel-etiqueta { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
+.papel-nombre { font-size: 17px; margin-top: 2px; }
+.papel-campo { width: 84px; flex: none; }
+.papel-ctrl input[type='range'] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.papel-valor { width: 46px; text-align: right; flex: none; color: var(--text-dim); }
+.papel-fichero { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.papeles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 10px; }
+.papel-card { padding: 6px 6px 8px; }
+.papel-card .muestra { display: block; aspect-ratio: 4 / 3; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+.papel-card .muestra svg { width: 100%; height: 100%; display: block; }
+.papel-card .nombre { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 0 2px; }
+.papel-card .en-uso { color: var(--accent); flex: none; }

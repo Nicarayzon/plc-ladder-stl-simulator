@@ -9,6 +9,8 @@ import { fmtReal } from '../../core/format';
 import { inputBits, outputBits } from '../../core/usage';
 import { T } from '../../i18n';
 import { displayOperand } from '../../core/translate';
+import { usePaletaVisible } from '../temas/CapaPapel';
+import { colorSenal } from '../temas/paletas';
 
 const ROW = 34;
 const AXIS = 22;
@@ -49,7 +51,7 @@ function coloresDe(doc: Document): Colores {
     e = { oscuro: win.matchMedia('(prefers-color-scheme: dark)'), tema: '', c: null };
     coloresCache.set(doc, e);
   }
-  const tema = `${doc.documentElement.getAttribute('data-theme') ?? ''}|${e.oscuro.matches}`;
+  const tema = `${doc.documentElement.getAttribute('data-theme') ?? ''}|${doc.documentElement.getAttribute('data-paleta') ?? ''}|${e.oscuro.matches}`;
   if (e.c && e.tema === tema) return e.c;
   const css = win.getComputedStyle(doc.documentElement);
   const c = Object.fromEntries(COLOR_VARS.map((n) => [n, css.getPropertyValue(n).trim()])) as Colores;
@@ -107,6 +109,9 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
   const [nuevo, setNuevo] = useState('');
   const [rev, setRev] = useState(0);
   const drag = useRef<{ x: number; t1: number } | null>(null);
+  // algunas paletas cambian los colores de las señales (Verde hacker: el verde pasa a rojo)
+  const paleta = usePaletaVisible();
+  const colorDe = (s: Signal) => colorSenal(paleta, s.color);
 
   const end = follow ? Math.max(buf.lastTime(), span) : t1;
   const start = end - span;
@@ -133,7 +138,7 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
     if (!W || !H) return;
     const end = follow ? Math.max(buf.lastTime(), span) : t1;
     const start = end - span;
-    const firma = [W, H, dpr, start, span, buf.count, buf.head, buf.signals.length, buf.markers.length, curA, curB, hover, grid, rev, coloresDe(doc)];
+    const firma = [W, H, dpr, start, span, buf.count, buf.head, buf.signals.length, buf.markers.length, curA, curB, hover, grid, rev, coloresDe(doc), paleta.id];
     if (firma.length === drawn.current.length && firma.every((v, i) => Object.is(v, drawn.current[i]))) return;
     drawn.current = firma;
     if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) {
@@ -185,8 +190,8 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
     buf.signals.forEach((s, row) => {
       const top = row * ROW + 5;
       const bot = top + ROW - 10;
-      g.strokeStyle = s.color;
-      g.fillStyle = s.color;
+      g.strokeStyle = colorDe(s);
+      g.fillStyle = colorDe(s);
       g.lineWidth = 1.6;
       if (s.view === 'bit') {
         g.beginPath();
@@ -415,7 +420,7 @@ export function AnalyzerPanel({ sim, buffer, readOnly, onSignalsChange, grid }: 
         <div className="an-side">
           {buf.signals.map((s) => (
             <div key={s.id} className="an-sig" style={{ height: ROW }}>
-              <span className="sw" style={{ background: s.color }} />
+              <span className="sw" style={{ background: colorDe(s) }} />
               <span className="nm" title={s.text}>{s.label}</span>
               <span className="vl">{fmtVal(valueAt(s, hover), s.view)}</span>
               {!readOnly && s.reader.size > 0 && (

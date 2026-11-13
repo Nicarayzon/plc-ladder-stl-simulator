@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useHashRoute, go } from './ui/router';
 import { Icon } from './ui/common/Icon';
-import { useSettings } from './store/settings';
 import { SimuladorLibre } from './ui/screens/SimuladorLibre';
 import { InicioScreen } from './ui/screens/Inicio';
 import { AprenderScreen } from './ui/screens/Aprender';
@@ -10,6 +9,8 @@ import { TeoriaScreen } from './ui/screens/Teoria';
 import { ExamenScreen } from './ui/screens/Examen';
 import { ProgresoScreen } from './ui/screens/Progreso';
 import { AjustesScreen } from './ui/screens/Ajustes';
+import { TemasScreen } from './ui/screens/Temas';
+import { CapaPapel, useAplicarTema } from './ui/temas/CapaPapel';
 import { AyudaScreen } from './ui/screens/Ayuda';
 import iconUrl from './assets/icon.png';
 import { installGlobalUndo } from './ui/globalUndo';
@@ -38,6 +39,7 @@ const NAV: NavDef[] = [
   { id: 'progreso', icon: 'chart', group: 'evaluar' },
   { id: 'simulador', icon: 'cpu', group: 'simulador' },
   { id: 'ajustes', icon: 'settings', group: 'aplicacion' },
+  { id: 'temas', icon: 'paleta', group: 'aplicacion' },
   { id: 'ayuda', icon: 'info', group: 'aplicacion' },
 ];
 
@@ -51,14 +53,6 @@ function useBarraMini(): [boolean, (v: boolean) => void] {
     try { localStorage.setItem(MINI_KEY, v ? '1' : '0'); } catch { /* sin almacenamiento */ }
   };
   return [mini, poner];
-}
-
-function useTheme() {
-  const theme = useSettings((s) => s.theme);
-  useEffect(() => {
-    if (theme === 'system') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 }
 
 const screens: Record<string, (route: string[]) => ReactNode> = {
@@ -75,6 +69,7 @@ const screens: Record<string, (route: string[]) => ReactNode> = {
   examen: () => <ExamenScreen />,
   progreso: () => <ProgresoScreen />,
   ajustes: () => <AjustesScreen />,
+  temas: (r) => <TemasScreen pestana={r[1]} />,
   ayuda: () => <AyudaScreen />,
   simulador: () => <SimuladorLibre />,
 };
@@ -93,7 +88,7 @@ function Desactivado() {
 }
 
 export function App() {
-  useTheme();
+  useAplicarTema();
   useEffect(() => installGlobalUndo(), []);
   const route = useHashRoute();
   const top = route[0];
@@ -107,6 +102,7 @@ export function App() {
   const [mini, setMini] = useBarraMini();
   return (
     <div className={`shell${mini ? ' mini' : ''}`}>
+      <CapaPapel />
       <nav className="sidebar" aria-label={T.app.navegacion}>
         <div className="brand" title={mini ? `Automatizacion v${APP_VERSION}` : undefined}>
           <img src={iconUrl} alt="" />

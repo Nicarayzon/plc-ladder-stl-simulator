@@ -1,17 +1,19 @@
 /* ───────── banco de trabajo ───────── */
-.wb { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--bg); }
-.wb-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); background: var(--bg-elev); flex-wrap: wrap; flex: none; }
+.wb { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--zona-prog); }
+.wb-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); background: var(--zona-barra); flex-wrap: wrap; flex: none; }
 .wb-toolbar .title { font-weight: 600; font-size: 13px; margin-right: 4px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wb-status { font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); white-space: nowrap; }
 .wb-status b { color: var(--text); font-weight: 600; }
 .run-switch { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
 .run-switch button { height: 26px; padding: 0 10px; border: 0; background: var(--bg-elev2); cursor: pointer; font-weight: 600; font-size: 12px; color: var(--text-dim); }
-.run-switch button.on.run { background: var(--ok-bg); color: var(--ok); }
-.run-switch button.on.stop { background: var(--warn-bg); color: var(--warn); }
+/* rellenos con colores fijos para que se vean con cualquier tema (--run-bg/--stop-bg en paletas.ts y theme.css) */
+.run-switch button.on.run { background: var(--run-bg); color: var(--run-text); }
+.run-switch button.on.stop { background: var(--stop-bg); color: var(--stop-text); }
 .wb-main { flex: 1; min-height: 0; display: flex; }
 .wb-center { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
-.wb-right { flex: none; border-left: 1px solid var(--border); background: var(--bg-elev); display: flex; flex-direction: column; min-height: 0; }
+.wb-right { flex: none; border-left: 1px solid var(--border); background: var(--zona-es); display: flex; flex-direction: column; min-height: 0; }
 .wb-right-body { flex: 1; overflow: auto; }
+.wb-right > .tabs { background: transparent; }
 .splitter-x { width: 5px; cursor: col-resize; flex: none; margin: 0 -2px; z-index: 2; position: relative; }
 .splitter-x:hover, .splitter-y:hover { background: var(--accent); opacity: 0.5; }
 .splitter-y { height: 5px; cursor: row-resize; flex: none; margin: -2px 0; z-index: 2; position: relative; }
@@ -62,16 +64,20 @@
 .awl-editor .cm-activeLineGutter { background: transparent; color: var(--text-dim); }
 .awl-editor .cm-cursor { border-left-color: var(--text); }
 .awl-editor .cm-selectionBackground, .awl-editor .cm-focused .cm-selectionBackground { background: color-mix(in srgb, var(--accent) 30%, transparent) !important; }
+/* zoom del AWL (Ajustes): --awl-zoom en <html>; la letra del editor va en AwlEditor.tsx y aquí crece lo que va con ella
+   (valores en vivo y puntos de parada, --z). Las columnas de «Observar» y su cabecera crecen a la mitad de ritmo (--zo):
+   si crecieran igual, con zoom grande le dejarían al código muy poco ancho y se partiría palabra por palabra. */
+.awl-editor, .obs-head { --z: var(--awl-zoom, 1); --zo: calc(1 + (var(--z) - 1) / 2); }
 .awl-editor .cm-line { position: relative; }
-.awl-editor.observing .cm-line { padding-right: calc(var(--obs-w) + 12px); }
-.cm-obs { position: absolute; right: 6px; top: 0; display: inline-flex; gap: 0; font-family: var(--mono); font-size: 11.5px; color: var(--text); pointer-events: none; }
-.cm-obs span { min-width: 34px; padding: 0 6px; text-align: right; border-left: 1px solid var(--border); background: color-mix(in srgb, var(--accent) 7%, var(--code-bg)); }
-.cm-obs span:nth-child(3), .cm-obs span:nth-child(4) { min-width: 82px; }
+.awl-editor.observing .cm-line { padding-right: calc(var(--obs-w) * var(--zo) + 12px); }
+.cm-obs { position: absolute; right: 6px; top: 0; display: inline-flex; gap: 0; font-family: var(--mono); font-size: calc(11.5px * var(--zo)); line-height: calc(16px * var(--z)); color: var(--text); pointer-events: none; }
+.cm-obs span { min-width: calc(34px * var(--zo)); padding: 0 calc(6px * var(--zo)); text-align: right; border-left: 1px solid var(--border); background: color-mix(in srgb, var(--accent) 7%, var(--code-bg)); }
+.cm-obs span:nth-child(3), .cm-obs span:nth-child(4) { min-width: calc(82px * var(--zo)); }
 .cm-obs span.cnt { min-width: 0; color: var(--warn); border-left: 0; background: transparent; }
 .cm-obs.dim { opacity: 0.35; }
-.cm-bp-gutter { width: 14px; cursor: pointer; }
+.cm-bp-gutter { width: calc(14px * var(--z)); cursor: pointer; }
 .cm-bp-gutter .cm-gutterElement { display: flex; align-items: center; justify-content: center; }
-.cm-bp { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--err); }
+.cm-bp { display: inline-block; width: calc(9px * var(--z)); height: calc(9px * var(--z)); border-radius: 50%; background: var(--err); }
 .cm-bp-gutter .cm-gutterElement:first-child .cm-bp { visibility: hidden; }
 .cm-current { background: color-mix(in srgb, var(--warn) 22%, transparent) !important; box-shadow: inset 3px 0 0 var(--warn); }
 .cm-stopline { background: color-mix(in srgb, var(--err) 22%, transparent) !important; box-shadow: inset 3px 0 0 var(--err); }
@@ -80,13 +86,19 @@
 .cm-completionDetail { color: var(--text-dim); margin-left: 10px; font-style: normal !important; }
 .cm-diagnostic-error { border-left-color: var(--err) !important; }
 .cm-lintRange-error { background-image: none !important; text-decoration: underline wavy var(--err); text-underline-offset: 3px; }
-.obs-head { display: flex; justify-content: flex-end; gap: 0; padding: 2px 6px; font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); background: var(--code-bg); border-bottom: 1px solid var(--border); }
-.obs-head span { min-width: 34px; padding: 0 6px; text-align: right; }
-.obs-head span.w { min-width: 82px; }
+.obs-head { display: flex; justify-content: flex-end; gap: 0; padding: 2px 6px; font-family: var(--mono); font-size: calc(10.5px * var(--zo)); color: var(--text-faint); background: var(--code-bg); border-bottom: 1px solid var(--border); }
+.obs-head span { min-width: calc(34px * var(--zo)); padding: 0 calc(6px * var(--zo)); text-align: right; }
+.obs-head span.w { min-width: calc(82px * var(--zo)); }
 
 /* paneles */
 .panel-sec { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-.panel-sec h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+/* títulos de las secciones del panel de la derecha (Entradas, Salidas, Marcas…): en el color del texto, en negrita y con una
+   marca del acento delante, para encontrarlos a simple vista (antes eran tenues y se perdían en el panel) */
+.panel-sec h4 { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.panel-sec h4::before { content: ''; flex: none; width: 3px; height: 13px; border-radius: 2px; background: var(--accent); }
+/* los botones de los títulos («Todas a 0», «Ocultar»/«Mostrar» las marcas), con forma de botón y el color del acento */
+.panel-sec .io-accion { text-transform: none; letter-spacing: 0; font-weight: 600; background: var(--bg-elev); border-color: var(--accent); color: var(--accent); }
+.panel-sec .io-accion:hover:not(:disabled) { background: var(--accent-bg); color: var(--text); }
 .io-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
 .io-in { display: flex; flex-direction: column; align-items: stretch; gap: 3px; padding: 6px 6px 5px; border: 1px solid var(--border-strong); border-radius: 7px; background: var(--bg-elev2); cursor: pointer; user-select: none; position: relative; text-align: left; }
 .io-in:hover { border-color: var(--accent); }
@@ -97,13 +109,40 @@
 .io-in .row2 .sym { flex: 1; min-width: 0; }
 .io-in .chips { display: inline-flex; align-items: center; gap: 3px; flex: none; }
 .io-in .kind { font-size: 9px; color: var(--text-faint); font-weight: 700; }
-.io-out { display: flex; flex-direction: column; gap: 3px; padding: 6px; border: 1px solid var(--border); border-radius: 7px; }
+.io-out { display: flex; flex-direction: column; gap: 3px; padding: 6px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-elev); }
 .io-out.on { border-color: color-mix(in srgb, var(--power) 60%, var(--border)); }
 .io-out .addr { font-family: var(--mono); font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
 .io-out .sym { font-size: 10.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .analog { display: grid; grid-template-columns: 70px 1fr 64px; gap: 8px; align-items: center; margin-bottom: 6px; }
 .analog input[type='range'] { width: 100%; accent-color: var(--accent); }
-.seven { display: inline-flex; gap: 2px; padding: 4px 6px; background: #0b0d0f; border-radius: 6px; font-family: var(--mono); color: #ff5a3c; font-size: 20px; letter-spacing: 1px; text-shadow: 0 0 6px rgba(255, 90, 60, 0.6); }
+/* Indicador de tensión de las PAW (0–10 V, medio círculo con aguja), encima de «Analógicas y palabras»: uno por fila */
+.volts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.volt { padding: 8px 12px 10px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); }
+.volt-cab { display: grid; grid-template-columns: minmax(120px, 170px) 1fr; align-items: center; gap: 14px; }
+/* su PEW, justo debajo del indicador */
+.volt > .analog { margin: 8px 0 0 4px; padding-top: 9px; border-top: 1px solid var(--border); }
+.volt-dial { display: block; width: 100%; height: auto; }
+.volt-pista, .volt-arco { fill: none; stroke-width: 8; }
+.volt-pista { stroke: var(--bg-elev3); stroke-linecap: round; }
+.volt-arco { stroke: var(--accent); transition: stroke-dasharray 0.12s ease-out; }
+.volt-marca { stroke: var(--text-faint); stroke-width: 1; }
+.volt-marca.grande { stroke: var(--text-dim); stroke-width: 1.6; }
+.volt-dial text { font-family: var(--mono); font-size: 9px; fill: var(--text-dim); text-anchor: middle; }
+.volt-aguja { stroke: var(--text); stroke-width: 2.4; stroke-linecap: round; transition: transform 0.12s ease-out; }
+.volt-eje { fill: var(--text); }
+.volt-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.volt-nombre { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.volt-lectura { font-family: var(--mono); font-size: 22px; font-weight: 700; line-height: 1.15; }
+.volt-lectura.fuera { color: var(--warn); }
+.volt-crudo { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); }
+/* Marcas: se pueden ocultar (solo queda el título) */
+.marcas-sec.oculta h4 { margin-bottom: 0; }
+/* el botón de la carpeta que abre el explorador de proyectos se tiene que ver sobre el color de la barra */
+.wb-toolbar .abrir-proyectos { color: var(--accent); border-color: var(--accent); background: var(--bg-elev); }
+.wb-toolbar .abrir-proyectos:hover:not(:disabled) { background: var(--accent-bg); }
+.wb-toolbar .carpeta { color: var(--accent); flex: none; }
+/* display de 7 segmentos de las palabras de salida: desactivado (ver WordOut en IoPanel.tsx)
+.seven { display: inline-flex; gap: 2px; padding: 4px 6px; background: #0b0d0f; border-radius: 6px; font-family: var(--mono); color: #ff5a3c; font-size: 20px; letter-spacing: 1px; text-shadow: 0 0 6px rgba(255, 90, 60, 0.6); } */
 .vat td input.input { height: 24px; width: 100%; }
 .vat .val { font-family: var(--mono); white-space: nowrap; }
 .vat .forced { color: var(--warn); font-weight: 600; }
@@ -137,7 +176,7 @@
 .load-status.warn { color: var(--warn); background: var(--warn-bg); }
 .load-status.err { color: var(--err); background: var(--err-bg); }
 
-.cm-val { display: inline-block; margin-left: 10px; padding: 0 5px; min-width: 16px; text-align: center; border-radius: 4px; font-size: 11px; font-weight: 700; line-height: 15px; vertical-align: 1px; font-family: var(--mono); }
+.cm-val { display: inline-block; margin-left: calc(10px * var(--z, 1)); padding: 0 calc(5px * var(--z, 1)); min-width: calc(16px * var(--z, 1)); text-align: center; border-radius: 4px; font-size: calc(11px * var(--z, 1)); font-weight: 700; line-height: calc(15px * var(--z, 1)); vertical-align: 1px; font-family: var(--mono); }
 .cm-val.on { background: color-mix(in srgb, var(--power) 22%, transparent); color: var(--power); }
 .cm-val.off { background: var(--bg-elev3); color: var(--text-faint); }
 .cm-val.num { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
@@ -157,7 +196,8 @@
 .sw-foot .kbd { font-size: 10px; padding: 0 3px; }
 .sw-foot .kind { font-size: 8.5px; font-weight: 700; color: var(--accent); }
 .sw-sym { font-size: 9.5px; color: var(--text-dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lamp { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 2px 6px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
+/* fondo de panel: en los temas de color el panel de E/S lleva más color, y el piloto va sobre su tarjeta */
+.lamp { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 2px 6px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; background: var(--bg-elev); }
 .lamp.on { border-color: color-mix(in srgb, var(--power) 60%, var(--border)); }
 .lamp-led { width: 16px; height: 16px; border-radius: 50%; background: var(--led-off); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25); }
 .lamp.on .lamp-led { background: var(--power); box-shadow: 0 0 8px var(--power); }
@@ -171,21 +211,30 @@
 /* simulador libre: explorador de proyectos */
 .libre { display: flex; height: 100%; min-height: 0; }
 .libre-main { flex: 1; min-width: 0; min-height: 0; }
-.explorer { flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--bg-elev); border-right: 1px solid var(--border); }
-.explorer-head { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
+/* lleva su propia intensidad del color del tema (--zona-proy), para no confundirse con la barra lateral ni con el programa */
+.explorer { flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--zona-proy); border-right: 1px solid var(--border); }
+.explorer-head { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+/* sobre el color del explorador, la letra atenuada (título, pie, descripciones) es la secundaria, que se lee mejor que la tenue */
+.explorer .faint { color: var(--text-dim); }
+.explorer .btn.ghost:hover:not(:disabled) { background: var(--proy-hover); }
 .explorer-head .btn { text-transform: none; letter-spacing: 0; color: var(--text); font-weight: 500; }
 .explorer-list { flex: 1; overflow-y: auto; padding: 6px 4px; }
 .explorer-foot { padding: 6px 12px; font-size: 10.5px; border-top: 1px solid var(--border); }
 .ex-folder { display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 2px 0 6px; border-radius: 6px; cursor: pointer; color: var(--text-dim); user-select: none; }
-.ex-folder:hover { background: var(--bg-hover); color: var(--text); }
+.ex-folder:hover { background: var(--proy-hover); color: var(--text); }
 .ex-folder.cur { color: var(--text); font-weight: 600; }
 .ex-folder .ex-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* nombre del proyecto: más grueso y con el máximo contraste (blanco en las oscuras, casi negro en las claras) */
+.ex-folder .ex-name { color: var(--proy-nombre); font-weight: 600; }
+.ex-folder.cur .ex-name { font-weight: 700; }
+/* la carpeta, algo más grande y del color de los nombres, para que se vea en cualquier tema */
+.ex-folder .ex-carpeta { flex: none; color: var(--proy-nombre); }
 .ex-folder .ex-add { opacity: 0; }
 .ex-folder:hover .ex-add, .ex-folder.cur .ex-add { opacity: 1; }
 .ex-blocks { padding: 2px 0 6px 22px; }
 .ex-block { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border-radius: 6px; cursor: pointer; font-size: 12px; user-select: none; }
-.ex-block:hover { background: var(--bg-hover); }
-.ex-block.cur { background: var(--accent-bg); }
+.ex-block:hover { background: var(--proy-hover); }
+.ex-block.cur { background: var(--proy-sel); }
 .ex-bicon { font-size: 8.5px; font-weight: 800; padding: 1px 3px; border-radius: 3px; background: var(--bg-elev3); color: var(--text-dim); }
 .ex-desc { font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ex-create { margin: 4px 0 0 4px; }

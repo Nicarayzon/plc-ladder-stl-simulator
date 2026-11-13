@@ -187,7 +187,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onCollapse }: { width: numb
                 onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: menuProyecto(p) }); }}
                 title={p.nombre}>
                 <Icon name={expanded ? 'down' : 'right'} size={12} />
-                <Icon name="folder" size={14} />
+                <Icon name="folder" size={17} stroke={2.1} className="ex-carpeta" />
                 <span className="ex-name">{p.nombre}</span>
                 <button className="btn small ghost icon ex-add" title={T.libre.crearBloqueTitulo} aria-label={T.libre.crearBloque}
                   onClick={(e) => { e.stopPropagation(); setMenu({ x: e.clientX, y: e.clientY, items: menuProyecto(p).slice(0, 4) }); }}><Icon name="plus" size={12} /></button>
@@ -238,8 +238,9 @@ function ProjectWorkbench({ proj, block, onBlock, explorerHidden, onShowExplorer
       block={block} onBlock={onBlock} vatVentanas proyecto={proj.nombre} vatPedida={vatPedida} onVatAtendida={onVatAtendida}
       title={(
         <span className="row" style={{ gap: 6 }}>
-          {explorerHidden && <button className="btn small icon" onClick={onShowExplorer} title={T.libre.mostrarExplorador} aria-label={T.libre.mostrarProyectos}><Icon name="folder" size={14} /></button>}
-          <Icon name="folder" size={14} />
+          {explorerHidden
+            ? <button className="btn small icon abrir-proyectos" onClick={onShowExplorer} title={T.libre.mostrarExplorador} aria-label={T.libre.mostrarProyectos}><Icon name="folder" size={14} /></button>
+            : <Icon name="folder" size={14} className="carpeta" />}
           <span title={proj.nombre}>{proj.nombre}</span>
         </span>
       )} />

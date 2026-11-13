@@ -99,26 +99,31 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
     }
   }
 
-  // L07: palabras solapadas
-  const words = new Map<string, { start: number; size: number; ins: Instr }>();
+  // L07: palabras solapadas. Una palabra ocupa 2 bytes y una doble palabra 4: PEW 128 y PEW 129 comparten el
+  // byte 129. Vale para cualquier zona (E, A, PE, PA, M, L, cada DB por separado); avisa con los bytes que
+  // comparten y la primera dirección que no se pisa.
+  const words = new Map<string, { zona: string; start: number; size: number; ins: Instr }>();
   for (const { ins } of all) {
     const op = ins.op;
-    if (op?.kind !== 'mem' || op.ind || op.area !== 'M' || op.size! < 2) continue;
-    words.set(`${op.byte}:${op.size}`, { start: op.byte!, size: op.size!, ins });
+    if (op?.kind !== 'mem' || op.ind || op.byte === undefined || op.size! < 2) continue;
+    const zona = `${op.area}${op.db ?? ''}`;
+    words.set(`${zona}:${op.byte}:${op.size}`, { zona, start: op.byte, size: op.size!, ins });
   }
-  const wl = [...words.values()].sort((a, b) => a.start - b.start);
+  const wl = [...words.values()].sort((a, b) => (a.zona < b.zona ? -1 : a.zona > b.zona ? 1 : a.start - b.start));
   const reported = new Set<string>();
   for (let i = 0; i < wl.length; i++) {
     for (let j = i + 1; j < wl.length; j++) {
       const a = wl[i];
       const c = wl[j];
-      if (c.start >= a.start + a.size) break;
+      if (c.zona !== a.zona || c.start >= a.start + a.size) break;
       if (a.start === c.start) continue;
-      const key = `${a.start}-${c.start}`;
+      const key = `${a.zona}:${a.start}-${c.start}`;
       if (reported.has(key)) continue;
       reported.add(key);
-      const shared = Array.from({ length: a.start + a.size - c.start }, (_, k) => `MB ${c.start + k}`).slice(0, 3).join(', ');
-      add('L07', c.ins, T.lint.L07(a.ins.op!.text, c.ins.op!.text, shared));
+      const fin = Math.min(a.start + a.size, c.start + c.size);
+      const bytes = Array.from({ length: fin - c.start }, (_, k) => c.start + k);
+      const libre = c.ins.op!.text.replace(/\d+(\s*)$/, `${a.start + a.size}$1`);
+      add('L07', c.ins, T.lint.L07(a.ins.op!.text, c.ins.op!.text, bytes, libre));
     }
   }
 

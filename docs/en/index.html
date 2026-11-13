@@ -18,7 +18,7 @@
   <meta property="og:site_name" content="Automatizacion">
   <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Free PLC Simulator to Learn Ladder Logic (LAD) and STL">
-  <meta property="og:description" content="Learn to program PLCs with a simulator on your computer: Ladder, STL, the scan cycle, timers and counters. Free and open source.">
+  <meta property="og:description" content="Learn to program PLCs with a simulator on your computer: Ladder, STL, the scan cycle, timers and counters. Free, with no ads and public source code.">
   <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/en/">
   <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
   <meta property="og:image:alt" content="The Automatizacion PLC simulator running an STL program">
@@ -38,7 +38,7 @@
     "operatingSystem": "Windows 10, Windows 11, macOS (Apple Silicon), Linux (Wine)",
     "inLanguage": ["es", "en", "de"],
     "isAccessibleForFree": true,
-    "license": "https://opensource.org/licenses/MIT",
+    "license": "https://polyformproject.org/licenses/strict/1.0.0/",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
     "author": { "@type": "Person", "name": "Arzath" },
     "keywords": "PLC simulator, ladder logic simulator, ladder simulator, STL simulator, PLC programming, Ladder, LAD, STL, statement list, industrial automation"
@@ -74,6 +74,7 @@
         <span>Automatizacion</span>
       </a>
       <nav class="menu menu-portada" aria-label="Sections">
+        <a href="#temas" class="menu-extra">Themes</a>
         <a href="#funciones">Features</a>
         <a href="#como-funciona">How it works</a>
         <a href="#usos" class="menu-extra">Uses</a>
@@ -172,6 +173,103 @@
           <span aria-hidden="true">·</span>
           <a href="#preguntas">Trouble opening it</a>
         </p>
+        <p class="descarga-oficial">Official downloads: only from this page or from the Releases of the GitHub repository.</p>
+      </div>
+    </section>
+
+    <!-- ───────── Novedad: temas (capturas img18…img20 y carrusel con img22…img25) ───────── -->
+    <section class="seccion" id="temas">
+      <div class="contenedor">
+        <div class="encabezado">
+          <p class="antetitulo">New</p>
+          <h2>Themes: the simulator in your colors</h2>
+          <p>19 color schemes, dark and light, and 29 background patterns. Each area of the simulator gets its own intensity of the theme color, so you can tell the program, the inputs and outputs, the projects and the control bar apart at a glance.</p>
+        </div>
+
+        <div class="pasos">
+          <!-- img18 -->
+          <article class="paso">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">Basic</p>
+                <h3>Choose the colors of the whole app</h3>
+                <p>In “Themes ▸ Basic” you will find the usual ones (Automatic, Dark and Light) and two more groups: dark colors and light colors. Each card shows a preview of the app in those colors.</p>
+              </div>
+              <ul class="lista">
+                <li>“Automatic” follows the light or dark mode of your system.</li>
+                <li>RUN and STOP are filled, so they stand out with any color.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img18">
+              <div class="captura-marco"><img alt="Themes ▸ Basic: cards with a preview of the default themes and the dark colors" width="707" height="470" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img19 -->
+          <article class="paso paso-inv">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">Advanced</p>
+                <h3>Background patterns</h3>
+                <p>A pattern repeated behind the simulator, like wrapping paper: contacts and coils, gears, circuit board, binary, signals and many more. The preview shows how it will look before you apply it.</p>
+              </div>
+              <ul class="lista">
+                <li>29 patterns in three groups, drawn with the colors of your current theme.</li>
+                <li>Adjustable intensity and size. Panels and code have no pattern, so they stay easy to read.</li>
+                <li>Or, if you prefer, an image of your own.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img19">
+              <div class="captura-marco"><img alt="Themes ▸ Advanced: preview of the grid pattern with intensity and size, and the Automation group of patterns" width="719" height="436" loading="lazy"></div>
+            </figure>
+          </article>
+
+          <!-- img20 -->
+          <article class="paso">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">Hacker green</p>
+                <h3>Black, green and a terminal font</h3>
+                <p>The whole interface in a terminal font, like a console. What is green in the other themes (power flow, lamps, RUN) is red here, so it stands out against the green.</p>
+              </div>
+              <ul class="lista">
+                <li>The program, the inputs and outputs, the projects and the control bar, each with its own shade of green.</li>
+                <li>Also in the screenshot: the new 0 to 10 V gauge of an analog output, with its analog input below it.</li>
+              </ul>
+            </div>
+            <figure class="captura" data-captura="img20">
+              <div class="captura-marco"><img alt="Free simulator in Hacker green: STL program in RUN with Monitor, red lamps and the 0 to 10 V gauge of an analog output" width="708" height="471" loading="lazy"></div>
+            </figure>
+          </article>
+        </div>
+
+        <!-- carrusel: un tema cada vez; los botones de debajo pasan al anterior o al siguiente (web.js, prepararCarrusel) -->
+        <div class="carrusel-temas">
+          <h3 class="carrusel-titulo">The simulator with other themes</h3>
+          <div class="carrusel" data-carrusel role="region" aria-roledescription="carousel" aria-label="Screenshots of the simulator with different themes" tabindex="0">
+            <div class="carrusel-pista">
+              <figure class="captura carrusel-diapo" data-captura="img22" data-nombre="Sky blue" role="group" aria-roledescription="slide" aria-label="1 / 4: Sky blue">
+                <div class="captura-marco"><img alt="Free simulator with the Sky blue theme" width="709" height="470" loading="lazy"></div>
+              </figure>
+              <figure class="captura carrusel-diapo" data-captura="img23" data-nombre="Light pink" role="group" aria-roledescription="slide" aria-label="2 / 4: Light pink" hidden>
+                <div class="captura-marco"><img alt="Free simulator with the Light pink theme" width="708" height="470" loading="lazy"></div>
+              </figure>
+              <figure class="captura carrusel-diapo" data-captura="img24" data-nombre="Coffee" role="group" aria-roledescription="slide" aria-label="3 / 4: Coffee" hidden>
+                <div class="captura-marco"><img alt="Free simulator with the Coffee theme" width="708" height="471" loading="lazy"></div>
+              </figure>
+              <figure class="captura carrusel-diapo" data-captura="img25" data-nombre="Ocean blue" role="group" aria-roledescription="slide" aria-label="4 / 4: Ocean blue" hidden>
+                <div class="captura-marco"><img alt="Free simulator with the Ocean blue theme" width="708" height="471" loading="lazy"></div>
+              </figure>
+            </div>
+            <div class="carrusel-mandos">
+              <button class="carrusel-btn carrusel-ant" type="button" data-paso="-1" aria-label="Previous theme"><svg class="icono"><use href="#i-flecha" /></svg></button>
+              <p class="carrusel-nombre" aria-live="polite"><b data-rel="carrusel-nombre">Sky blue</b><span data-rel="carrusel-cuenta">1 / 4</span></p>
+              <button class="carrusel-btn" type="button" data-paso="1" aria-label="Next theme"><svg class="icono"><use href="#i-flecha" /></svg></button>
+            </div>
+            <div class="carrusel-puntos" role="group" aria-label="Choose a theme"></div>
+          </div>
+          <p class="carrusel-mas">And many more waiting for you to try them!</p>
+        </div>
       </div>
     </section>
 
@@ -530,7 +628,7 @@
           <article class="uso">
             <svg class="icono icono-uso"><use href="#i-libro" /></svg>
             <h3>Getting started in automation</h3>
-            <p>If you want to learn industrial automation on your own: complete theory and examples that run, with no hardware, no licenses and no connection.</p>
+            <p>If you want to learn industrial automation on your own: complete theory and examples that run, with no hardware, no license fees and no connection.</p>
           </article>
         </div>
       </div>
@@ -596,7 +694,7 @@
           </details>
           <details>
             <summary>Is it free?</summary>
-            <p>Yes. It is open source under the MIT license: no ads and no accounts. It works offline; it only connects to the internet if you ask it to check for updates.</p>
+            <p>Yes, for any non-commercial use (personal, in class or at a school): no ads and no accounts. It works offline; it only connects to the internet if you ask it to check for updates. The source code is public under the PolyForm Strict 1.0.0 license: you may use the app and read the code, but not modify, redistribute or sell it. Download it only from this page or from the repository's Releases: any other copy is not official.</p>
           </details>
         </div>
         <p class="preguntas-pie">Can’t find your question? <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">Ask it in Discussions</a>.</p>
@@ -615,7 +713,7 @@
           <div class="autor-texto">
             <h3>Adrian</h3>
             <p class="autor-cargo">Data Engineer in Industrial Processes</p>
-            <p>I developed Automatizacion to practice PLC programming in Ladder and STL, and I share it for free and as open source so that it can help others learn too.</p>
+            <p>I developed Automatizacion to practice PLC programming in Ladder and STL, and I share it for free, with its source code public, so that it can help others learn too.</p>
             <p>Do you have a question, an idea or a program you want to show? Write to me in Discussions. If something goes wrong, open an issue.</p>
             <div class="autor-enlaces">
               <a class="btn btn-primario btn-pequeno" href="https://github.com/Nicarayzon/plc-ladder-stl-simulator/discussions">
@@ -640,7 +738,7 @@
         <img src="../favicon.svg" alt="" width="24" height="24">
         <span>Automatizacion</span>
       </div>
-      <p>Free PLC simulator to learn Ladder and STL. © 2026 Arzath · MIT License · Independent educational project, not affiliated with any PLC manufacturer.</p>
+      <p>Free PLC simulator to learn Ladder and STL. © 2026 Arzath · PolyForm Strict 1.0.0 License · Independent educational project, not affiliated with any PLC manufacturer.</p>
       <a href="https://github.com/Nicarayzon/plc-ladder-stl-simulator">GitHub</a>
     </div>
   </footer>
