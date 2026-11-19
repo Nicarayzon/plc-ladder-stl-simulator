@@ -6,14 +6,15 @@ import { T } from '../i18n';
 
 export interface KopIssue { id: string; field?: string; msg: string; severity: 'error' | 'aviso' }
 
-type Kind = 'bitTZ' | 'bit' | 'bitRTZ' | 'timer' | 'counter' | 'word' | 'dword' | 'real' | 's5' | 'zw' | 'in' | 'out' | 'block';
+type Kind = 'bitTZ' | 'bit' | 'bitRTZ' | 'timer' | 'counter' | 'word' | 'dword' | 'real' | 's5' | 'zw' | 'in' | 'out' | 'block' | 'ptrBit' | 'int';
 
-function check(op: string, kind: Kind, symbols?: Symbols): string | null {
+function check(op: string, kind: Kind, symbols?: Symbols, pin = ''): string | null {
   const V = T.kopVal;
   if (!op.trim()) return V.faltaOperando;
   let o: Op | null;
   try {
-    o = parseOperand(op, symbols);
+    // un puntero se puede escribir con P# o sin él
+    o = parseOperand(kind === 'ptrBit' ? op.replace(/^\s*P#\s*/i, '') : op, symbols);
   } catch (e) {
     return (e as Error).message;
   }
@@ -33,6 +34,8 @@ function check(op: string, kind: Kind, symbols?: Symbols): string | null {
     case 'in': return o.kind === 'mem' || o.kind === 'const' || o.kind === 'timer' || o.kind === 'counter' ? null : V.noValor(o.text);
     case 'out': return o.kind === 'mem' ? null : V.salida(o.text);
     case 'block': return o.kind === 'block' && o.name === 'FC' ? null : V.soloFc(o.text);
+    case 'ptrBit': return o.kind === 'bit' && !o.ind && o.area !== 'DI' ? null : T.motor.parametroPuntero(pin, op.trim());
+    case 'int': return (o.kind === 'const' && o.ctype === 'INT') || (o.kind === 'mem' && o.size === 2 && !o.ind && o.area !== 'PA') ? null : T.motor.parametroInt(pin, op.trim());
   }
   return null;
 }
@@ -40,7 +43,7 @@ function check(op: string, kind: Kind, symbols?: Symbols): string | null {
 export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[] {
   const out: KopIssue[] = [];
   const req = (id: string, field: string, op: string | undefined, kind: Kind) => {
-    const m = check(op ?? '', kind, symbols);
+    const m = check(op ?? '', kind, symbols, field.replace(/^p\./, ''));
     if (m) out.push({ id, field, msg: m, severity: 'error' });
   };
   const opt = (id: string, field: string, op: string | undefined, kind: Kind) => {
@@ -102,6 +105,13 @@ export function validateSegment(seg: SegmentoKOP, symbols?: Symbols): KopIssue[]
       case 'BIEST': req(s.id, 'op', s.op, 'bit'); chainPin(s.pin2); ramas(s.q); break;
       case 'BOX': {
         const d = BOX_DEFS[s.fn];
+        if (d.lib) {
+          // S_BIT: dirección de un bit; N: INT
+          req(s.id, 'p.S_BIT', s.p.S_BIT, 'ptrBit');
+          req(s.id, 'p.N', s.p.N, 'int');
+          ramas(s.eno);
+          break;
+        }
         for (const n of d.ins) req(s.id, `p.${n}`, s.p[n], 'in');
         for (const n of d.outs) req(s.id, `p.${n}`, s.p[n], 'out');
         ramas(s.eno);

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bausteine: OB, FC, FB und DB · Automatizacion</title>
-  <meta name="description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.">
+  <meta name="description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs, wie Bausteine in AWL aufgerufen werden, und die Bibliotheksbausteine FC 82 und FC 83, die einen Bitbereich rücksetzen oder setzen.">
   <meta name="author" content="Arzath">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e1013">
@@ -18,12 +18,12 @@
   <meta property="og:site_name" content="Automatizacion">
   <meta property="og:locale" content="de_DE">
   <meta property="og:title" content="Bausteine: OB, FC, FB und DB">
-  <meta property="og:description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.">
+  <meta property="og:description" content="Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs, wie Bausteine in AWL aufgerufen werden, und die Bibliotheksbausteine FC 82 und FC 83, die einen Bitbereich rücksetzen oder setzen.">
   <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/">
   <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
-  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Bausteine: OB, FC, FB und DB","description":"Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist der Unterschied zwischen einer FC und einem FB?","acceptedAnswer":{"@type":"Answer","text":"Der FB hat ein eigenes Gedächtnis: einen Instanz-DB, in dem er seine statischen Variablen (STAT) speichert, die ihren Wert zwischen zwei Aufrufen behalten. Eine FC hat nur temporäre Variablen, die am Ende verloren gehen."}},{"@type":"Question","name":"Welcher OB bearbeitet das Hauptprogramm?","acceptedAnswer":{"@type":"Answer","text":"Der OB1, den die CPU zyklisch bearbeitet. Der OB100 ist der Anlauf, der OB35 der Weckalarm und der OB80 der Zeitfehler."}},{"@type":"Question","name":"Was passiert, wenn ein Fehler auftritt und sein OB nicht programmiert ist?","acceptedAnswer":{"@type":"Answer","text":"Die CPU geht in STOP. Ein ungültiges BCD ruft zum Beispiel den OB121 auf: Ist der OB121 nicht geladen, hält die CPU an."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Bausteine OB, FC, FB, DB","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/"}]}]
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Bausteine: OB, FC, FB und DB","description":"Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs, wie Bausteine in AWL aufgerufen werden, und die Bibliotheksbausteine FC 82 und FC 83, die einen Bitbereich rücksetzen oder setzen.","inLanguage":"de","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist der Unterschied zwischen einer FC und einem FB?","acceptedAnswer":{"@type":"Answer","text":"Der FB hat ein eigenes Gedächtnis: einen Instanz-DB, in dem er seine statischen Variablen (STAT) speichert, die ihren Wert zwischen zwei Aufrufen behalten. Eine FC hat nur temporäre Variablen, die am Ende verloren gehen."}},{"@type":"Question","name":"Welcher OB bearbeitet das Hauptprogramm?","acceptedAnswer":{"@type":"Answer","text":"Der OB1, den die CPU zyklisch bearbeitet. Der OB100 ist der Anlauf, der OB35 der Weckalarm und der OB80 der Zeitfehler."}},{"@type":"Question","name":"Was passiert, wenn ein Fehler auftritt und sein OB nicht programmiert ist?","acceptedAnswer":{"@type":"Answer","text":"Die CPU geht in STOP. Ein ungültiges BCD ruft zum Beispiel den OB121 auf: Ist der OB121 nicht geladen, hält die CPU an."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Theorie","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/"},{"@type":"ListItem","position":3,"name":"Bausteine OB, FC, FB, DB","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/de/theorie/bausteine-ob-fc-fb-db/"}]}]
   </script>
   <link rel="stylesheet" href="../../../estilos.css">
   <link rel="stylesheet" href="../../../teoria.css">
@@ -77,7 +77,7 @@
       </details>
       <nav class="migas" aria-label="Breadcrumb"><a href="../">Theorie</a><span aria-hidden="true">›</span><span>Bausteine OB, FC, FB, DB</span></nav>
       <h1>Bausteine: OB, FC, FB und DB</h1>
-      <p class="articulo-entradilla">Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.</p>
+      <p class="articulo-entradilla">Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs, wie Bausteine in AWL aufgerufen werden, und die Bibliotheksbausteine FC 82 und FC 83, die einen Bitbereich rücksetzen oder setzen.</p>
       <div class="articulo-cuerpo">
 <section><h2 id="bausteinarten">Bausteinarten</h2>
 
@@ -259,6 +259,86 @@ TITLE = Selbsthaltung
       =     #Motor;
 END_FUNCTION</code></pre>
 <p>In KOP ist ein Aufruf eine <strong>Box</strong> mit EN/ENO, und die Parameter sind ihre Anschlüsse.</p></section>
+<section><h2 id="bibliotheksbausteine-fc-82-rset-und-fc-83-sset">Bibliotheksbausteine: FC 82 (RSET) und FC 83 (SSET)</h2>
+<p>Die <strong>Standardbibliothek</strong> bringt fertige Bausteine mit, die man ins Projekt kopiert. Zwei sehr nützliche sind:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Baustein</th><th>Symbolischer Name</th><th>Was er macht</th></tr></thead><tbody><tr><td><strong>FC 82</strong></td><td>RSET</td><td>Setzt N aufeinanderfolgende Bits auf einmal auf <strong>0</strong></td></tr><tr><td><strong>FC 83</strong></td><td>SSET</td><td>Setzt N aufeinanderfolgende Bits auf einmal auf <strong>1</strong></td></tr></tbody></table></div>
+<p>Beide haben dieselben Parameter:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Parameter</th><th>Deklaration</th><th>Typ</th><th>Bedeutung</th></tr></thead><tbody><tr><td><code>S_BIT</code></td><td>IN</td><td>POINTER</td><td>Adresse des <strong>ersten Bits</strong> des Bereichs: <code>M 0.0</code>, <code>A 4.0</code>… Es ist ein Pointer, also geht auch <code>P#M 0.0</code></td></tr><tr><td><code>N</code></td><td>IN</td><td>INT</td><td><strong>Wie viele</strong> aufeinanderfolgende Bits: eine Konstante (<code>8</code>) oder ein Wort (<code>MW 10</code>)</td></tr></tbody></table></div>
+<p><strong>Typischer Einsatz</strong>: die Schrittmerker einer GRAFCET-Schrittkette beim Start oder beim Neuinitialisieren auf einmal löschen, statt für jeden Schritt ein <code>R</code>, und danach den Anfangsschritt setzen.</p>
+<p><strong>So kommt er ins Projekt</strong>: Er wird aus der Bibliothek in den Bausteinordner des Programms kopiert, neben den OB1, und mit den übrigen Bausteinen in die CPU geladen. Hat die CPU einen OB1, der FC 82 aufruft, aber keinen FC 82, geht sie beim Aufruf in <strong>STOP</strong> (Baustein nicht vorhanden, OB121 nicht geladen).</p>
+<ul>
+<li>Im Simulator: Schaltfläche mit dem Buch im Explorer → <strong>Konvertierungsbausteine ▸ Bausteine</strong>, und FC 82 in den Ordner <strong>Bausteine</strong> des Projekts ziehen. Mit dem markierten Baustein öffnet <strong>F1</strong> seine Hilfe. Im Projekt ist er geschützt: Sein Code ist nicht sichtbar.</li>
+<li>In KOP ist er auch im Katalog, Gruppe <em>Bibliotheken</em>: Legst du die Box in ein Netzwerk, wird der Baustein ins Projekt kopiert.</li>
+</ul>
+<p><strong>Aufruf in AWL</strong>: Die Parameter stehen unter dem <code>CALL</code>, einer pro Zeile. Im Simulator ergänzt der Editor die leeren Parameter, wenn du <code>CALL FC 82</code> schreibst und die Eingabetaste drückst.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>          <span class="t-com">// Rücksetzbedingung</span>
+      <span class="t-ins">SPBN</span>  <span class="t-op">m001</span>           <span class="t-com">// nicht erfüllt: Aufruf überspringen</span>
+      <span class="t-ins">CALL</span>  <span class="t-op">FC 82</span>
+        <span class="t-ins">S_BIT</span> <span class="t-op">:= M 0.0</span>     <span class="t-com">// erstes Bit</span>
+        <span class="t-ins">N</span>     <span class="t-op">:= 8</span>         <span class="t-com">// wie viele Bits: M 0.0 bis M 0.7</span>
+<span class="t-meta">m001:</span> <span class="t-ins">NOP</span>   <span class="t-cte">0</span></code></pre>
+<p>Er setzt M 0.0 bis M 0.7 auf 0, aber nur in den Zyklen, in denen E 0.0 = 1 ist.</p>
+<p><strong>In KOP</strong> ist er eine Box mit <code>EN</code>, <code>S_BIT</code> und <code>N</code> links und <code>ENO</code> rechts. Um ihn bedingt zu machen, setzt du einfach den Kontakt vor <code>EN</code>.</p>
+<p><strong>Vorsicht</strong>:</p>
+<ul>
+<li>Ein <code>CALL</code> läuft immer, in jedem Zyklus, ohne aufs VKE zu schauen: Ohne Bedingung wären die Bits ständig 0. Mach ihn mit einem Sprung (<code>SPBN</code>) oder in KOP über den Eingang <code>EN</code> bedingt. Oder ruf ihn im <strong>OB100</strong> auf, der nur beim Anlauf läuft. <code>UC</code> und <code>CC</code> helfen nicht: Sie rufen nur Bausteine ohne Parameter auf.</li>
+<li>Er hängt vom <strong>MCR</strong> ab (siehe <a href="../indirekte-adressierung-und-mcr/#mcr-master-control-relay">MCR (Master Control Relay)</a>): In einem ausgeschalteten MCR-Bereich ändert er nichts.</li>
+<li>Ist <code>N</code> 0 oder negativ, macht er nichts. Geht der Bereich über den Speicherbereich hinaus, geht die CPU in STOP.</li>
+<li>Nach der Rückkehr ist <code>BIE</code> = 1 (in KOP <code>ENO</code> = 1) und <code>/ER</code> = 0: Die nächste Abfrage beginnt eine neue Verknüpfung.</li>
+<li>Der Bereich darf das Byte des <strong>Taktmerkers</strong> (siehe <a href="../taktmerker/#taktmerker">Taktmerker: Taktmerker</a>) nicht enthalten, sonst wird es gelöscht.</li>
+</ul>
+<p><strong>Beispiel mit GRAFCET</strong>: Mit dem Initialisierungstaster E 0.0 werden alle Schritte (M 0.0 … M 0.7) gelöscht und der Anfangsschritt gesetzt.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>          <span class="t-com">// Initialisierungstaster</span>
+      <span class="t-ins">SPBN</span>  <span class="t-op">m002</span>
+      <span class="t-ins">CALL</span>  <span class="t-op">FC 82</span>          <span class="t-com">// löscht alle Schritte</span>
+        <span class="t-ins">S_BIT</span> <span class="t-op">:= M 0.0</span>
+        <span class="t-ins">N</span>     <span class="t-op">:= 8</span>
+      <span class="t-ins">SET</span>
+      <span class="t-ins">S</span>     <span class="t-op">M 0.0</span>          <span class="t-com">// setzt den Anfangsschritt</span>
+<span class="t-meta">m002:</span> <span class="t-ins">NOP</span>   <span class="t-cte">0</span></code></pre></section>
 <section><h2 id="bausteinende-und-aufrufe">Bausteinende und Aufrufe</h2>
 
 
@@ -289,7 +369,7 @@ END_FUNCTION</code></pre>
 
 
 
-<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>BE</code></td><td>Bausteinende</td></tr><tr><td><code>BEA</code></td><td>Unbedingtes Bausteinende</td></tr><tr><td><code>BEB</code></td><td>Bausteinende, wenn VKE = 1. Bei VKE = 0 geht es weiter, mit VKE := 1 und /ER := 0</td></tr><tr><td><code>CALL</code></td><td>Aufruf mit Parametern (siehe <a href="#aufrufe">Aufrufe</a>)</td></tr><tr><td><code>UC</code> / <code>CC</code></td><td>Unbedingter / bedingter Aufruf, ohne Parameter</td></tr></tbody></table></div></section>
+<div class="tabla"><table><thead><tr><th>Anweisung</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>BE</code></td><td>Bausteinende</td></tr><tr><td><code>BEA</code></td><td>Unbedingtes Bausteinende</td></tr><tr><td><code>BEB</code></td><td>Bausteinende, wenn VKE = 1. Bei VKE = 0 geht es weiter, mit VKE := 1 und /ER := 0</td></tr><tr><td><code>CALL</code></td><td>Aufruf mit Parametern (siehe <a href="#aufrufe">Aufrufe</a>). Zum Beispiel eines Bibliotheksbausteins wie FC 82 (siehe <a href="#bibliotheksbausteine-fc-82-rset-und-fc-83-sset">Bibliotheksbausteine: FC 82 (RSET) und FC 83 (SSET)</a>)</td></tr><tr><td><code>UC</code> / <code>CC</code></td><td>Unbedingter / bedingter Aufruf, ohne Parameter</td></tr></tbody></table></div></section>
 <section><h2 id="datenbausteine">Datenbausteine</h2>
 <pre class="codigo-awl"><code>      <span class="t-ins">AUF</span>   <span class="t-op">DB 1</span>            <span class="t-com">// öffnet DB1 als globalen DB</span>
       <span class="t-ins">L</span>     <span class="t-op">DBW 0</span>           <span class="t-com">// DB1.DBW0</span>

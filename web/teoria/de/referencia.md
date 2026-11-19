@@ -161,7 +161,7 @@ Der **Taktmerker** ist ein Merkerbyte, das die CPU selbst schreibt: Jedes seiner
 
 **So wird er aktiviert**:
 - In der echten CPU: *Eigenschaften der CPU → Zyklus/Taktmerker*. Das Kästchen anhaken, das Byte wählen (zum Beispiel MB100) und die Hardwarekonfiguration laden.
-- Im Simulator: Schaltfläche **Hardware** → CPU → *Ciclo / marca de ciclo* (die Oberfläche ist auf Spanisch). Standardmäßig wird MB0 verwendet, aber jedes Byte kann gewählt werden.
+- Im Simulator genauso: im Explorer **Station(1) ▸ Hardware** (Doppelklick; die Schaltfläche **Hardware** in der Leiste ist eine Abkürzung) → Doppelklick auf die **CPU** → Register *Zyklus/Taktmerker*. Das Kästchen anhaken, das Byte eingeben und *OK* drücken. Danach *Station ▸ Speichern und übersetzen* und *Zielsystem ▸ Laden in Baugruppe*, das die CPU in STOP schalten will. Bis sie geladen ist, behält die CPU die vorige Konfiguration.
 
 | Bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |---|---|---|---|---|---|---|---|---|
@@ -179,7 +179,7 @@ Mit MB100 als Taktmerker hat `M 100.5` eine Periodendauer von 1 s: 0,5 s auf 0 u
 
 **Achtung**:
 - **Das Programm darf dieses Byte nur lesen.** Die CPU überschreibt es in jedem Zyklus, deshalb geht alles verloren, was das Programm hineinschreibt. Der Simulator warnt, wenn das Programm in dieses Byte schreibt.
-- Das Byte muss frei bleiben: Verwende es für nichts anderes, auch nicht als Teil eines Wortes (`MW 99` und `MW 100` enthalten `MB 100`).
+- Das Byte muss frei bleiben: Verwende es für nichts anderes, auch nicht als Teil eines Wortes (`MW 99` und `MW 100` enthalten `MB 100`) und auch nicht im Bereich eines FC 82 oder FC 83 (§5.5).
 - Für genaue Zeitmessungen ist er nicht geeignet: Wenn die Bedingung erfüllt wird, kann das Bit mitten in seiner Periode stehen, deshalb kann das erste Blinken kürzer sein. Für genaue Verzögerungen verwendet man Zeiten (§6.6).
 - Im Simulator wird das Byte zu Beginn jedes Zyklus aktualisiert, bevor die Eingänge gelesen werden. Wird der Taktmerker deaktiviert oder das Byte geändert, wird das alte Byte auf 0 gesetzt.
 
@@ -340,6 +340,63 @@ END_FUNCTION
 ```
 
 In KOP ist ein Aufruf eine **Box** mit EN/ENO, und die Parameter sind ihre Anschlüsse.
+
+### 5.5 Bibliotheksbausteine: FC 82 (RSET) und FC 83 (SSET)
+
+Die **Standardbibliothek** bringt fertige Bausteine mit, die man ins Projekt kopiert. Zwei sehr nützliche sind:
+
+| Baustein | Symbolischer Name | Was er macht |
+|---|---|---|
+| **FC 82** | RSET | Setzt N aufeinanderfolgende Bits auf einmal auf **0** |
+| **FC 83** | SSET | Setzt N aufeinanderfolgende Bits auf einmal auf **1** |
+
+Beide haben dieselben Parameter:
+
+| Parameter | Deklaration | Typ | Bedeutung |
+|---|---|---|---|
+| `S_BIT` | IN | POINTER | Adresse des **ersten Bits** des Bereichs: `M 0.0`, `A 4.0`… Es ist ein Pointer, also geht auch `P#M 0.0` |
+| `N` | IN | INT | **Wie viele** aufeinanderfolgende Bits: eine Konstante (`8`) oder ein Wort (`MW 10`) |
+
+**Typischer Einsatz**: die Schrittmerker einer GRAFCET-Schrittkette beim Start oder beim Neuinitialisieren auf einmal löschen, statt für jeden Schritt ein `R`, und danach den Anfangsschritt setzen.
+
+**So kommt er ins Projekt**: Er wird aus der Bibliothek in den Bausteinordner des Programms kopiert, neben den OB1, und mit den übrigen Bausteinen in die CPU geladen. Hat die CPU einen OB1, der FC 82 aufruft, aber keinen FC 82, geht sie beim Aufruf in **STOP** (Baustein nicht vorhanden, OB121 nicht geladen).
+- Im Simulator: Schaltfläche mit dem Buch im Explorer → **Konvertierungsbausteine ▸ Bausteine**, und FC 82 in den Ordner **Bausteine** des Projekts ziehen. Mit dem markierten Baustein öffnet **F1** seine Hilfe. Im Projekt ist er geschützt: Sein Code ist nicht sichtbar.
+- In KOP ist er auch im Katalog, Gruppe *Bibliotheken*: Legst du die Box in ein Netzwerk, wird der Baustein ins Projekt kopiert.
+
+**Aufruf in AWL**: Die Parameter stehen unter dem `CALL`, einer pro Zeile. Im Simulator ergänzt der Editor die leeren Parameter, wenn du `CALL FC 82` schreibst und die Eingabetaste drückst.
+
+```awl
+      U     E 0.0          // Rücksetzbedingung
+      SPBN  m001           // nicht erfüllt: Aufruf überspringen
+      CALL  FC 82
+        S_BIT := M 0.0     // erstes Bit
+        N     := 8         // wie viele Bits: M 0.0 bis M 0.7
+m001: NOP   0
+```
+
+Er setzt M 0.0 bis M 0.7 auf 0, aber nur in den Zyklen, in denen E 0.0 = 1 ist.
+
+**In KOP** ist er eine Box mit `EN`, `S_BIT` und `N` links und `ENO` rechts. Um ihn bedingt zu machen, setzt du einfach den Kontakt vor `EN`.
+
+**Vorsicht**:
+- Ein `CALL` läuft immer, in jedem Zyklus, ohne aufs VKE zu schauen: Ohne Bedingung wären die Bits ständig 0. Mach ihn mit einem Sprung (`SPBN`) oder in KOP über den Eingang `EN` bedingt. Oder ruf ihn im **OB100** auf, der nur beim Anlauf läuft. `UC` und `CC` helfen nicht: Sie rufen nur Bausteine ohne Parameter auf.
+- Er hängt vom **MCR** ab (§7.20): In einem ausgeschalteten MCR-Bereich ändert er nichts.
+- Ist `N` 0 oder negativ, macht er nichts. Geht der Bereich über den Speicherbereich hinaus, geht die CPU in STOP.
+- Nach der Rückkehr ist `BIE` = 1 (in KOP `ENO` = 1) und `/ER` = 0: Die nächste Abfrage beginnt eine neue Verknüpfung.
+- Der Bereich darf das Byte des **Taktmerkers** (§2.6) nicht enthalten, sonst wird es gelöscht.
+
+**Beispiel mit GRAFCET**: Mit dem Initialisierungstaster E 0.0 werden alle Schritte (M 0.0 … M 0.7) gelöscht und der Anfangsschritt gesetzt.
+
+```awl
+      U     E 0.0          // Initialisierungstaster
+      SPBN  m002
+      CALL  FC 82          // löscht alle Schritte
+        S_BIT := M 0.0
+        N     := 8
+      SET
+      S     M 0.0          // setzt den Anfangsschritt
+m002: NOP   0
+```
 
 ---
 
@@ -989,7 +1046,7 @@ SIG:  T     MW 10           // Schleifenzähler
 | `BE` | Bausteinende |
 | `BEA` | Unbedingtes Bausteinende |
 | `BEB` | Bausteinende, wenn VKE = 1. Bei VKE = 0 geht es weiter, mit VKE := 1 und /ER := 0 |
-| `CALL` | Aufruf mit Parametern (§5.4) |
+| `CALL` | Aufruf mit Parametern (§5.4). Zum Beispiel eines Bibliotheksbausteins wie FC 82 (§5.5) |
 | `UC` / `CC` | Unbedingter / bedingter Aufruf, ohne Parameter |
 
 ### 7.18 Datenbausteine

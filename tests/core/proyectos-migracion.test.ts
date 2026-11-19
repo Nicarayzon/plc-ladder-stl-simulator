@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { migrarProyectos, quitarDemo } from '../../src/store/projects';
-import { clockByteOf, migrarHw, type HwEstacion, type Programa } from '../../src/core/program';
+import { clockByteGuardado, clockByteOf, hwSinCargar, migrarHw, type HwEstacion, type Programa } from '../../src/core/program';
 import { demoAntiguo } from '../../src/store/legacyDemo';
 import { emptyWbState } from '../../src/ui/workbench/types';
 
@@ -31,10 +31,10 @@ describe('migración: hardware guardado por versiones anteriores', () => {
 
   it('la CPU pasa a tipo «CPU» y la marca de ciclo sigue activa en el mismo byte', () => {
     const p = programa([antigua('Antigua 300(1)')]);
-    expect(clockByteOf(p)).toBeNull();
+    expect(clockByteGuardado(p)).toBeNull();
     const m = migrarHw(p);
     expect(m.hw!.estaciones[0]).toEqual({ id: 'h1', tipo: 'CPU', nombre: 'CPU(1)', marcaCiclo: { activa: true, byte: 10 } });
-    expect(clockByteOf(m)).toBe(10);
+    expect(clockByteGuardado(m)).toBe(10);
   });
   it('conserva el nombre que puso el alumno y no toca lo ya migrado', () => {
     expect(migrarHw(programa([antigua('Banco de cintas')])).hw!.estaciones[0].nombre).toBe('Banco de cintas');
@@ -48,5 +48,16 @@ describe('migración: hardware guardado por versiones anteriores', () => {
     const r = migrarProyectos(st, 3);
     expect(clockByteOf(r.proyectos[0].programa)).toBe(10);
     expect(r.proyectos[0].wb).toEqual(st.proyectos[0].wb);
+  });
+  it('versión 4 → 5: el hardware guardado (que antes se aplicaba solo) pasa a estar cargado en la CPU', () => {
+    const cpu: HwEstacion = { id: 'h2', tipo: 'CPU', nombre: 'CPU(1)', marcaCiclo: { activa: true, byte: 100 } };
+    const st = { proyectos: [{ id: 'a', nombre: 'Aviso', programa: programa([cpu]), wb: emptyWbState(), actualizado: 1 }], actual: 'a' };
+    expect(clockByteOf(st.proyectos[0].programa)).toBeNull();
+    const r = migrarProyectos(st, 4);
+    expect(clockByteOf(r.proyectos[0].programa)).toBe(100);
+    expect(hwSinCargar(r.proyectos[0].programa)).toBe(false);
+    // un proyecto sin hardware se queda igual
+    const sin = migrarProyectos({ proyectos: [{ id: 'b', nombre: 'B', programa: { nemotecnia: 'de', simbolos: [], bloques: [] }, wb: emptyWbState(), actualizado: 1 }], actual: 'b' }, 4);
+    expect(sin.proyectos[0].programa.hwCargado).toBeUndefined();
   });
 });

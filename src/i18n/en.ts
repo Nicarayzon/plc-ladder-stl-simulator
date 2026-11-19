@@ -221,11 +221,19 @@ export const en: Textos = {
 
 ## Projects (free simulator)
 
-The project explorer is on the left of the free simulator. **“New”** creates a project (a folder) with the name you choose; inside it you create **OB1** and, if you need them, OB100 and FCs. Right-click a folder to rename, duplicate, export or delete the project; right-click a block to delete or rename it. The ‹ arrow hides the explorer.
+The project explorer is on the left of the free simulator. **“New”** creates a project (a folder) with the name you choose. Inside it there are two folders: **Station(1)**, with the CPU **Hardware**, and **Blocks**, where you create **OB1** and, if you need them, OB100, FCs and variable tables. Right-click a project to rename, duplicate, export or delete it; right-click a block to delete or rename it. The ‹ arrow hides the explorer.
 
 ## Hardware and clock memory
 
-The **Hardware** button (next to RUN/STOP/MRES in the free simulator) configures the hardware of the project. “Add” inserts the **compact CPU** station, and in its properties you enable the **clock memory** and choose its memory byte (MB0 by default). Each bit of that byte oscillates on its own, with equal pulse and pause:
+The clock memory is enabled in the hardware configuration, as on the real CPU:
+
+1. In the explorer, open **Station(1)** and **double-click Hardware** (or press the **Hardware** button of the toolbar, next to RUN/STOP/MRES, which is a shortcut). The rack opens with the power supply, the CPU and its integrated I/O.
+2. **Double-click the CPU** (slot 2), or right-click → *Object Properties…*.
+3. On the **Cycle/Clock Memory** tab, tick **Clock memory**, type the **memory byte** (for example, 100) and press **OK**.
+4. **Station ▸ Save and Compile** (Ctrl+S).
+5. **PLC ▸ Download to Module**. If the CPU is in RUN, it asks to switch it to STOP and, when it finishes, to RUN again.
+
+Until it is downloaded, the CPU keeps the previous configuration, and the status strip says so. Each bit of the byte oscillates on its own, with equal pulse and pause:
 
 | Bit | Memory bit (byte 0) | Period | Frequency |
 |---|---|---|---|
@@ -238,7 +246,17 @@ The **Hardware** button (next to RUN/STOP/MRES in the free simulator) configures
 | 6 | M 0.6 | 1.6 s | 0.625 Hz |
 | 7 | M 0.7 | 2 s | 0.5 Hz |
 
-They are used like any memory bit, for example a 1 s flasher: \`A M 0.5\` / \`= Q 124.7\`. Do not write to that byte from the program: the CPU overwrites it in every cycle. The configuration is saved with the project.
+They are used like any memory bit, for example a 1 s flasher: \`A M 0.5\` / \`= Q 124.7\`. Do not write to that byte from the program: the CPU overwrites it in every cycle. Do not include it in the range of an FC 82 either. The configuration is saved with the project.
+
+## Standard Library (FC 82 and FC 83)
+
+The book button of the explorer (or right-click **Blocks** → *Open the Standard Library…*) opens the library. **Converting Blocks ▸ Blocks** holds **FC 82 (RSET)**, which resets a range of bits to 0, and **FC 83 (SSET)**, which sets it to 1. With a block selected, **F1** opens its help.
+
+- To bring it into the project, **drag it to the Blocks folder**, use Ctrl+C in the library and Ctrl+V on the folder, or press «Copy to project». It ends up next to OB1, protected.
+- Call it with \`CALL FC 82\` and its parameters, one per line: \`S_BIT := M 0.0\` (first bit) and \`N := 8\` (how many bits). Pressing Enter after \`CALL FC 82\` makes the editor write the parameters.
+- In LAD it is in the catalog, **Libraries** group: when you place the box in a network, the block is copied to the project.
+- A \`CALL\` runs in every cycle: make it conditional with \`JCN\` or, in LAD, with a contact before EN.
+- If the block is not in the project, the program compiles with a warning, but the CPU goes to **STOP** when it calls it.
 
 ## Inputs and outputs
 
@@ -317,6 +335,13 @@ The app is not signed by Apple. If macOS does not let you open it the first time
 
   libre: {
     descBloque: { OB1: 'cyclic program', OB100: 'startup' } as Record<string, string>,
+    carpetaBloques: 'Blocks',
+    hardware: 'Hardware',
+    hardwareTitulo: 'Double-click: open the hardware configuration (CPU, clock memory)',
+    abrirHardware: 'Open Hardware',
+    abrirObjeto: 'Open Object',
+    hwSinCargar: 'not downloaded',
+    hwCiclo: (b: number) => `clock memory MB ${b}`,
     proyectoN: (n: number) => `Project ${n}`,
     copia: (nombre: string) => `${nombre} (copy)`,
     importado: 'Imported',
@@ -379,6 +404,10 @@ The app is not signed by Apple. If macOS does not let you open it the first time
   },
 
   wb: {
+    hardware: 'Hardware',
+    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · clock memory MB${byte}` : ''}. Shortcut to Station ▸ Hardware in the explorer`,
+    hardwareConfigurar: 'Configure the hardware (CPU, clock memory). Shortcut to Station ▸ Hardware in the explorer',
+    hardwareSinCargar: 'Hardware: what is saved is not downloaded to the CPU (PLC ▸ Download to Module)',
     confirmarBorrarSegmento: 'Delete this network?',
     sinKop: 'This network cannot be shown in LAD (only empty networks are converted)',
     crearOb1: 'Create OB1 (cyclic program)',
@@ -386,9 +415,6 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     anadirOb100: 'Add OB100 (startup)',
     confirmarBorrarBloque: (b: string) => `Delete block ${b}?`,
     convertirNemotecnia: (n: 'de' | 'en') => `Also convert the STL code to the ${n === 'en' ? 'English mnemonics (A, I, Q…)' : 'German mnemonics (U, E, A…)'}?`,
-    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · clock memory MB${byte}` : ''}`,
-    hardwareConfigurar: 'Configure the hardware (CPU, clock memory)',
-    hardware: 'Hardware',
     senalesFueraTitulo: 'The signals are in another window: click to bring it to the front',
     senalesOcultar: 'Hide the input and output signals',
     senalesVer: 'Show the input and output signals (timing chart of 0s and 1s)',
@@ -429,8 +455,10 @@ The app is not signed by Apple. If macOS does not let you open it the first time
       irAlError: 'Go to the error',
       verTodos: 'Show all',
       cicloTitulo: 'A memory bit that nothing writes is always 0. The CPU only writes the clock memory bits if they are enabled in the hardware configuration.',
-      cicloTexto: (nombres: string) => `**${nombres} is always 0**: your program reads it but never writes it. Is it a clock memory bit? Enable it in Hardware.`,
-      activarCiclo: (byte: number) => `Enable clock memory in MB${byte}`,
+      cicloTexto: (nombres: string) => `**${nombres} is always 0**: your program reads it but never writes it. Is it a clock memory bit? Enable it in the station's Hardware and download it to the CPU.`,
+      activarCiclo: (byte: number) => `Configure the clock memory (MB${byte})…`,
+      hwSinCargar: '**The saved hardware is not downloaded to the CPU**: the CPU keeps the previous configuration. Open it and use PLC ▸ Download to Module.',
+      abrirHw: 'Open Hardware',
       stop: (porError: boolean) => `**CPU in STOP**${porError ? ' because of a runtime error' : ''}: the program is not running. Press **RUN**.`,
       pausaCiclo: '**Paused in the middle of a cycle** (step by step): “Instr.” executes the next instruction, “Cycle” finishes the cycle and ▶ continues in real time.',
       pausa: '**Simulation paused**: no cycles run, so the inputs you change do not reach the program. Press ▶.',
@@ -614,19 +642,44 @@ The app is not signed by Apple. If macOS does not let you open it the first time
 
   hw: {
     cpuCompacta: 'Compact CPU',
-    cpuCompactaDesc: 'CPU with 2 accumulators and integrated I/O (inputs IB124…, outputs QB124…)',
-    titulo: 'Project hardware',
-    estaciones: 'Stations',
-    anadir: 'Add',
-    marcaCicloMb: (b: number) => ` · clock memory MB${b}`,
-    sinHardware: 'No hardware configured.',
-    noTiene: 'The project has no hardware',
-    anadeEstacion: 'Add a station to configure the CPU (for example, the clock memory).',
+    cpuCompactaDesc: 'CPU with 2 accumulators and integrated I/O: inputs I 124.0–125.7 and outputs Q 124.0–125.7',
+    equipo: 'Station(1)',
+    titulo: (equipo: string) => `Hardware configuration — ${equipo}`,
+    menuEquipo: 'Station',
+    menuSistema: 'PLC',
+    guardarCompilar: 'Save and Compile',
+    cargarModulo: 'Download to Module',
+    cerrar: 'Close',
+    propiedadesObjeto: 'Object Properties…',
+    bastidor: '(0) Rack',
+    slot: 'Slot',
+    modulo: 'Module',
+    dirE: 'I address',
+    dirA: 'Q address',
+    comentario: 'Comment',
+    fuente: 'Power supply (PS)',
+    esIntegradas: 'DI16/DO16 (integrated I/O)',
+    dobleClicCpu: 'Double-click the CPU (slot 2) to open its properties: the clock memory is there.',
+    sinGuardar: '**There are unsaved changes**: Station ▸ Save and Compile (Ctrl+S).',
+    guardadoSinCargar: '**Saved and compiled without errors. It still has to be downloaded to the CPU**: PLC ▸ Download to Module.',
+    cargado: 'The saved configuration is the one downloaded to the CPU.',
+    enCpu: (b: number | null) => (b === null ? 'In the CPU: no clock memory' : `In the CPU: clock memory MB ${b}`),
+    guardado: (b: number | null) => (b === null ? 'Saved: no clock memory' : `Saved: clock memory MB ${b}`),
+    confirmarCerrar: 'There are unsaved changes in the hardware configuration. Close without saving them?',
+    guardarAntes: 'The configuration has unsaved changes. To download it, it must be saved and compiled first. Save and compile now?',
+    pasarAStop: (cpu: string) => `The target module (${cpu}) is in RUN. To download the configuration it has to go to STOP. Switch to STOP?`,
+    arrancar: (cpu: string) => `Configuration downloaded to ${cpu}. Start the module again (RUN)?`,
+    cargadoToast: 'Hardware configuration downloaded to the CPU',
+    guardadoToast: 'Saved and compiled without errors',
+    propiedades: (cpu: string) => `Properties — ${cpu} (R0/S2)`,
+    tabs: { general: 'General', arranque: 'Startup', ciclo: 'Cycle/Clock Memory', remanencia: 'Retentive Memory', alarmas: 'Interrupts' },
+    noDisponible: 'Not available in the simulator',
     nombre: 'Name',
-    nombreEstacion: 'Station name',
-    confirmarQuitar: (n: string) => `Remove “${n}” from the hardware?`,
-    quitar: 'Remove',
-    cicloSec: 'Cycle / clock memory',
+    nombreEstacion: 'CPU name',
+    tipo: 'Type',
+    descripcion: 'Description',
+    cicloSec: 'Cycle',
+    tiempoCiclo: (ms: number) => `Simulator cycle time: ${ms} ms (change it in Settings).`,
     marcaCiclo: 'Clock memory',
     byteMarcas: 'Memory byte',
     bit: 'Bit',
@@ -635,7 +688,87 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     frecuencia: 'Frequency',
     ahora: 'Now',
     conflicto: (b: number) => `⚠ Your program writes to MB${b}: the CPU overwrites that byte with the clock memory in every cycle.`,
-    explicacion: (b: number) => `Each bit oscillates on its own, with equal pulse and pause (half the period at 1 and the other half at 0). Use them in the program like any memory bit, for example **A M ${b}.5** for a 1 s flasher.`,
+    explicacion: (b: number) => `Each bit toggles on its own, with equal pulse and pause (half the period at 1 and the other half at 0). Use them in the program like any memory bit, for example **A M ${b}.5** for a 1 s flasher.`,
+    pasos: 'Then: **OK**, **Station ▸ Save and Compile** and **PLC ▸ Download to Module**. Until it is downloaded, the CPU keeps the previous configuration.',
+  },
+
+  biblioteca: {
+    titulo: 'Standard Library',
+    raiz: 'Standard Library',
+    conversion: 'Converting Blocks',
+    bloques: 'Blocks',
+    carpeta: 'Folder',
+    carpetas: 'Library folders',
+    contenido: (c: string) => `Contents of ${c}`,
+    colNombre: 'Object name',
+    colSimbolo: 'Symbolic name',
+    colLenguaje: 'Language',
+    colComentario: 'Comment',
+    vacia: 'This folder is empty.',
+    arrastraTitulo: 'Drag the block to the «Blocks» folder of your project (or Ctrl+C here and Ctrl+V on the folder). F1: help',
+    estado: 'Open **Converting Blocks ▸ Blocks**, choose a block and drag it to the **Blocks** folder of your project.',
+    estadoSel: (b: string, id: string, r: string) => `**${b}** (${id}): ${r}. **F1**: help · drag it to the **Blocks** folder or press «Copy to project».`,
+    ayudaBoton: 'Help (F1)',
+    ayudaDe: (fc: string) => `Help on ${fc}`,
+    cerrarAyuda: 'Close the help',
+    copiar: 'Copy',
+    copiarAlProyecto: 'Copy to project',
+    copiarTitulo: (p: string) => `Copy the selected block to the Blocks folder of «${p}»`,
+    parametro: 'Parameter',
+    declaracion: 'Declaration',
+    tipo: 'Type',
+    significado: 'Meaning',
+    ejemplo: 'Example (STL):',
+    yaEsta: (fc: string, id: string, p: string) => `${fc} (${id}) is already in «${p}»`,
+    sustituir: (fc: string, p: string) => `«${p}» already has your own ${fc}. If you copy the library one, it replaces yours and its code is lost. Replace it?\n\nTo keep yours, cancel and rename it first.`,
+    copiado: (fc: string, id: string, p: string) => `${fc} (${id}) copied to the Blocks folder of «${p}»`,
+    copiadoPortapapeles: (fc: string, id: string) => `${fc} (${id}) copied: paste it into the Blocks folder of your project with Ctrl+V`,
+    pegar: (fc: string, id: string) => `Paste ${fc} (${id})`,
+    abrir: 'Open the Standard Library…',
+    soltar: 'Drop to copy the block to this project',
+    protegido: (id: string) => `Library block ${id} (protected)`,
+    protegidoTexto: (fc: string) => `This block comes from the **Standard Library**. It is protected: its code cannot be seen or changed. Call it from another block with **CALL ${fc}** and its parameters (in LAD, with the ${fc} box of the catalog, «Libraries» group).`,
+    kopCopiado: (fc: string, id: string) => `${fc} (${id}) copied from the Standard Library to the Blocks folder`,
+    kopOtro: (fc: string) => `The project already has your own ${fc}, which has no parameters: rename it and bring the ${fc} from the Standard Library.`,
+    ayuda: {
+      RSET: {
+        titulo: 'Reset a range of bits',
+        resumen: 'resets N consecutive bits to 0',
+        descripcion: 'Resets to **0** in one go the **N** consecutive bits that start at **S_BIT**, whether outputs (Q) or memory bits (M). Typical use: clearing the step memory bits of a GRAFCET when the sequence starts or is reinitialized, instead of one `R` for each of them, and then activating the initial step.',
+        params: { S_BIT: 'Address of the **first bit**: `M 0.0`, `Q 124.0`… It is a pointer, so `P#M 0.0` is also valid.', N: '**How many** consecutive bits are reset to 0. A constant (`8`) or a word (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'A `CALL` runs **in every cycle**, so the bits would always be 0. Make it conditional with a jump (`JCN`), or in LAD with a contact before **EN**. Another option is to call it in **OB100**, which only runs at startup.',
+          'It depends on the **MCR**: inside a disabled MCR zone it changes nothing.',
+          'If **N** is 0 or negative, it does nothing. If the range goes beyond the area, the CPU goes to **STOP**.',
+          'On return, **BR** = 1 (in LAD, **ENO** = 1).',
+          'Keep the **clock memory** byte out of the range, or it will be cleared.',
+        ],
+        ejemplo: `      A     I 0.0          // reset condition
+      JCN   m001           // if it is not met, skip the call
+      CALL  FC 82
+        S_BIT := M 0.0     // first bit
+        N     := 8         // how many bits: M 0.0 to M 0.7
+m001: NOP   0`,
+      },
+      SSET: {
+        titulo: 'Set a range of bits',
+        resumen: 'sets N consecutive bits to 1',
+        descripcion: 'The opposite of FC 82: sets to **1** in one go the **N** consecutive bits that start at **S_BIT**, whether outputs (Q) or memory bits (M). For example, to switch on a group of lamps at once.',
+        params: { S_BIT: 'Address of the **first bit**: `M 0.0`, `Q 124.0`… It is a pointer, so `P#Q 124.0` is also valid.', N: '**How many** consecutive bits are set to 1. A constant (`4`) or a word (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'A `CALL` runs **in every cycle**: make it conditional with a jump (`JCN`), or in LAD with a contact before **EN**.',
+          'It depends on the **MCR**: inside a disabled MCR zone it changes nothing.',
+          'If **N** is 0 or negative, it does nothing. If the range goes beyond the area, the CPU goes to **STOP**.',
+          'On return, **BR** = 1 (in LAD, **ENO** = 1).',
+        ],
+        ejemplo: `      A     I 0.1          // push button
+      JCN   m002
+      CALL  FC 83
+        S_BIT := Q 124.0   // first bit
+        N     := 4         // Q 124.0 to Q 124.3
+m002: NOP   0`,
+      },
+    },
   },
 
   senales: {
@@ -818,7 +951,7 @@ The app is not signed by Apple. If macOS does not let you open it the first time
       bits: 'Bit logic', comparacion: 'Comparison', temporizadores: 'Timers', contadores: 'Counters',
       Transferencia: 'Move', Enteros: 'Integer math', 'Coma flotante': 'Floating point', 'Conversión': 'Conversion',
       'Lógica de palabras': 'Word logic', 'Desplazamiento y rotación': 'Shift and rotate',
-      saltos: 'Jumps', control: 'Program control', estado: 'Status bits',
+      Bibliotecas: 'Libraries', saltos: 'Jumps', control: 'Program control', estado: 'Status bits',
     } as Record<string, string>,
     comparar: (t: 'I' | 'D' | 'R', r: string) => `Compare ${t === 'I' ? 'integers' : t === 'D' ? 'double integers' : 'REAL'}: IN1 ${r} IN2`,
     d: {
@@ -859,6 +992,8 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     },
     bitEstado: (s: string) => `Contact of the status bit ${s}`,
     cajas: {
+      FC82: 'Reset N consecutive bits from S_BIT to 0 (RSET, from the Standard Library)',
+      FC83: 'Set N consecutive bits from S_BIT to 1 (SSET, from the Standard Library)',
       MOVE: 'Copy IN to OUT',
       SHL_W: 'Shift word left',
       SHR_W: 'Shift word right',
@@ -1102,6 +1237,17 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     constante255: (mn: string) => `${mn}: the constant ranges from 0 to 255`,
     aufDbDi: 'OPN only opens a DB or DI',
     soloFc: 'only FCs without parameters can be called',
+    // CALL with parameters (library blocks)
+    parametroSinCall: (p: string) => `${p} := …: a parameter goes right below its CALL`,
+    parametroConMeta: 'a CALL parameter cannot have a label',
+    ucCcConParametros: (mn: string, fc: string) => `${mn} cannot call ${fc}, which has parameters: use CALL ${fc}`,
+    sinParametros: (fc: string) => `${fc} has no parameters (only library blocks such as FC 82 and FC 83 have them)`,
+    parametroDesconocido: (p: string, fc: string, lista: string[]) => `${fc} has no parameter ${p} (its parameters are ${lista.join(' and ')})`,
+    parametroRepetido: (p: string) => `parameter ${p} is repeated`,
+    faltanParametros: (fc: string, lista: string[]) => `CALL ${fc}: missing ${lista.length > 1 ? 'parameters' : 'parameter'} ${lista.join(' and ')}`,
+    parametroVacio: (p: string) => `parameter ${p} has no value`,
+    parametroPuntero: (p: string, v: string) => `${p} is a pointer: it needs the address of a bit (M 0.0, Q 124.0, P#M 0.0…), not ${v}`,
+    parametroInt: (p: string, v: string) => `${p} is an INT: it needs an integer or a word (8, MW 10…), not ${v}`,
     cierraSinAbrir: "')' without an open bracket",
     faltaCerrar: 'A bracket is not closed: there are more "(" than ")"',
     metaNoExiste: (m: string) => `the label ${m} does not exist`,
@@ -1128,6 +1274,7 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     valorNoValido: 'Invalid value',
     cargarEnCiclo: 'The program cannot be loaded in the middle of a cycle',
     bloqueNoExiste: (n: string) => `Call to a block that does not exist: ${n}`,
+    llamadaSinParametros: (fc: string) => `CALL ${fc} without its parameters`,
     pilaBloques: 'Block stack overflow (too many nested calls)',
     cicloExcedido: 'Cycle time exceeded (endless loop?)',
     sinDb: 'No data block is open (OPN DB n is missing)',
@@ -1196,7 +1343,9 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     L09b: (op: string) => `the LOOP counter is loaded from ${op}: if it is 0, LOOP makes 65,535 extra loops (check it first with a jump).`,
     B01: (fc: string, fcEsp: string) => `${fc} is not called from any block (UC/CC/CALL ${fcEsp} is missing in OB1): its code is not executed.`,
     B02: 'OB100 runs only once, when switching to RUN: the assignments you put here are not repeated in every cycle (did you mean to write them in OB1?).',
-    B03: (m: string, byte: number) => `${m} is read but the program never writes it, so it is always 0. If you wanted a flasher, enable the clock memory in Hardware (byte ${byte}).`,
+    B03: (m: string, byte: number) => `${m} is read but the program never writes it, so it is always 0. If you wanted a flasher, enable the clock memory in the station's Hardware (byte ${byte}) and download it to the CPU.`,
+    B04: (fc: string, sim: string) => `${fc} (${sim}) is not in the project: bring it from the Standard Library. Otherwise the CPU will go to STOP when it calls it.`,
+    B05: (fc: string, desde: string, hasta: string, byte: number, valor: number) => `${fc} sets ${desde} to ${hasta} to ${valor}, which includes the clock memory (MB ${byte}): those bits will not flash properly. Use a range that leaves it out.`,
   },
 
   correccion: {

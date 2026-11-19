@@ -19,8 +19,11 @@ import * as ops from './programOps';
 import type { VatFila, WbState } from './types';
 import { kopToAwlText } from '../../kop/compile';
 import { askText } from '../common/ask';
-import { HardwareDialog, nuevaEstacion } from './HardwareDialog';
-import { clockByteOf } from '../../core/program';
+import { HwConfig, type HwPedido } from './HwConfig';
+import { clockByteOf, hwSinCargar } from '../../core/program';
+import { BIBLIOTECA, conEspacio, type LibId } from '../../core/biblioteca';
+import { libsDeSegmento } from '../../kop/model';
+import { AyudaLib } from '../biblioteca/Biblioteca';
 import { useSettings } from '../../store/settings';
 import { lintProgram, marcasNuncaEscritas } from '../../core/lint';
 import { translateAwl } from '../../core/translate';
@@ -55,8 +58,11 @@ export interface WorkbenchProps {
   /** Bloque activo controlado desde fuera (explorador de proyectos) */
   block?: string;
   onBlock?: (b: string) => void;
-  /** Botón «Hardware» (configuración de la CPU, marca de ciclo) */
+  /** El proyecto tiene hardware (simulador libre): avisos de la marca de ciclo y ventana de configuración del hardware */
   hardware?: boolean;
+  /** Abrir la configuración del hardware (doble clic en «Hardware» del explorador; `n` cambia en cada petición) */
+  hwPedido?: HwPedido | null;
+  onHwAtendido?: () => void;
   /** Botón «Señales E/S»: el panel de abajo se abre a mano y las señales pueden ir a otra ventana */
   senales?: SenalesVentana & { nombre?: string };
   /** Tablas de variables del proyecto (`wbState.vats`) en una ventana flotante dentro de la app o abajo, en lugar de las pestañas «Variables» y «T / Z» */
@@ -125,16 +131,16 @@ export function Workbench(props: WorkbenchProps) {
   const [observe, setObserve] = useState(true);
   const [focusSeg, setFocusSeg] = useState<string | null>(null);
   const [blockMenu, setBlockMenu] = useState<{ x: number; y: number; name?: string } | null>(null);
-  const [hwOpen, setHwOpen] = useState(false);
+  const [hw, setHw] = useState<HwPedido | null>(null);
+  const hwPedido = props.hwPedido;
+  useEffect(() => {
+    if (!hwPedido) return;
+    setHw(hwPedido);
+    props.onHwAtendido?.();
+  }, [hwPedido?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   const clockByte = clockByteOf(programa);
   /** Marcas consultadas que nunca se escriben: probable marca de ciclo sin activar */
   const pistaCiclo = useMemo(() => (props.hardware && sim.compiled.cp ? marcasNuncaEscritas(sim.compiled.cp, clockByte) : []), [sim.compiled, clockByte, props.hardware]);
-  const activarCiclo = (byte: number) => {
-    const est = programa.hw?.estaciones ?? [];
-    const cpu = est.find((e) => e.tipo === 'CPU');
-    const list = cpu ? est.map((e) => (e === cpu ? { ...e, marcaCiclo: { activa: true, byte } } : e)) : [...est, { ...nuevaEstacion('CPU', est.length + 1), marcaCiclo: { activa: true, byte } }];
-    change({ ...programa, hw: { estaciones: list } });
-  };
   const [rightW, startRight] = useSplit(`${props.layoutKey ?? 'wb'}-right`, props.compact ? 290 : 360, 220, 720);
   const [bottomH, startBottom] = useSplit(`${props.layoutKey ?? 'wb'}-bottom`, props.compact ? 200 : 230, 90, 700);
   const nemo = programa.nemotecnia;
@@ -171,6 +177,7 @@ export function Workbench(props: WorkbenchProps) {
 
   // compilación diferida
   useEffect(() => {
+    if (programa !== sim.programa) sim.programaPendiente = programa;
     const t = setTimeout(() => sim.setProgram(programa), 400);
     return () => clearTimeout(t);
   }, [programa, sim]);
@@ -184,6 +191,13 @@ export function Workbench(props: WorkbenchProps) {
   const blk = programa.bloques.find((b) => normBlockName(b.nombre) === block);
   const symByAddr = useMemo(() => symbolsByAddr(programa), [programa.simbolos]); // eslint-disable-line react-hooks/exhaustive-deps
   const symbolNames = useMemo(() => programa.simbolos.map((s) => s.nombre).filter(Boolean), [programa.simbolos]);
+  /** Parámetros de los bloques de biblioteca del proyecto (FC82 → S_BIT, N): el editor AWL los escribe tras «CALL FC 82» */
+  const libsClave = programa.bloques.map((b) => (b.biblioteca ? `${b.nombre}:${b.biblioteca}` : '')).join(',');
+  const interfaces = useMemo(() => {
+    const m: Record<string, string[]> = {};
+    for (const b of programa.bloques) if (b.biblioteca) m[normBlockName(b.nombre)] = BIBLIOTECA[b.biblioteca].params.map((x) => x.nombre);
+    return m;
+  }, [libsClave]); // eslint-disable-line react-hooks/exhaustive-deps
   const warnings: ProgramIssue[] = useMemo(() => [...sim.compiled.warnings, ...(sim.compiled.cp ? lintProgram(programa, sim.compiled, { ncInputs: props.ncInputs }) : [])], [sim.compiled, programa, props.ncInputs]);
   // los avisos de cada segmento, para subrayarlos en su editor; la misma lista mientras no cambien,
   // para que los demás segmentos no se repinten con cada tecla (SegmentCard es memo)
@@ -199,6 +213,21 @@ export function Workbench(props: WorkbenchProps) {
     avisosCache.current = out;
     return out;
   }, [warnings]);
+
+  /** Un segmento cambia. Si en KOP aparece un cuadro de biblioteca (FC 82…) cuyo bloque no está, se copia al proyecto */
+  const cambiarSegmento = (s: Segmento, ns: Segmento) => {
+    let p = ops.updateSegment(programa, block, segId(s), () => ns);
+    if (ns.lang === 'KOP') {
+      const antes = s.lang === 'KOP' ? libsDeSegmento(s.kop) : [];
+      const nuevos = [...new Set(libsDeSegmento(ns.kop))].filter((l) => !antes.includes(l));
+      for (const l of nuevos as LibId[]) {
+        const fc = conEspacio(BIBLIOTECA[l].bloque);
+        const est = ops.libEnProyecto(p, l);
+        if (est === 'no') { p = ops.addLibBlock(p, l); toast(T.biblioteca.kopCopiado(fc, l)); } else if (est === 'otro') toast(T.biblioteca.kopOtro(fc));
+      }
+    }
+    change(p, ns.lang === 'KOP');
+  };
 
   const segOps = (s: Segmento) => {
     const id = segId(s);
@@ -239,7 +268,8 @@ export function Workbench(props: WorkbenchProps) {
     ];
     if (name && name !== 'OB1') {
       items.push({ label: T.libre.borrarX(name), disabled: false, onClick: () => { if (confirm(T.wb.confirmarBorrarBloque(name))) change(ops.removeBlock(programa, name)); } });
-      if (name.startsWith('FC')) items.push({ label: T.libre.renombrarX(name), disabled: false, onClick: async () => {
+      const esLib = !!programa.bloques.find((b) => normBlockName(b.nombre) === name)?.biblioteca;
+      if (name.startsWith('FC') && !esLib) items.push({ label: T.libre.renombrarX(name), disabled: false, onClick: async () => {
         const to = (await askText({ title: T.libre.renombrarTitulo(name), label: T.libre.nuevoNombreFc, value: name, validate: (v) => {
           const t = v.toUpperCase().replace(/\s+/g, '');
           return !/^FC\d+$/.test(t) ? T.libre.fcInvalida : blocks.includes(t) && t !== name ? T.libre.yaExiste(t) : null;
@@ -264,8 +294,9 @@ export function Workbench(props: WorkbenchProps) {
         afterMres={props.hardware || senales ? (
           <>
             {props.hardware && (
-              <button className={`btn small ${programa.hw?.estaciones.length ? 'active' : ''}`} onClick={() => setHwOpen(true)}
-                title={programa.hw?.estaciones.length ? T.wb.hardwareTitulo(programa.hw.estaciones.map((e) => e.nombre).join(', '), clockByte) : T.wb.hardwareConfigurar}>
+              // atajo de Equipo ▸ Hardware del explorador: abre la misma configuración del hardware
+              <button className={`btn small ${programa.hw?.estaciones.length ? 'active' : ''}`} onClick={() => setHw({ n: Date.now() })}
+                title={hwSinCargar(programa) ? T.wb.hardwareSinCargar : programa.hw?.estaciones.length ? T.wb.hardwareTitulo(programa.hw.estaciones.map((e) => e.nombre).join(', '), clockByte) : T.wb.hardwareConfigurar}>
                 <Icon name="cpu" size={13} />{T.wb.hardware}
               </button>
             )}
@@ -298,16 +329,17 @@ export function Workbench(props: WorkbenchProps) {
             {blocks.map((b) => (
               <button key={b} role="tab" aria-selected={b === block} className={`block-tab ${b === block ? 'active' : ''}`} onClick={() => setBlock(b)}
                 onContextMenu={(e) => { if (readOnly) return; e.preventDefault(); setBlockMenu({ x: e.clientX, y: e.clientY, name: b }); }}>
-                {b}{blockErr(b) && <span className="err-dot" />}
+                {b}{programa.bloques.find((x) => normBlockName(x.nombre) === b)?.biblioteca && <Icon name="lock" size={11} />}{blockErr(b) && <span className="err-dot" />}
               </button>
             ))}
             {!readOnly && <button className="btn small ghost icon" onClick={(e) => setBlockMenu({ x: e.clientX, y: e.clientY })} title={T.wb.anadirBloque} aria-label={T.wb.anadirBloque}><Icon name="plus" size={14} /></button>}
             <span className="spacer" />
             <span className="faint" style={{ fontSize: 11.5, paddingBottom: 4 }}>
-              {block === 'OB1' ? T.wb.descOb1 : block === 'OB100' ? T.wb.descOb100 : T.wb.descFc}
+              {blk?.biblioteca ? T.biblioteca.protegido(blk.biblioteca) : block === 'OB1' ? T.wb.descOb1 : block === 'OB100' ? T.wb.descOb100 : T.wb.descFc}
             </span>
           </div>
-          <LoadStatus sim={sim} onErrors={() => showBottom('msg')} onGoto={gotoSeg} pistaCiclo={pistaCiclo} onActivarCiclo={activarCiclo} />
+          <LoadStatus sim={sim} onErrors={() => showBottom('msg')} onGoto={gotoSeg} pistaCiclo={pistaCiclo} hwPendiente={!!props.hardware && hwSinCargar(programa)}
+            onAbrirHw={props.hardware ? (ciclo) => setHw({ n: Date.now(), ciclo }) : undefined} />
           {stop && (
             <div className="stop-banner" role="alert">
               <Icon name="alert" />
@@ -325,12 +357,19 @@ export function Workbench(props: WorkbenchProps) {
                 {!readOnly && <button className="btn primary" onClick={() => { change(ops.addBlock(programa, 'OB1')); setBlock('OB1'); }}><Icon name="plus" size={14} />{T.wb.crearOb1Boton}</button>}
               </div>
             )}
+            {blk?.biblioteca && (
+              <div className="lib-bloque">
+                <div className="lib-bloque-tit"><Icon name="lock" size={16} /><b>{conEspacio(BIBLIOTECA[blk.biblioteca].bloque)} «{blk.biblioteca}»</b><span className="faint">— {T.biblioteca.ayuda[blk.biblioteca].titulo}</span></div>
+                <p><Rico t={T.biblioteca.protegidoTexto(conEspacio(BIBLIOTECA[blk.biblioteca].bloque))} /></p>
+                <AyudaLib id={blk.biblioteca} />
+              </div>
+            )}
             {blk?.segmentos.map((s, i) => (
               <SegmentCard key={segId(s)} sim={sim} block={block} seg={s} index={i} total={blk.segmentos.length} observe={observe && sim.cpu.state === 'RUN'}
                 readOnly={readOnly} lang={nemo} symbols={symbolNames} symByAddr={symByAddr} focused={focusSeg === segId(s)} onFocus={() => setFocusSeg(segId(s))}
-                onChange={(ns) => change(ops.updateSegment(programa, block, segId(s), () => ns), ns.lang === 'KOP')} ops={segOps(s)} avisos={avisosDe.get(segId(s))} />
+                onChange={(ns) => cambiarSegmento(s, ns)} ops={segOps(s)} avisos={avisosDe.get(segId(s))} interfaces={interfaces} />
             ))}
-            {!readOnly && blk && (
+            {!readOnly && blk && !blk.biblioteca && (
               <div className="add-seg">
                 <button className="btn" onClick={() => { const n = ops.newSegment('AWL'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="plus" size={14} />{T.wb.segmentoAwl}</button>
                 <button className="btn" onClick={() => { const n = ops.newSegment('KOP'); change(ops.insertSegment(programa, block, null, n)); setFocusSeg(segId(n)); }}><Icon name="ladder" size={14} />{T.wb.segmentoKop}</button>
@@ -406,14 +445,14 @@ export function Workbench(props: WorkbenchProps) {
           </VatFlotante>
         );
       })}
-      {hwOpen && <HardwareDialog sim={sim} programa={programa} onChange={(p) => change(p)} onClose={() => setHwOpen(false)} />}
+      {hw && props.hardware && <HwConfig sim={sim} programa={programa} pedido={hw} onChange={(p) => change(p)} onCerrar={() => setHw(null)} />}
       {blockMenu && <ContextMenu x={blockMenu.x} y={blockMenu.y} items={blockItems(blockMenu.name)} onClose={() => setBlockMenu(null)} />}
     </div>
   );
 }
 
 /** Franja de estado siempre visible: ¿lo que ves está cargado y ejecutándose en la CPU? */
-function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], onActivarCiclo }: { sim: SimController; onErrors: () => void; onGoto: (b: string, seg?: string) => void; pistaCiclo?: { key: string; byte: number }[]; onActivarCiclo?: (byte: number) => void }) {
+function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], hwPendiente, onAbrirHw }: { sim: SimController; onErrors: () => void; onGoto: (b: string, seg?: string) => void; pistaCiclo?: { key: string; byte: number }[]; hwPendiente?: boolean; onAbrirHw?: (ciclo?: number) => void }) {
   useSimTick(sim, 8, () => [sim.rev, sim.cpu.state, sim.playing, sim.cpu.phase]);
   const cpu = sim.cpu;
   const errs = sim.compiled.errors;
@@ -433,7 +472,16 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], onActivarCiclo }: 
         {errs.length > 1 && <button className="btn small ghost" onClick={onErrors}>{T.wb.estado.verTodos}</button>}
       </>
     );
-  } else if (pistaCiclo.length && onActivarCiclo) {
+  } else if (hwPendiente && onAbrirHw) {
+    cls = 'warn';
+    body = (
+      <>
+        <Icon name="cpu" size={13} />
+        <span className="grow"><Rico t={T.wb.estado.hwSinCargar} /></span>
+        <button className="btn small" onClick={() => onAbrirHw()}>{T.wb.estado.abrirHw}</button>
+      </>
+    );
+  } else if (pistaCiclo.length && onAbrirHw) {
     cls = 'warn';
     const byte = pistaCiclo[0].byte;
     const nombres = pistaCiclo.slice(0, 3).map((m) => m.key.replace('M', 'M ')).join(', ');
@@ -441,7 +489,7 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], onActivarCiclo }: 
       <>
         <Icon name="clock" size={13} />
         <span className="grow" title={T.wb.estado.cicloTitulo}><Rico t={T.wb.estado.cicloTexto(nombres + (pistaCiclo.length > 3 ? '…' : ''))} /></span>
-        <button className="btn small" onClick={() => onActivarCiclo(byte)}>{T.wb.estado.activarCiclo(byte)}</button>
+        <button className="btn small" onClick={() => onAbrirHw(byte)}>{T.wb.estado.activarCiclo(byte)}</button>
       </>
     );
   } else if (cpu.state === 'STOP') {

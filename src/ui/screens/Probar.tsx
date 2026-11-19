@@ -5,14 +5,15 @@ import { Icon } from '../common/Icon';
 import { Workbench } from '../workbench/Workbench';
 import { useWorkbenchSim } from '../workbench/useWorkbenchSim';
 import { emptyWbState, type WbState } from '../workbench/types';
-import { programFromAwl, type Programa } from '../../core/program';
+import { conBibliotecaUsada, programFromAwl, type Programa } from '../../core/program';
 import { useProjects } from '../../store/projects';
 import { go } from '../router';
 import { T } from '../../i18n';
 
 /** `nemotecnia`: la del código que se abre (en la teoría en inglés, la inglesa) */
 export function ProbarModal({ code, title, onClose, nemotecnia = 'de' }: { code: string; title: string; onClose: () => void; nemotecnia?: 'de' | 'en' }) {
-  const [prog, setProg] = useState<Programa>(() => ({ ...programFromAwl(code.replace(/\n$/, '')), nemotecnia }));
+  // si el código llama al FC 82 o al FC 83 con sus parámetros, esos bloques de biblioteca se añaden solos
+  const [prog, setProg] = useState<Programa>(() => conBibliotecaUsada({ ...programFromAwl(code.replace(/\n$/, '')), nemotecnia }));
   const [wb, setWb] = useState<WbState>(emptyWbState());
   const sim = useWorkbenchSim(`probar-${title}`, prog, wb);
   const crear = useProjects((s) => s.crear);

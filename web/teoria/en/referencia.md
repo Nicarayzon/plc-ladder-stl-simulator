@@ -162,7 +162,7 @@ Bit memory is the programmer's "bit RAM". It is used for:
 
 **How to enable it**:
 - On the real CPU: *CPU properties → Cycle/Clock memory*. Tick the box, choose the byte (for example, MB100) and download the hardware configuration.
-- In the simulator: **Hardware** button → CPU → *Ciclo / marca de ciclo* (the interface is in Spanish). It uses MB0 by default, but any byte can be chosen.
+- In the simulator, the same way: in the explorer, **Station(1) ▸ Hardware** (double-click; the **Hardware** button of the toolbar is a shortcut) → double-click the **CPU** → *Cycle/Clock Memory* tab. Tick the box, type the byte and press *OK*. Then *Station ▸ Save and Compile* and *PLC ▸ Download to Module*, which asks to switch the CPU to STOP. Until it is downloaded, the CPU keeps the previous configuration.
 
 | Bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |---|---|---|---|---|---|---|---|---|
@@ -180,7 +180,7 @@ With MB100 as clock memory, `M 100.5` has a period of 1 s: 0.5 s at 0 and 0.5 s 
 
 **Watch out**:
 - **The program must only read that byte.** The CPU overwrites it every cycle, so anything the program writes to it is lost. The simulator warns you if the program writes to it.
-- The byte must stay free: do not use it for anything else, not even inside a word (`MW 99` and `MW 100` include `MB 100`).
+- The byte must stay free: do not use it for anything else, not even inside a word (`MW 99` and `MW 100` include `MB 100`), nor inside the range of an FC 82 or FC 83 (§5.5).
 - It is not suitable for accurate timing: when the condition becomes true, the bit may be halfway through its period, so the first flash can be shorter. For exact delays, use timers (§6.6).
 - In the simulator, the byte is updated at the start of each cycle, before the inputs are read. If the clock memory is disabled or the byte is changed, the old byte is set to 0.
 
@@ -341,6 +341,63 @@ END_FUNCTION
 ```
 
 In Ladder a call is a **box** with EN/ENO and the parameters as pins.
+
+### 5.5 Library blocks: FC 82 (RSET) and FC 83 (SSET)
+
+The **standard library** brings ready-made blocks that are copied into the project. Two very useful ones are:
+
+| Block | Symbolic name | What it does |
+|---|---|---|
+| **FC 82** | RSET | Resets N consecutive bits to **0** in one go |
+| **FC 83** | SSET | Sets N consecutive bits to **1** in one go |
+
+Both have the same parameters:
+
+| Parameter | Declaration | Type | Meaning |
+|---|---|---|---|
+| `S_BIT` | IN | POINTER | Address of the **first bit** of the range: `M 0.0`, `Q 4.0`… It is a pointer, so `P#M 0.0` is also valid |
+| `N` | IN | INT | **How many** consecutive bits: a constant (`8`) or a word (`MW 10`) |
+
+**Typical use**: clearing the step memory bits of a GRAFCET in one go when the sequence starts or is reinitialized, instead of one `R` for each step, and then activating the initial step.
+
+**How to bring it into the project**: it is copied from the library to the block folder of the program, next to OB1, and downloaded to the CPU with the other blocks. If the CPU has an OB1 that calls FC 82 but does not have FC 82, it goes to **STOP** when it calls it (block does not exist, OB121 not loaded).
+- In the simulator: book button of the explorer → **Converting Blocks ▸ Blocks**, and drag FC 82 to the **Blocks** folder of the project. With the block selected, **F1** opens its help. In the project it is protected: its code cannot be seen.
+- In LAD it is also in the catalog, *Libraries* group: when you place the box in a network, the block is copied to the project.
+
+**Call in STL**: the parameters go below the `CALL`, one per line. In the simulator, when you type `CALL FC 82` and press Enter, the editor adds the empty parameters.
+
+```awl
+      U     E 0.0          // reset condition
+      SPBN  m001           // if it is not met, skip the call
+      CALL  FC 82
+        S_BIT := M 0.0     // first bit
+        N     := 8         // how many bits: M 0.0 to M 0.7
+m001: NOP   0
+```
+
+It resets M 0.0 to M 0.7, but only in the cycles in which I 0.0 = 1.
+
+**In LAD** it is a box with `EN`, `S_BIT` and `N` on the left and `ENO` on the right. To make it conditional, just put the contact before `EN`.
+
+**Watch out**:
+- A `CALL` always runs, in every cycle, without looking at the RLO: without a condition, the bits would be 0 all the time. Make it conditional with a jump (`JCN`) or, in LAD, with the `EN` input. Another option is to call it in **OB100**, which only runs at startup. `UC` and `CC` are no use: they only call blocks without parameters.
+- It depends on the **MCR** (§7.20): inside a disabled MCR zone it changes nothing.
+- If `N` is 0 or negative, it does nothing. If the range goes beyond the area, the CPU goes to STOP.
+- On return, `BR` = 1 (in LAD, `ENO` = 1) and `/FC` = 0: the next check starts a new chain.
+- The range must not include the **clock memory** byte (§2.6), or it will clear it.
+
+**Example with GRAFCET**: the initialization push button I 0.0 clears all the steps (M 0.0 … M 0.7) and activates the initial one.
+
+```awl
+      U     E 0.0          // initialization push button
+      SPBN  m002
+      CALL  FC 82          // clears all the steps
+        S_BIT := M 0.0
+        N     := 8
+      SET
+      S     M 0.0          // activates the initial step
+m002: NOP   0
+```
 
 ---
 
@@ -990,7 +1047,7 @@ SIG:  T     MW 10           // loop counter
 | `BE` | Block end |
 | `BEU` | Unconditional block end |
 | `BEC` | Block end if RLO = 1. If RLO = 0 it carries on, with RLO := 1 and /FC := 0 |
-| `CALL` | Call with parameters (§5.4) |
+| `CALL` | Call with parameters (§5.4). For example, to a library block such as FC 82 (§5.5) |
 | `UC` / `CC` | Unconditional / conditional call, without parameters |
 
 ### 7.18 Data blocks

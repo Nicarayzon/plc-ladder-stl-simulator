@@ -7,6 +7,7 @@ import { type Area, type Op, type Symbols } from './operands';
 import { s5timeDecode } from './constants';
 import { bcdDecode, bcdEncode, bitsF32, f32Bits, roundHalfEven, s16, s32, S5_BASES_MS, u16, u32 } from './num';
 import { BITLOGIC, CMP, CONV, FLOATFN, JUMPS, NEST_OPEN, SHIFTS, TSTART, WORDLOG } from './mnemonics';
+import { BIBLIOTECA, type LibId } from './biblioteca';
 import { T } from '../i18n';
 
 export type TimerMode = 'SI' | 'SV' | 'SE' | 'SS' | 'SA' | null;
@@ -478,15 +479,55 @@ export class CPU {
     if (this.tracing) this.extra = {};
     const r = this.exec(ins, f);
     if (r === CALL) {
+      const name = `${ins.op!.name}${ins.op!.n}`;
+      const lib = this.blocks.get(name)?.lib;
+      if (lib) {
+        // bloque de biblioteca: se ejecuta de una vez, como una sola instrucción
+        this.runLib(lib, ins, name);
+        this.record(f, f.pc, snap, ins);
+        f.pc += 1;
+        this.settle();
+        return;
+      }
       f.pendCall = true;
       f.pend = snap;
-      this.enterBlock(`${ins.op!.name}${ins.op!.n}`, false, f.depth + 1);
+      this.enterBlock(name, false, f.depth + 1);
       this.settle();
       return;
     }
     this.record(f, f.pc, snap, ins);
     f.pc = r === END ? f.blk.instrs.length : r === NEXT ? f.pc + 1 : r;
     this.settle();
+  }
+
+  /**
+   * FC 82 (RSET) y FC 83 (SSET): ponen a 0 o a 1 los N bits consecutivos que empiezan en S_BIT. Dependen del MCR:
+   * dentro de una zona MCR desactivada no cambian nada. N ≤ 0 no hace nada; si el rango se sale del área, la CPU
+   * pasa a STOP. Al volver, como cualquier bloque: /ER = 0, OR = 0 y OS = 0; y BIE = 1 (ENO del cuadro KOP).
+   */
+  private runLib(lib: LibId, ins: Instr, name: string) {
+    const def = BIBLIOTECA[lib];
+    const pS = ins.params?.find((p) => p.name === 'S_BIT')?.op;
+    const pN = ins.params?.find((p) => p.name === 'N')?.op;
+    if (!pS || !pN) throw new PLCError(T.motor.llamadaSinParametros(name.replace(/^FC/, 'FC ')));
+    const n = s16(pN.kind === 'const' ? pN.value! : this.rmem(pN));
+    // el MCR lo evalúa el propio bloque (activa el MCR dentro), así que mira la pila del que llama
+    const mcr = this.mcrStack.every((v) => v);
+    if (n > 0 && mcr) {
+      this.resolve(pS);
+      const buf = this.buf(pS.area!, pS.db);
+      const ini = this.rByte * 8 + this.rBit;
+      const fin = ini + n;
+      if (fin > buf.length * 8) throw new PLCError(T.motor.fueraDeRango(pS.area!, Math.floor((fin - 1) / 8)));
+      for (let i = ini; i < fin; i++) {
+        if (def.valor) buf[i >> 3] |= 1 << (i & 7);
+        else buf[i >> 3] &= ~(1 << (i & 7)) & 0xFF;
+      }
+    }
+    this.os = 0;
+    this.fc = 0;
+    this.orb = 0;
+    this.br = 1;
   }
 
   private record(f: Frame, pc: number, snap: PendSnap, insIn: Instr | undefined) {

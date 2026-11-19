@@ -4,6 +4,7 @@ import { normBlockName } from '../../core/compiler';
 import { reId } from '../../kop/ids';
 import type { SegmentoKOP } from '../../kop/model';
 import { newId } from '../../kop/ids';
+import { BIBLIOTECA, type LibId } from '../../core/biblioteca';
 
 export const blockIndex = (p: Programa, name: string) => p.bloques.findIndex((b) => normBlockName(b.nombre) === name);
 
@@ -59,12 +60,25 @@ export function nextFc(p: Programa): string {
   for (let i = 1; ; i++) if (!used.has(`FC${i}`)) return `FC${i}`;
 }
 
+const blockOrder = (n: string) => (n === 'OB1' ? 0 : n === 'OB100' ? 1 : n.startsWith('OB') ? 2 : 3 + parseInt(n.slice(2), 10) / 1000);
+const sortBlocks = (list: Bloque[]) => [...list].sort((a, b) => blockOrder(normBlockName(a.nombre)) - blockOrder(normBlockName(b.nombre)));
+
 export function addBlock(p: Programa, name: string): Programa {
   if (blockIndex(p, name) >= 0) return p;
-  const blocks = [...p.bloques, { nombre: name, segmentos: [newSegment('AWL')] }];
-  const order = (n: string) => (n === 'OB1' ? 0 : n === 'OB100' ? 1 : n.startsWith('OB') ? 2 : 3 + parseInt(n.slice(2), 10) / 1000);
-  blocks.sort((a, b) => order(normBlockName(a.nombre)) - order(normBlockName(b.nombre)));
-  return { ...p, bloques: blocks };
+  return { ...p, bloques: sortBlocks([...p.bloques, { nombre: name, segmentos: [newSegment('AWL')] }]) };
+}
+
+/** Copia un bloque de la biblioteca al proyecto. Si ya hay un bloque con ese número, lo sustituye. */
+export function addLibBlock(p: Programa, id: LibId): Programa {
+  const def = BIBLIOTECA[id];
+  const resto = p.bloques.filter((b) => normBlockName(b.nombre) !== def.bloque);
+  return { ...p, bloques: sortBlocks([...resto, { nombre: def.bloque, segmentos: [], biblioteca: id }]) };
+}
+
+/** ¿Qué hay en el proyecto con el número de ese bloque de biblioteca? Nada, ese mismo bloque o un bloque del alumno. */
+export function libEnProyecto(p: Programa, id: LibId): 'no' | 'igual' | 'otro' {
+  const b = p.bloques.find((x) => normBlockName(x.nombre) === BIBLIOTECA[id].bloque);
+  return !b ? 'no' : b.biblioteca === id ? 'igual' : 'otro';
 }
 
 export function removeBlock(p: Programa, name: string): Programa {

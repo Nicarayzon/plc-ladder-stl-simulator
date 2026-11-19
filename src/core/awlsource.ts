@@ -3,6 +3,7 @@ import { normBlockName, splitLines } from './compiler';
 import { newSegId, type Bloque, type Programa, type Segmento } from './program';
 import { kopToAwlText } from '../kop/compile';
 import { translateAwl } from './translate';
+import { esLibId, libPorBloque } from './biblioteca';
 
 export function exportAwlSource(p: Programa): string {
   const out: string[] = [];
@@ -10,6 +11,11 @@ export function exportAwlSource(p: Programa): string {
     const name = normBlockName(b.nombre);
     const isOb = name.startsWith('OB');
     const num = name.replace(/^\D+/, '');
+    if (b.biblioteca) {
+      // bloque de biblioteca: solo la cabecera (FAMILY : BIBLIOTECA), para volver a crearlo al importar
+      out.push(`FUNCTION FC ${num} : VOID`, `TITLE =${b.biblioteca}`, 'FAMILY : BIBLIOTECA', 'VERSION : 0.1', 'BEGIN', 'END_FUNCTION', '');
+      continue;
+    }
     out.push(isOb ? `ORGANIZATION_BLOCK OB ${num}` : `FUNCTION FC ${num} : VOID`);
     out.push(`TITLE =${b.comentario ? b.comentario : ''}`);
     out.push('VERSION : 0.1', '');
@@ -54,7 +60,8 @@ export function importAwlSource(text: string): Programa {
   const closeBlock = () => {
     closeSeg();
     if (cur) {
-      if (!cur.segmentos.length) cur.segmentos.push({ lang: 'AWL', id: newSegId(), awl: '' });
+      if (cur.biblioteca) cur.segmentos = [];
+      else if (!cur.segmentos.length) cur.segmentos.push({ lang: 'AWL', id: newSegId(), awl: '' });
       bloques.push(cur);
     }
     cur = null;
@@ -80,8 +87,13 @@ export function importAwlSource(text: string): Programa {
     if (!inBody) {
       const t = /^TITLE\s*=(.*)$/i.exec(l);
       if (t) cur.comentario = t[1].trim() || undefined;
+      if (/^FAMILY\s*:\s*BIBLIOTECA\b/i.test(l)) {
+        const id = esLibId(cur.comentario) ? cur.comentario : libPorBloque(normBlockName(cur.nombre))?.id;
+        if (id) { cur.biblioteca = id; cur.comentario = undefined; }
+      }
       continue;
     }
+    if (cur.biblioteca) continue;
     if (/^NETWORK\b/i.test(l)) { closeSeg(); seg = { comentario: [], lines: [] }; continue; }
     if (!seg) seg = { comentario: [], lines: [] };
     const t = /^TITLE\s*=(.*)$/i.exec(l);

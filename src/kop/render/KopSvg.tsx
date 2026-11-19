@@ -1,7 +1,7 @@
 // Dibujo SVG de un segmento KOP (a partir de la maquetación) con estados de corriente
 import { Fragment, type ReactNode } from 'react';
 import type { Elem, Salida } from '../model';
-import { CONT_EN, TEMP_EN } from '../model';
+import { BOX_DEFS, CONT_EN, TEMP_EN } from '../model';
 import type { LBox, LItem, Layout, PowerRef } from '../layout';
 import type { Flow, Pw } from '../flow';
 import type { KopIssue } from '../validate';
@@ -218,7 +218,9 @@ export function KopSvg(o: RenderOpts) {
     if (s.k === 'TEMP') { title = o.lang === 'en' ? TEMP_EN[s.tipo] : s.tipo; opField = 't'; opVal = s.t; }
     if (s.k === 'CONT') { title = o.lang === 'en' ? CONT_EN[s.tipo] : s.tipo; opField = 'z'; opVal = s.z; }
     if (s.k === 'BIEST') { title = s.tipo; opField = 'op'; opVal = s.op; }
-    if (s.k === 'BOX') title = s.fn;
+    // un bloque de biblioteca lleva su nombre simbólico debajo («FC82» / «RSET»)
+    let sub = '';
+    if (s.k === 'BOX') { title = s.fn; sub = BOX_DEFS[s.fn].lib ?? ''; }
     const qCls = pwClass(flow, { id: b.id, side: 'q' });
     const qOn = qCls.includes('on');
     return (
@@ -227,6 +229,7 @@ export function KopSvg(o: RenderOpts) {
         <rect x={x0 - 2} y={top - 20} width={x1 - x0 + 4} height={bot - top + 24} rx={6} className={`hit ${selected === b.id ? 'sel' : ''} ${o.issues.get(b.id)?.length ? 'err' : ''}`} />
         <rect x={x0 + 4} y={top} width={x1 - x0 - 8} height={bot - top} rx={3} className={`sym-box box ${flow ? (qOn ? 'c-on' : 'c-off') : ''}`} />
         <text x={cx} y={top + 13} textAnchor="middle" className="boxtxt">{title}</text>
+        {sub && <text x={cx} y={top + 24} textAnchor="middle" className="sym">{sub}</text>}
         {opField && opVal && (() => { const sh = o.showOp(opVal); return sh.sub ? <text x={cx} y={top + 24} textAnchor="middle" className="sym">{sh.sub}</text> : null; })()}
         {opField && <OpText o={o} id={b.id} field={opField} x={cx} y={top - 6} value={opVal} noSub noLive />}
         {b.pins.map((p, i) => {

@@ -42,6 +42,8 @@ interface Props {
   onFocus: () => void;
   /** Avisos del programa (L07…): los de este segmento salen subrayados en el editor AWL */
   avisos?: ProgramIssue[];
+  /** Parámetros de los bloques de biblioteca del proyecto (FC82 → S_BIT, N), para escribirlos tras «CALL FC 82» */
+  interfaces?: Record<string, string[]>;
 }
 
 const hex = (v: number) => (v >>> 0).toString(16).toUpperCase().padStart(8, '0');
@@ -133,7 +135,7 @@ function calcValues(sim: SimController, operands: { line: number; pos: number; r
   });
 }
 
-function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, onFocus, avisos }: Props & { seg: Extract<Segmento, { lang: 'AWL' }> }) {
+function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, onFocus, avisos, interfaces }: Props & { seg: Extract<Segmento, { lang: 'AWL' }> }) {
   const id = seg.id;
   const observeHex = useSettings((s) => s.observeHex);
   const observeExtra = useSettings((s) => s.observeExtra);
@@ -181,7 +183,7 @@ function AwlBody({ sim, block, seg, observe, readOnly, lang, symbols, onChange, 
       <AwlEditor value={seg.awl} readOnly={readOnly} lang={lang} symbols={symbols} diagnostics={diags} observe={obs} observeWidth={w} values={values}
         breakpoints={bps} onToggleBreakpoint={(line) => sim.toggleBreakpoint(originKeyLine(block, id, line))}
         currentLine={cur ? parseInt(cur.slice(pre.length), 10) : null} stopLine={stopLine}
-        onChange={(v) => onChange({ ...seg, awl: v })} onFocus={onFocus} />
+        onChange={(v) => onChange({ ...seg, awl: v })} onFocus={onFocus} interfaces={interfaces} />
     </>
   );
 }

@@ -84,7 +84,7 @@
 <p><strong>Cómo se activa</strong>:</p>
 <ul>
 <li>En la CPU real: <em>Propiedades de la CPU → Ciclo/marca de ciclo</em>. Se marca la casilla, se elige el byte (por ejemplo, MB100) y se carga la configuración del hardware.</li>
-<li>En el simulador: botón <strong>Hardware</strong> → CPU → <em>Ciclo / marca de ciclo</em>. Por defecto usa MB0, pero se puede elegir cualquier byte.</li>
+<li>En el simulador, igual: en el explorador, <strong>Equipo(1) ▸ Hardware</strong> (doble clic; el botón <strong>Hardware</strong> de la barra es un atajo) → doble clic en la <strong>CPU</strong> → pestaña <em>Ciclo/Marca de ciclo</em>. Se marca la casilla, se escribe el byte y se pulsa <em>Aceptar</em>. Después, <em>Equipo ▸ Guardar y compilar</em> y <em>Sistema de destino ▸ Cargar en módulo</em>, que pide pasar la CPU a STOP. Hasta que se carga, la CPU sigue con la configuración anterior.</li>
 </ul>
 
 
@@ -136,7 +136,7 @@
 <p><strong>Cuidado</strong>:</p>
 <ul>
 <li><strong>El programa solo debe leer ese byte.</strong> La CPU lo sobrescribe en cada ciclo, así que lo que escriba el programa se pierde. El simulador avisa si el programa escribe en él.</li>
-<li>El byte tiene que quedar libre: no lo uses para otra cosa, tampoco dentro de una palabra (<code>MW 99</code> y <code>MW 100</code> incluyen <code>MB 100</code>).</li>
+<li>El byte tiene que quedar libre: no lo uses para otra cosa, tampoco dentro de una palabra (<code>MW 99</code> y <code>MW 100</code> incluyen <code>MB 100</code>), ni dentro del rango de un FC 82 o un FC 83 (ver <a href="../bloques-ob-fc-fb-db/#bloques-de-biblioteca-fc-82-rset-y-fc-83-sset">Bloques de biblioteca: FC 82 (RSET) y FC 83 (SSET)</a>).</li>
 <li>No sirve para medir tiempos con precisión: cuando se cumple la condición, el bit puede estar a mitad de su periodo, así que el primer parpadeo puede ser más corto. Para retardos exactos se usan los temporizadores (ver <a href="../temporizadores/#temporizadores-en-kop">Temporizadores en KOP</a>).</li>
 <li>En el simulador, el byte se actualiza al empezar cada ciclo, antes de leer las entradas. Si se desactiva la marca de ciclo o se cambia de byte, el byte anterior se pone a 0.</li>
 </ul></section>

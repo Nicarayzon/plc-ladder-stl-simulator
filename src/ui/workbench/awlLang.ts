@@ -16,6 +16,11 @@ export const awlStream = StreamLanguage.define<St>({
       return 'comment';
     }
     if (state.col === 'start') {
+      // parámetro de un CALL: «S_BIT := M 0.0»
+      if (stream.match(/^[A-Za-z_][A-Za-z0-9_]*(?=\s*:=)/)) {
+        state.col = 'op';
+        return 'propertyName';
+      }
       if (stream.match(/^[A-Za-z_][A-Za-z0-9_]{0,3}\s*:(?!=)/)) {
         return 'labelName';
       }
@@ -25,6 +30,7 @@ export const awlStream = StreamLanguage.define<St>({
         return 'keyword';
       }
     }
+    if (stream.match(':=')) return 'operator';
     if (stream.match(/^"[^"]*"?/)) return 'string';
     if (stream.match(/^(S5T|S5TIME|T|TIME|L|DW#16|W#16|B#16|16|2|C|P|D|TOD|B)#[^\s;/]*/i)) return 'number';
     if (stream.match(/^'[^']*'/)) return 'number';

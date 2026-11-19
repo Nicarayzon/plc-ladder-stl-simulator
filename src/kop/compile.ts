@@ -40,6 +40,10 @@ export function compileKopSegment(seg: SegmentoKOP, ctx: KopCtx): KopLine[] {
   const setLabel = (l: string) => {
     pendingLabel = l;
   };
+  /** Línea de parámetro de un CALL (`  S_BIT := M 0.0`): no es una instrucción, va con la anterior */
+  const emitParam = (name: string, value: string, elem: string) => {
+    out.push({ mn: ':=', op: value, text: `        ${name} := ${value}`.trimEnd(), line: out.length + 1, origin: { block: ctx.block, seg: seg.id, elem, role: 'pin' }, lang: 'de' } as KopLine);
+  };
 
   function serie(list: Elem[], primero: boolean, ownerId: string) {
     if (!list.length && primero) {
@@ -207,6 +211,18 @@ export function compileKopSegment(seg: SegmentoKOP, ctx: KopCtx): KopLine[] {
         const def = BOX_DEFS[o.fn];
         const lbl = newLabel();
         emit('SPBNB', lbl, o.id, 'key');
+        if (def.lib) {
+          // llamada a un bloque de biblioteca: CALL con sus parámetros; ENO = BIE al volver
+          emit('CALL', o.fn.replace(/^FC/, 'FC '), o.id);
+          const ancho = Math.max(...def.ins.map((n) => n.length));
+          for (const n of def.ins) emitParam(n.padEnd(ancho), o.p[n] ?? '', o.id);
+          setLabel(lbl);
+          if (o.eno?.length) {
+            emit('U', 'BIE', o.id, 'q');
+            ramas(o.eno, o.id, false);
+          } else emit('NOP', '0', o.id);
+          break;
+        }
         if (o.fn === 'MOVE') {
           emit('L', o.p.IN ?? '', o.id);
         } else if (def.ins.includes('N')) {

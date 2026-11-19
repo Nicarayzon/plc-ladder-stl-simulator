@@ -71,6 +71,11 @@ export class SimController {
   index: OriginIndex = { map: new Map(), rev: new Map() };
   /** Programa válido pendiente de cargar al terminar el ciclo en curso */
   pending: { cp: CompiledProgram; pc: ProgramCompile } | null = null;
+  /**
+   * Último programa editado que aún no se ha compilado (el banco de trabajo compila 400 ms después del último cambio).
+   * Al pasar a RUN se compila antes, para no arrancar con el programa anterior.
+   */
+  programaPendiente: Programa | null = null;
   playing = false;
   /** Arrancar solo en cuanto el programa no tenga errores (hasta que el alumno pause a mano) */
   autoPlay = false;
@@ -166,6 +171,7 @@ export class SimController {
   // ───────────── programa ─────────────
   /** Recompila el programa. Si es válido se carga en el siguiente límite de ciclo. */
   setProgram(p: Programa) {
+    this.programaPendiente = null;
     this.programa = p;
     this.cpu.setClockByte(clockByteOf(p)); // el hardware se aplica aunque el código tenga errores
     const pc = compileProgram(p);
@@ -207,6 +213,7 @@ export class SimController {
 
   /** Selector RUN/STOP de la CPU. RUN desde STOP = rearranque completo (OB100). */
   setRun(run: boolean) {
+    if (run && this.programaPendiente && this.programaPendiente !== this.programa) this.setProgram(this.programaPendiente);
     if (run) {
       if (this.cpu.state === 'STOP') {
         if (this.hasErrors) {

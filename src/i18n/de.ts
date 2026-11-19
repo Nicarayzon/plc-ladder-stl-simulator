@@ -221,11 +221,19 @@ export const de: Textos = {
 
 ## Projekte (freier Simulator)
 
-Links im freien Simulator ist der Projekt-Explorer. **„Neu“** legt ein Projekt (einen Ordner) mit dem Namen deiner Wahl an; darin erstellst du den **OB1** und bei Bedarf den OB100 und FCs. Mit Rechtsklick auf einen Ordner kannst du das Projekt umbenennen, duplizieren, exportieren oder löschen; mit Rechtsklick auf einen Baustein löschst oder benennst du ihn um. Der Pfeil ‹ blendet den Explorer aus.
+Links im freien Simulator ist der Projekt-Explorer. **„Neu“** legt ein Projekt (einen Ordner) mit dem Namen deiner Wahl an. Darin gibt es zwei Ordner: **Station(1)** mit der **Hardware** der CPU und **Bausteine**, wo du den **OB1** und bei Bedarf den OB100, FCs und Variablentabellen erstellst. Mit Rechtsklick auf ein Projekt kannst du es umbenennen, duplizieren, exportieren oder löschen; mit Rechtsklick auf einen Baustein löschst oder benennst du ihn um. Der Pfeil ‹ blendet den Explorer aus.
 
 ## Hardware und Taktmerker
 
-Die Schaltfläche **Hardware** (neben RUN/STOP/MRES im freien Simulator) konfiguriert die Hardware des Projekts. Mit „Hinzufügen“ wird die Station **Kompakt-CPU** eingefügt, und in ihren Eigenschaften aktivierst du den **Taktmerker** und wählst sein Merkerbyte (standardmäßig MB0). Jedes Bit dieses Bytes schwingt von selbst, mit gleich langem Impuls und gleich langer Pause:
+Der Taktmerker wird in der Hardwarekonfiguration aktiviert, wie bei der echten CPU:
+
+1. Öffne im Explorer **Station(1)** und mach einen **Doppelklick auf Hardware** (oder drück die Schaltfläche **Hardware** in der Leiste neben RUN/STOP/MRES, eine Abkürzung). Es öffnet sich der Baugruppenträger mit Stromversorgung, CPU und ihrer integrierten E/A.
+2. **Doppelklick auf die CPU** (Steckplatz 2) oder Rechtsklick → *Objekteigenschaften…*.
+3. Setz im Register **Zyklus/Taktmerker** das Häkchen bei **Taktmerker**, gib das **Merkerbyte** ein (zum Beispiel 100) und drück **OK**.
+4. **Station ▸ Speichern und übersetzen** (Strg+S).
+5. **Zielsystem ▸ Laden in Baugruppe**. Ist die CPU in RUN, fragt sie, ob sie in STOP gehen soll, und am Ende, ob sie wieder in RUN gehen soll.
+
+Bis sie geladen ist, behält die CPU die vorige Konfiguration, und der Statusstreifen weist darauf hin. Jedes Bit des Bytes schwingt von selbst, mit gleich langem Impuls und gleich langer Pause:
 
 | Bit | Merker (Byte 0) | Periode | Frequenz |
 |---|---|---|---|
@@ -238,7 +246,17 @@ Die Schaltfläche **Hardware** (neben RUN/STOP/MRES im freien Simulator) konfigu
 | 6 | M 0.6 | 1,6 s | 0,625 Hz |
 | 7 | M 0.7 | 2 s | 0,5 Hz |
 
-Sie werden wie jeder andere Merker verwendet, zum Beispiel für einen Blinker mit 1 s: \`U M 0.5\` / \`= A 124.7\`. Schreibe aus dem Programm nicht in dieses Byte: Die CPU überschreibt es in jedem Zyklus. Die Konfiguration wird mit dem Projekt gespeichert.
+Sie werden wie jeder andere Merker verwendet, zum Beispiel für einen Blinker mit 1 s: \`U M 0.5\` / \`= A 124.7\`. Schreibe aus dem Programm nicht in dieses Byte: Die CPU überschreibt es in jedem Zyklus. Nimm es auch nicht in den Bereich eines FC 82 auf. Die Konfiguration wird mit dem Projekt gespeichert.
+
+## Standardbibliothek (FC 82 und FC 83)
+
+Die Schaltfläche mit dem Buch im Explorer (oder Rechtsklick auf **Bausteine** → *Standardbibliothek öffnen…*) öffnet die Bibliothek. In **Konvertierungsbausteine ▸ Bausteine** liegen **FC 82 (RSET)**, der einen Bitbereich auf 0 setzt, und **FC 83 (SSET)**, der ihn auf 1 setzt. Mit einem markierten Baustein öffnet **F1** seine Hilfe.
+
+- Um ihn ins Projekt zu holen, **zieh ihn in den Ordner Bausteine**, nimm Strg+C in der Bibliothek und Strg+V im Ordner, oder drück «Ins Projekt kopieren». Er landet geschützt neben dem OB1.
+- Du rufst ihn mit \`CALL FC 82\` und seinen Parametern auf, einer pro Zeile: \`S_BIT := M 0.0\` (erstes Bit) und \`N := 8\` (wie viele Bits). Drückst du nach \`CALL FC 82\` die Eingabetaste, schreibt der Editor die Parameter.
+- In KOP ist er im Katalog, Gruppe **Bibliotheken**: Legst du die Box in ein Netzwerk, wird der Baustein ins Projekt kopiert.
+- Ein \`CALL\` läuft in jedem Zyklus: Mach ihn mit \`SPBN\` oder in KOP mit einem Kontakt vor EN bedingt.
+- Ist der Baustein nicht im Projekt, wird das Programm mit einer Warnung übersetzt, aber die CPU geht beim Aufruf in **STOP**.
 
 ## Eingänge und Ausgänge
 
@@ -317,6 +335,13 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
 
   libre: {
     descBloque: { OB1: 'zyklisches Programm', OB100: 'Anlauf' } as Record<string, string>,
+    carpetaBloques: 'Bausteine',
+    hardware: 'Hardware',
+    hardwareTitulo: 'Doppelklick: Hardwarekonfiguration öffnen (CPU, Taktmerker)',
+    abrirHardware: 'Hardware öffnen',
+    abrirObjeto: 'Objekt öffnen',
+    hwSinCargar: 'nicht geladen',
+    hwCiclo: (b: number) => `Taktmerker MB ${b}`,
     proyectoN: (n: number) => `Projekt ${n}`,
     copia: (nombre: string) => `${nombre} (Kopie)`,
     importado: 'Importiert',
@@ -379,6 +404,10 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
   },
 
   wb: {
+    hardware: 'Hardware',
+    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · Taktmerker MB${byte}` : ''}. Abkürzung zu Station ▸ Hardware im Explorer`,
+    hardwareConfigurar: 'Hardware konfigurieren (CPU, Taktmerker). Abkürzung zu Station ▸ Hardware im Explorer',
+    hardwareSinCargar: 'Hardware: Das Gespeicherte ist nicht in die CPU geladen (Zielsystem ▸ Laden in Baugruppe)',
     confirmarBorrarSegmento: 'Dieses Netzwerk löschen?',
     sinKop: 'Dieses Netzwerk lässt sich nicht in KOP darstellen (nur leere Netzwerke werden umgewandelt)',
     crearOb1: 'OB1 anlegen (zyklisches Programm)',
@@ -386,9 +415,6 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     anadirOb100: 'OB100 hinzufügen (Anlauf)',
     confirmarBorrarBloque: (b: string) => `Den Baustein ${b} löschen?`,
     convertirNemotecnia: (n: 'de' | 'en') => `Auch den AWL-Code in die ${n === 'en' ? 'englische Mnemonik (A, I, Q…)' : 'deutsche Mnemonik (U, E, A…)'} umwandeln?`,
-    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · Taktmerker MB${byte}` : ''}`,
-    hardwareConfigurar: 'Hardware konfigurieren (CPU, Taktmerker)',
-    hardware: 'Hardware',
     senalesFueraTitulo: 'Die Signale sind in einem anderen Fenster: Klicke, um es nach vorne zu holen',
     senalesOcultar: 'Ein- und Ausgangssignale ausblenden',
     senalesVer: 'Ein- und Ausgangssignale anzeigen (Zeitdiagramm aus 0 und 1)',
@@ -429,8 +455,10 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
       irAlError: 'Zum Fehler',
       verTodos: 'Alle anzeigen',
       cicloTitulo: 'Ein Merker, den nichts schreibt, ist immer 0. Die CPU schreibt die Bits des Taktmerkers nur, wenn er in der Hardwarekonfiguration aktiviert ist.',
-      cicloTexto: (nombres: string) => `**${nombres} ist immer 0**: Dein Programm liest den Merker, schreibt ihn aber nie. Ist es ein Taktmerker? Aktiviere ihn unter Hardware.`,
-      activarCiclo: (byte: number) => `Taktmerker in MB${byte} aktivieren`,
+      cicloTexto: (nombres: string) => `**${nombres} ist immer 0**: Dein Programm liest den Merker, schreibt ihn aber nie. Ist es ein Taktmerker? Aktiviere ihn in der Hardware der Station und lade sie in die CPU.`,
+      activarCiclo: (byte: number) => `Taktmerker konfigurieren (MB${byte})…`,
+      hwSinCargar: '**Die gespeicherte Hardware ist nicht in die CPU geladen**: Die CPU behält die vorige Konfiguration. Öffne sie und nimm Zielsystem ▸ Laden in Baugruppe.',
+      abrirHw: 'Hardware öffnen',
       stop: (porError: boolean) => `**CPU in STOP**${porError ? ' wegen eines Laufzeitfehlers' : ''}: Das Programm läuft nicht. Drücke **RUN**.`,
       pausaCiclo: '**Mitten im Zyklus angehalten** (Einzelschritt): „Anw.“ führt die nächste Anweisung aus, „Zyklus“ beendet den Zyklus und ▶ läuft in Echtzeit weiter.',
       pausa: '**Simulation angehalten**: Es laufen keine Zyklen, deshalb erreichen geänderte Eingänge das Programm nicht. Drücke ▶.',
@@ -614,19 +642,44 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
 
   hw: {
     cpuCompacta: 'Kompakt-CPU',
-    cpuCompactaDesc: 'CPU mit 2 Akkumulatoren und integrierter E/A (Eingänge EB124…, Ausgänge AB124…)',
-    titulo: 'Hardware des Projekts',
-    estaciones: 'Stationen',
-    anadir: 'Hinzufügen',
-    marcaCicloMb: (b: number) => ` · Taktmerker MB${b}`,
-    sinHardware: 'Keine Hardware konfiguriert.',
-    noTiene: 'Das Projekt hat keine Hardware',
-    anadeEstacion: 'Füge eine Station hinzu, um die CPU zu konfigurieren (zum Beispiel den Taktmerker).',
+    cpuCompactaDesc: 'CPU mit 2 Akkumulatoren und integrierter E/A: Eingänge E 124.0–125.7 und Ausgänge A 124.0–125.7',
+    equipo: 'Station(1)',
+    titulo: (equipo: string) => `Hardwarekonfiguration — ${equipo}`,
+    menuEquipo: 'Station',
+    menuSistema: 'Zielsystem',
+    guardarCompilar: 'Speichern und übersetzen',
+    cargarModulo: 'Laden in Baugruppe',
+    cerrar: 'Schließen',
+    propiedadesObjeto: 'Objekteigenschaften…',
+    bastidor: '(0) Baugruppenträger',
+    slot: 'Steckplatz',
+    modulo: 'Baugruppe',
+    dirE: 'E-Adresse',
+    dirA: 'A-Adresse',
+    comentario: 'Kommentar',
+    fuente: 'Stromversorgung (PS)',
+    esIntegradas: 'DI16/DO16 (integrierte E/A)',
+    dobleClicCpu: 'Doppelklick auf die CPU (Steckplatz 2) öffnet ihre Eigenschaften: Dort ist der Taktmerker.',
+    sinGuardar: '**Es gibt ungespeicherte Änderungen**: Station ▸ Speichern und übersetzen (Strg+S).',
+    guardadoSinCargar: '**Ohne Fehler gespeichert und übersetzt. Sie muss noch in die CPU geladen werden**: Zielsystem ▸ Laden in Baugruppe.',
+    cargado: 'Die gespeicherte Konfiguration ist die, die in der CPU geladen ist.',
+    enCpu: (b: number | null) => (b === null ? 'In der CPU: kein Taktmerker' : `In der CPU: Taktmerker MB ${b}`),
+    guardado: (b: number | null) => (b === null ? 'Gespeichert: kein Taktmerker' : `Gespeichert: Taktmerker MB ${b}`),
+    confirmarCerrar: 'Die Hardwarekonfiguration hat ungespeicherte Änderungen. Ohne Speichern schließen?',
+    guardarAntes: 'Die Konfiguration hat ungespeicherte Änderungen. Zum Laden muss sie zuerst gespeichert und übersetzt werden. Jetzt speichern und übersetzen?',
+    pasarAStop: (cpu: string) => `Die Zielbaugruppe (${cpu}) ist in RUN. Zum Laden der Konfiguration muss sie in STOP gehen. In STOP schalten?`,
+    arrancar: (cpu: string) => `Konfiguration in ${cpu} geladen. Baugruppe wieder starten (RUN)?`,
+    cargadoToast: 'Hardwarekonfiguration in die CPU geladen',
+    guardadoToast: 'Ohne Fehler gespeichert und übersetzt',
+    propiedades: (cpu: string) => `Eigenschaften — ${cpu} (R0/S2)`,
+    tabs: { general: 'Allgemein', arranque: 'Anlauf', ciclo: 'Zyklus/Taktmerker', remanencia: 'Remanenz', alarmas: 'Alarme' },
+    noDisponible: 'Im Simulator nicht verfügbar',
     nombre: 'Name',
-    nombreEstacion: 'Name der Station',
-    confirmarQuitar: (n: string) => `„${n}“ aus der Hardware entfernen?`,
-    quitar: 'Entfernen',
-    cicloSec: 'Zyklus / Taktmerker',
+    nombreEstacion: 'Name der CPU',
+    tipo: 'Typ',
+    descripcion: 'Beschreibung',
+    cicloSec: 'Zyklus',
+    tiempoCiclo: (ms: number) => `Zykluszeit des Simulators: ${ms} ms (änderbar in den Einstellungen).`,
     marcaCiclo: 'Taktmerker',
     byteMarcas: 'Merkerbyte',
     bit: 'Bit',
@@ -635,7 +688,87 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     frecuencia: 'Frequenz',
     ahora: 'Jetzt',
     conflicto: (b: number) => `⚠ Dein Programm schreibt in MB${b}: Die CPU überschreibt dieses Byte in jedem Zyklus mit dem Taktmerker.`,
-    explicacion: (b: number) => `Jedes Bit schwingt von selbst, mit gleich langem Impuls und gleich langer Pause (die halbe Periode auf 1 und die andere Hälfte auf 0). Verwende sie im Programm wie jeden anderen Merker, zum Beispiel **U M ${b}.5** für einen Blinker mit 1 s.`,
+    explicacion: (b: number) => `Jedes Bit wechselt von selbst, mit gleich langem Puls und Pause (die halbe Periode 1, die andere Hälfte 0). Nimm sie im Programm wie jeden Merker, zum Beispiel **U M ${b}.5** für einen Blinker mit 1 s.`,
+    pasos: 'Danach: **OK**, **Station ▸ Speichern und übersetzen** und **Zielsystem ▸ Laden in Baugruppe**. Bis sie geladen ist, behält die CPU die vorige Konfiguration.',
+  },
+
+  biblioteca: {
+    titulo: 'Standardbibliothek',
+    raiz: 'Standardbibliothek',
+    conversion: 'Konvertierungsbausteine',
+    bloques: 'Bausteine',
+    carpeta: 'Ordner',
+    carpetas: 'Ordner der Bibliothek',
+    contenido: (c: string) => `Inhalt von ${c}`,
+    colNombre: 'Objektname',
+    colSimbolo: 'Symbolischer Name',
+    colLenguaje: 'Sprache',
+    colComentario: 'Kommentar',
+    vacia: 'Dieser Ordner ist leer.',
+    arrastraTitulo: 'Zieh den Baustein in den Ordner «Bausteine» deines Projekts (oder Strg+C hier und Strg+V im Ordner). F1: Hilfe',
+    estado: 'Öffne **Konvertierungsbausteine ▸ Bausteine**, wähl einen Baustein und zieh ihn in den Ordner **Bausteine** deines Projekts.',
+    estadoSel: (b: string, id: string, r: string) => `**${b}** (${id}): ${r}. **F1**: Hilfe · zieh ihn in den Ordner **Bausteine** oder drück «Ins Projekt kopieren».`,
+    ayudaBoton: 'Hilfe (F1)',
+    ayudaDe: (fc: string) => `Hilfe zu ${fc}`,
+    cerrarAyuda: 'Hilfe schließen',
+    copiar: 'Kopieren',
+    copiarAlProyecto: 'Ins Projekt kopieren',
+    copiarTitulo: (p: string) => `Den gewählten Baustein in den Ordner Bausteine von «${p}» kopieren`,
+    parametro: 'Parameter',
+    declaracion: 'Deklaration',
+    tipo: 'Typ',
+    significado: 'Bedeutung',
+    ejemplo: 'Beispiel (AWL):',
+    yaEsta: (fc: string, id: string, p: string) => `${fc} (${id}) ist schon in «${p}»`,
+    sustituir: (fc: string, p: string) => `In «${p}» gibt es schon einen eigenen ${fc}. Wenn du den aus der Bibliothek kopierst, ersetzt er deinen, und dessen Code geht verloren. Ersetzen?\n\nUm deinen zu behalten, brich ab und benenne ihn vorher um.`,
+    copiado: (fc: string, id: string, p: string) => `${fc} (${id}) in den Ordner Bausteine von «${p}» kopiert`,
+    copiadoPortapapeles: (fc: string, id: string) => `${fc} (${id}) kopiert: Füg ihn mit Strg+V in den Ordner Bausteine deines Projekts ein`,
+    pegar: (fc: string, id: string) => `${fc} (${id}) einfügen`,
+    abrir: 'Standardbibliothek öffnen…',
+    soltar: 'Loslassen, um den Baustein in dieses Projekt zu kopieren',
+    protegido: (id: string) => `Bibliotheksbaustein ${id} (geschützt)`,
+    protegidoTexto: (fc: string) => `Dieser Baustein kommt aus der **Standardbibliothek**. Er ist geschützt: Sein Code ist nicht sichtbar und nicht änderbar. Du rufst ihn aus einem anderen Baustein mit **CALL ${fc}** und seinen Parametern auf (in KOP mit der Box ${fc} aus dem Katalog, Gruppe «Bibliotheken»).`,
+    kopCopiado: (fc: string, id: string) => `${fc} (${id}) aus der Standardbibliothek in den Ordner Bausteine kopiert`,
+    kopOtro: (fc: string) => `Im Projekt gibt es schon einen eigenen ${fc} ohne Parameter: Benenne ihn um und hol den ${fc} aus der Standardbibliothek.`,
+    ayuda: {
+      RSET: {
+        titulo: 'Bitbereich rücksetzen',
+        resumen: 'setzt N aufeinanderfolgende Bits auf 0',
+        descripcion: 'Setzt auf einmal die **N** aufeinanderfolgenden Bits ab **S_BIT** auf **0**, egal ob Ausgänge (A) oder Merker (M). Typisch: die Schrittmerker einer GRAFCET-Schrittkette beim Start oder beim Neuinitialisieren löschen, statt für jeden ein `R`, und danach den Anfangsschritt setzen.',
+        params: { S_BIT: 'Adresse des **ersten Bits**: `M 0.0`, `A 124.0`… Es ist ein Pointer, also geht auch `P#M 0.0`.', N: '**Wie viele** aufeinanderfolgende Bits auf 0 gesetzt werden. Eine Konstante (`8`) oder ein Wort (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'Ein `CALL` läuft **in jedem Zyklus**, die Bits wären also immer 0. Mach ihn bedingt mit einem Sprung (`SPBN`) oder in KOP mit einem Kontakt vor **EN**. Oder ruf ihn im **OB100** auf, der nur beim Anlauf läuft.',
+          'Er hängt vom **MCR** ab: In einem ausgeschalteten MCR-Bereich ändert er nichts.',
+          'Ist **N** 0 oder negativ, macht er nichts. Geht der Bereich über den Speicherbereich hinaus, geht die CPU in **STOP**.',
+          'Nach der Rückkehr ist **BIE** = 1 (in KOP **ENO** = 1).',
+          'Das Byte des **Taktmerkers** darf nicht im Bereich liegen, sonst wird es gelöscht.',
+        ],
+        ejemplo: `      U     E 0.0          // Rücksetzbedingung
+      SPBN  m001           // nicht erfüllt: Aufruf überspringen
+      CALL  FC 82
+        S_BIT := M 0.0     // erstes Bit
+        N     := 8         // wie viele Bits: M 0.0 bis M 0.7
+m001: NOP   0`,
+      },
+      SSET: {
+        titulo: 'Bitbereich setzen',
+        resumen: 'setzt N aufeinanderfolgende Bits auf 1',
+        descripcion: 'Das Gegenteil von FC 82: Setzt auf einmal die **N** aufeinanderfolgenden Bits ab **S_BIT** auf **1**, egal ob Ausgänge (A) oder Merker (M). Zum Beispiel, um eine Gruppe von Leuchten gleichzeitig einzuschalten.',
+        params: { S_BIT: 'Adresse des **ersten Bits**: `M 0.0`, `A 124.0`… Es ist ein Pointer, also geht auch `P#A 124.0`.', N: '**Wie viele** aufeinanderfolgende Bits auf 1 gesetzt werden. Eine Konstante (`4`) oder ein Wort (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'Ein `CALL` läuft **in jedem Zyklus**: Mach ihn bedingt mit einem Sprung (`SPBN`) oder in KOP mit einem Kontakt vor **EN**.',
+          'Er hängt vom **MCR** ab: In einem ausgeschalteten MCR-Bereich ändert er nichts.',
+          'Ist **N** 0 oder negativ, macht er nichts. Geht der Bereich über den Speicherbereich hinaus, geht die CPU in **STOP**.',
+          'Nach der Rückkehr ist **BIE** = 1 (in KOP **ENO** = 1).',
+        ],
+        ejemplo: `      U     E 0.1          // Taster
+      SPBN  m002
+      CALL  FC 83
+        S_BIT := A 124.0   // erstes Bit
+        N     := 4         // A 124.0 bis A 124.3
+m002: NOP   0`,
+      },
+    },
   },
 
   senales: {
@@ -818,7 +951,7 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
       bits: 'Bitverknüpfung', comparacion: 'Vergleicher', temporizadores: 'Zeiten', contadores: 'Zähler',
       Transferencia: 'Übertragung', Enteros: 'Festpunkt-Arithmetik', 'Coma flotante': 'Gleitpunkt-Arithmetik', 'Conversión': 'Umwandlung',
       'Lógica de palabras': 'Wortverknüpfung', 'Desplazamiento y rotación': 'Schieben und Rotieren',
-      saltos: 'Sprünge', control: 'Programmsteuerung', estado: 'Statusbits',
+      Bibliotecas: 'Bibliotheken', saltos: 'Sprünge', control: 'Programmsteuerung', estado: 'Statusbits',
     } as Record<string, string>,
     comparar: (t: 'I' | 'D' | 'R', r: string) => `Vergleich ${t === 'I' ? 'Ganzzahlen' : t === 'D' ? 'Doppelganzzahlen' : 'REAL'}: IN1 ${r} IN2`,
     d: {
@@ -859,6 +992,8 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     },
     bitEstado: (s: string) => `Kontakt des Statusbits ${s}`,
     cajas: {
+      FC82: 'N aufeinanderfolgende Bits ab S_BIT auf 0 setzen (RSET, aus der Standardbibliothek)',
+      FC83: 'N aufeinanderfolgende Bits ab S_BIT auf 1 setzen (SSET, aus der Standardbibliothek)',
       MOVE: 'IN nach OUT kopieren',
       SHL_W: 'Wort links schieben',
       SHR_W: 'Wort rechts schieben',
@@ -1102,6 +1237,17 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     constante255: (mn: string) => `${mn}: Die Konstante liegt zwischen 0 und 255`,
     aufDbDi: 'AUF öffnet nur einen DB oder DI',
     soloFc: 'es können nur FCs ohne Parameter aufgerufen werden',
+    // CALL mit Parametern (Bibliotheksbausteine)
+    parametroSinCall: (p: string) => `${p} := …: ein Parameter steht direkt unter seinem CALL`,
+    parametroConMeta: 'ein CALL-Parameter hat keine Sprungmarke',
+    ucCcConParametros: (mn: string, fc: string) => `${mn} kann ${fc} nicht aufrufen, weil er Parameter hat: nimm CALL ${fc}`,
+    sinParametros: (fc: string) => `${fc} hat keine Parameter (die haben nur Bibliotheksbausteine wie FC 82 und FC 83)`,
+    parametroDesconocido: (p: string, fc: string, lista: string[]) => `${fc} hat keinen Parameter ${p} (seine Parameter sind ${lista.join(' und ')})`,
+    parametroRepetido: (p: string) => `der Parameter ${p} steht doppelt da`,
+    faltanParametros: (fc: string, lista: string[]) => `CALL ${fc}: ${lista.length > 1 ? 'es fehlen die Parameter' : 'es fehlt der Parameter'} ${lista.join(' und ')}`,
+    parametroVacio: (p: string) => `der Parameter ${p} hat keinen Wert`,
+    parametroPuntero: (p: string, v: string) => `${p} ist ein Pointer: er braucht die Adresse eines Bits (M 0.0, A 124.0, P#M 0.0…), nicht ${v}`,
+    parametroInt: (p: string, v: string) => `${p} ist ein INT: er braucht eine ganze Zahl oder ein Wort (8, MW 10…), nicht ${v}`,
     cierraSinAbrir: "')' ohne offene Klammer",
     faltaCerrar: 'Eine Klammer ist nicht geschlossen: Es gibt mehr "(" als ")"',
     metaNoExiste: (m: string) => `die Sprungmarke ${m} gibt es nicht`,
@@ -1128,6 +1274,7 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     valorNoValido: 'Ungültiger Wert',
     cargarEnCiclo: 'Das Programm kann nicht mitten im Zyklus geladen werden',
     bloqueNoExiste: (n: string) => `Aufruf eines Bausteins, den es nicht gibt: ${n}`,
+    llamadaSinParametros: (fc: string) => `CALL ${fc} ohne seine Parameter`,
     pilaBloques: 'Überlauf des Bausteinstacks (zu viele verschachtelte Aufrufe)',
     cicloExcedido: 'Zykluszeit überschritten (Endlosschleife?)',
     sinDb: 'Es ist kein Datenbaustein geöffnet (AUF DB n fehlt)',
@@ -1196,7 +1343,9 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     L09b: (op: string) => `der LOOP-Zähler wird aus ${op} geladen: Wenn er 0 ist, läuft LOOP 65.535 Mal zu oft (prüfe ihn vorher mit einem Sprung).`,
     B01: (fc: string, fcEsp: string) => `${fc} wird von keinem Baustein aufgerufen (UC/CC/CALL ${fcEsp} fehlt im OB1): Ihr Code wird nicht bearbeitet.`,
     B02: 'der OB100 läuft nur einmal, beim Wechsel nach RUN: Die Zuweisungen hier werden nicht in jedem Zyklus wiederholt (wolltest du sie in den OB1 schreiben?).',
-    B03: (m: string, byte: number) => `${m} wird gelesen, aber das Programm schreibt ihn nie, also ist er immer 0. Wenn du einen Blinker wolltest, aktiviere den Taktmerker unter Hardware (Byte ${byte}).`,
+    B03: (m: string, byte: number) => `${m} wird gelesen, aber das Programm schreibt ihn nie, also ist er immer 0. Wenn du einen Blinker wolltest, aktiviere den Taktmerker in der Hardware der Station (Byte ${byte}) und lade sie in die CPU.`,
+    B04: (fc: string, sim: string) => `${fc} (${sim}) ist nicht im Projekt: hol ihn aus der Standardbibliothek. Sonst geht die CPU beim Aufruf in STOP.`,
+    B05: (fc: string, desde: string, hasta: string, byte: number, valor: number) => `${fc} setzt ${desde} bis ${hasta} auf ${valor}, und darin liegt der Taktmerker (MB ${byte}): diese Bits blinken dann nicht richtig. Nimm einen Bereich, der ihn nicht berührt.`,
   },
 
   correccion: {

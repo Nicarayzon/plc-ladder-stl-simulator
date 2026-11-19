@@ -1,7 +1,7 @@
 import { BANCO, TIPO_LABEL } from '../../content/banco';
 import { pendientes, useProgress } from '../../store/progress';
 import { useProjects, type Proyecto } from '../../store/projects';
-import { migrarHw } from '../../core/program';
+import { migrarHw, migrarHwCargado } from '../../core/program';
 import { useSettings } from '../../store/settings';
 import { go } from '../router';
 import { downloadText, pickFile, toast } from '../common/ui';
@@ -25,7 +25,7 @@ export function ProgresoScreen() {
       if (Array.isArray(d.proyectos)) {
         const cur = useProjects.getState().proyectos;
         const ids = new Set(cur.map((p) => p.id));
-        useProjects.setState({ proyectos: [...cur, ...d.proyectos.filter((p: Proyecto) => !ids.has(p.id)).map((p: Proyecto) => (p.programa ? { ...p, programa: migrarHw(p.programa) } : p))] });
+        useProjects.setState({ proyectos: [...cur, ...d.proyectos.filter((p: Proyecto) => !ids.has(p.id)).map((p: Proyecto) => (p.programa ? { ...p, programa: migrarHwCargado(migrarHw(p.programa)) } : p))] });
       }
       toast('Copia importada');
     } catch (e) { toast(`No se pudo importar: ${(e as Error).message}`); }

@@ -42,6 +42,7 @@ export function analyzeUsage(cp: CompiledProgram): Usage {
   const u: Usage = { accesses: [], timers: new Map(), counters: new Set(), usesEdges: false, usesSetReset: false, usesTimersOrCounters: false, hasIndirect: false };
   for (const [block, b] of cp.blocks) {
     b.instrs.forEach((ins, idx) => {
+      if (ins.params?.length) paramAccesses(u, block, idx, ins);
       const op = ins.op;
       if (!op) return;
       const mn = ins.mn;
@@ -83,6 +84,43 @@ export function analyzeUsage(cp: CompiledProgram): Usage {
     });
   }
   return u;
+}
+
+/** Máximo de bits de un rango (FC 82/83) que se apuntan uno a uno */
+const MAX_RANGO = 2048;
+
+/**
+ * Lo que leen y escriben los parámetros de un CALL a un bloque de biblioteca (FC 82, FC 83): escribe N bits desde
+ * S_BIT y lee N. Si N es una palabra, el rango no se sabe: se apunta el primer bit como acceso indirecto.
+ */
+function paramAccesses(u: Usage, block: string, idx: number, ins: Instr) {
+  const pS = ins.params!.find((p) => p.name === 'S_BIT')?.op;
+  const pN = ins.params!.find((p) => p.name === 'N')?.op;
+  if (pN?.kind === 'mem') {
+    const a = access(block, idx, ins, pN, 'r');
+    if (a) u.accesses.push(a);
+  }
+  if (pS?.kind !== 'bit' || pS.ind) return;
+  u.usesSetReset = true;
+  if (pN?.kind !== 'const') {
+    u.hasIndirect = true;
+    u.accesses.push({ block, idx, ins, mode: 'w', kind: 'bit', area: pS.area!, byte: pS.byte!, bit: pS.bit!, size: 0, db: pS.db, indirect: true });
+    return;
+  }
+  const n = Math.min(MAX_RANGO, (pN.value! << 16) >> 16);
+  const ini = pS.byte! * 8 + pS.bit!;
+  for (let i = ini; i < ini + n; i++) u.accesses.push({ block, idx, ins, mode: 'w', kind: 'bit', area: pS.area!, byte: i >> 3, bit: i & 7, size: 0, db: pS.db, indirect: false });
+}
+
+/** Bits que escribe un CALL a FC 82/83 con N constante (para avisos): área, primer y último bit. */
+export function rangoDeCall(ins: Instr): { area: string; ini: number; fin: number } | null {
+  const pS = ins.params?.find((p) => p.name === 'S_BIT')?.op;
+  const pN = ins.params?.find((p) => p.name === 'N')?.op;
+  if (pS?.kind !== 'bit' || pS.ind || pN?.kind !== 'const') return null;
+  const n = (pN.value! << 16) >> 16;
+  if (n <= 0) return null;
+  const ini = pS.byte! * 8 + pS.bit!;
+  return { area: pS.area!, ini, fin: ini + n - 1 };
 }
 
 export const bitKey = (area: string, byte: number, bit: number) => `${area}${byte}.${bit}`;

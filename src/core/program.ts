@@ -1,10 +1,11 @@
 // Modelo de programa de la app: bloques (OB1, OB100, FCn) con segmentos KOP o AWL y tabla de símbolos.
-import { type CBlock, type CompileIssue, type CompiledProgram, type Lang, type Origin, type SourceLine, compileLines, normBlockName, splitLines, cleanLine } from './compiler';
+import { type CBlock, type CompileIssue, type CompiledProgram, type Lang, type Origin, type SourceLine, PARAM_RE, compileLines, normBlockName, splitLines, cleanLine } from './compiler';
 import { parseOperand } from './operands';
 import { CompileError } from './errors';
 import { compileKopSegment, newKopCtx, type KopLine } from '../kop/compile';
 import { kopIsBlank, type SegmentoKOP } from '../kop/model';
 import { validateSegment } from '../kop/validate';
+import { esLibId, libPorBloque, type LibDef, type LibId } from './biblioteca';
 import { T } from '../i18n';
 
 export type Segmento =
@@ -15,6 +16,8 @@ export interface Bloque {
   nombre: string;
   comentario?: string;
   segmentos: Segmento[];
+  /** Bloque copiado de la biblioteca (FC 82 = RSET…): protegido y sin segmentos, la CPU lo ejecuta directamente */
+  biblioteca?: LibId;
 }
 
 export interface Simbolo {
@@ -34,14 +37,43 @@ export interface Programa {
   nemotecnia: Lang;
   bloques: Bloque[];
   simbolos: Simbolo[];
-  /** Hardware configurado (opcional; sin estaciones = CPU sin marca de ciclo) */
+  /** Hardware guardado en el proyecto («Guardar y compilar» de la configuración del hardware) */
   hw?: { estaciones: HwEstacion[] };
+  /**
+   * Hardware cargado en la CPU («Cargar en módulo»). Es el que usa la CPU: si el guardado es distinto, la CPU sigue
+   * con este hasta que se cargue. Sin él, la CPU no tiene marca de ciclo.
+   */
+  hwCargado?: { estaciones: HwEstacion[] };
 }
 
-/** Byte de la marca de ciclo activa en el proyecto, o null. */
-export function clockByteOf(p: Programa): number | null {
-  const cpu = p.hw?.estaciones.find((e) => e.tipo === 'CPU');
+const marcaDe = (hw: Programa['hw']): number | null => {
+  const cpu = hw?.estaciones.find((e) => e.tipo === 'CPU');
   return cpu && cpu.marcaCiclo.activa ? cpu.marcaCiclo.byte : null;
+};
+
+/** Byte de la marca de ciclo que usa la CPU (la del hardware cargado), o null. */
+export function clockByteOf(p: Programa): number | null {
+  return marcaDe(p.hwCargado);
+}
+
+/** Byte de la marca de ciclo del hardware guardado en el proyecto (puede no estar cargado aún), o null. */
+export function clockByteGuardado(p: Programa): number | null {
+  return marcaDe(p.hw);
+}
+
+/** ¿El hardware guardado es distinto del cargado en la CPU? (hay que «Cargar en módulo») */
+export function hwSinCargar(p: Programa): boolean {
+  if (!p.hw) return false;
+  return JSON.stringify(p.hw) !== JSON.stringify(p.hwCargado ?? null);
+}
+
+/**
+ * Proyectos de la 0.27.0 y anteriores: el hardware se aplicaba al guardarlo, sin «Cargar en módulo». Para que su
+ * marca de ciclo siga funcionando, el guardado pasa a ser también el cargado.
+ */
+export function migrarHwCargado(p: Programa): Programa {
+  if (!p.hw || p.hwCargado !== undefined) return p;
+  return { ...p, hwCargado: structuredClone(p.hw) };
 }
 
 /**
@@ -119,6 +151,10 @@ export function compileProgram(p: Programa): ProgramCompile {
   const blocks = new Map<string, CBlock>();
   const names = new Set<string>();
 
+  // nombre → bloque de biblioteca que es (o null): para comprobar los parámetros de los CALL
+  const interfaces = new Map<string, LibId | null>();
+  for (const b of p.bloques) interfaces.set(normBlockName(b.nombre), esLibId(b.biblioteca) ? b.biblioteca : null);
+
   for (const b of p.bloques) {
     const name = normBlockName(b.nombre);
     if (!/^(OB|FC)\d+$/.test(name)) {
@@ -130,6 +166,11 @@ export function compileProgram(p: Programa): ProgramCompile {
       continue;
     }
     names.add(name);
+    if (esLibId(b.biblioteca)) {
+      // bloque de biblioteca: sin código, la CPU lo ejecuta directamente
+      blocks.set(name, { name, instrs: [], labels: new Map(), lib: b.biblioteca });
+      continue;
+    }
     const lines: SourceLine[] = [];
     const ctx = newKopCtx(name);
     const invalidKop = new Set<string>();
@@ -165,7 +206,7 @@ export function compileProgram(p: Programa): ProgramCompile {
       }
     });
     const segIndex = new Map(b.segmentos.map((s, i) => [segId(s), i]));
-    const res = compileLines(lines, { symbols, lang: p.nemotecnia, collect: true, name });
+    const res = compileLines(lines, { symbols, lang: p.nemotecnia, collect: true, name, bloques: interfaces });
     for (const e of res.errors) {
       if (e.origin?.seg && invalidKop.has(e.origin.seg)) continue;
       const si = e.origin?.seg !== undefined ? segIndex.get(e.origin.seg) : undefined;
@@ -228,4 +269,31 @@ export function programFromAwl(blocks: string | Record<string, string>, idPrefix
 
 export function emptyProgram(): Programa {
   return { nemotecnia: 'de', simbolos: [], bloques: [{ nombre: 'OB1', segmentos: [{ lang: 'AWL', id: newSegId(), titulo: '', awl: '' }] }] };
+}
+
+/** Bloques de biblioteca a los que llama el programa con parámetros (CALL FC 82 + S_BIT/N) y que no tiene. */
+export function bibliotecaQueFalta(p: Programa): LibDef[] {
+  const tiene = new Set(p.bloques.map((b) => normBlockName(b.nombre)));
+  const faltan = new Map<string, LibDef>();
+  for (const b of p.bloques) {
+    for (const s of b.segmentos) {
+      if (s.lang !== 'AWL') continue;
+      const lines = splitLines(s.awl).map(cleanLine);
+      lines.forEach((l, i) => {
+        const m = /^(?:[A-Za-z_][A-Za-z0-9_]{0,3}\s*:(?!=)\s*)?CALL\s+FC\s*(\d+)$/i.exec(l);
+        if (!m) return;
+        const next = lines.slice(i + 1).find((x) => x);
+        const d = libPorBloque(`FC${m[1]}`);
+        if (d && next && PARAM_RE.test(next) && !tiene.has(d.bloque)) faltan.set(d.bloque, d);
+      });
+    }
+  }
+  return [...faltan.values()];
+}
+
+/** El programa con los bloques de biblioteca que usa y le faltan (para «Probar» un ejemplo de la teoría). */
+export function conBibliotecaUsada(p: Programa): Programa {
+  const faltan = bibliotecaQueFalta(p);
+  if (!faltan.length) return p;
+  return { ...p, bloques: [...p.bloques, ...faltan.map((d): Bloque => ({ nombre: d.bloque, segmentos: [], biblioteca: d.id }))] };
 }

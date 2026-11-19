@@ -240,12 +240,8 @@
 .ex-create { margin: 4px 0 0 4px; }
 
 /* hardware */
-.hw { display: grid; grid-template-columns: 230px 1fr; gap: 16px; min-height: 380px; }
-.hw-list { border-right: 1px solid var(--border); padding-right: 12px; }
-.hw-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 8px; background: none; cursor: pointer; margin-bottom: 4px; }
-.hw-item:hover { background: var(--bg-hover); }
-.hw-item.cur { background: var(--accent-bg); border-color: var(--accent); }
 .hw-sec { border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.hw-sec + .hw-sec { margin-top: 10px; }
 .hw-sec-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); font-weight: 600; margin-bottom: 10px; }
 .hw-table { margin-top: 10px; }
 .hw-table td, .hw-table th { padding: 3px 8px; }
@@ -307,3 +303,71 @@
 
 /* nota de Símbolos: el código va en **…** en el diccionario y se ve en monoespaciada */
 .simbolos-nota b { font-family: var(--mono); font-size: 12px; font-weight: normal; }
+
+/* ───────── ventanas flotantes dentro de la app (Biblioteca estándar, configuración del hardware) ───────── */
+.vflot { position: fixed; display: flex; flex-direction: column; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); overflow: hidden; }
+.vflot-head { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 6px 0 12px; background: var(--bg-elev2); border-bottom: 1px solid var(--border); cursor: move; flex: none; user-select: none; }
+.vflot-head .tit { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vflot-head .btn { cursor: pointer; }
+.vflot-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.vflot-tam { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; }
+
+/* Biblioteca estándar */
+.bib-cuerpo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.bib-ruta { padding: 6px 12px; font-size: 11.5px; border-bottom: 1px solid var(--border); }
+.bib-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 210px 1fr; }
+.bib-arbol { overflow: auto; padding: 6px 4px; border-right: 1px solid var(--border); background: var(--zona-proy); }
+.bib-nodo { display: flex; align-items: center; gap: 5px; height: 26px; padding-right: 6px; border-radius: 6px; cursor: pointer; user-select: none; font-size: 12.5px; }
+.bib-nodo:hover { background: var(--proy-hover); }
+.bib-nodo.cur { background: var(--proy-sel); font-weight: 600; }
+.bib-flecha { width: 12px; display: inline-flex; justify-content: center; color: var(--text-dim); }
+.bib-lista { overflow: auto; font-size: 12.5px; }
+.bib-fila { display: grid; grid-template-columns: 130px 120px 80px 1fr; align-items: center; gap: 8px; min-height: 28px; padding: 0 10px; border-bottom: 1px solid var(--border); cursor: default; user-select: none; }
+.bib-fila.cab { position: sticky; top: 0; background: var(--bg-elev2); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: default; }
+.bib-fila.bloque { cursor: grab; }
+.bib-fila:not(.cab):hover { background: var(--bg-hover); }
+.bib-fila.sel, .bib-fila.sel:hover { background: var(--accent-bg); }
+.bib-fila:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.bib-ayuda { flex: none; max-height: 52%; overflow: auto; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--bg); font-size: 12.5px; }
+.bib-pie { flex: none; display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-top: 1px solid var(--border); background: var(--bg-elev2); }
+.lib-ayuda p { margin: 4px 0 8px; line-height: 1.5; }
+.lib-ayuda ul { margin: 8px 0; padding-left: 18px; line-height: 1.5; }
+.lib-ayuda .bib-params td, .lib-ayuda .bib-params th { padding: 4px 8px; vertical-align: top; }
+.lib-ayuda .awl-hl { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-elev); overflow-x: auto; }
+
+/* bloque de biblioteca abierto en el banco de trabajo (protegido) */
+.lib-bloque { max-width: 860px; margin: 4px 0 16px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elev); }
+.lib-bloque-tit { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 4px; }
+.lib-bloque > p { margin: 6px 0 10px; line-height: 1.5; }
+.block-tab .icon, .block-tab svg { vertical-align: -1px; margin-left: 3px; }
+
+/* configuración del hardware */
+.hwc-cuerpo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.hwc-menus { flex: none; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-bottom: 1px solid var(--border); background: var(--bg-elev2); }
+.hwc-menus .sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.hwc-rack { flex: 1; min-height: 0; overflow: auto; padding: 12px; }
+.hwc-rack-tit { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; margin-bottom: 6px; }
+.hwc-tabla { width: 100%; max-width: 720px; border: 1px solid var(--border-strong); }
+.hwc-tabla td, .hwc-tabla th { padding: 5px 10px; text-align: left; }
+.hwc-tabla tbody tr { cursor: default; user-select: none; }
+.hwc-tabla tbody tr:hover { background: var(--bg-hover); }
+.hwc-tabla tbody tr.sel { background: var(--accent-bg); }
+.hwc-tabla tbody tr.vacio td { height: 26px; }
+.hwc-estado { flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-top: 1px solid var(--border); font-size: 12px; background: var(--bg-elev2); }
+.hwc-estado.warn { background: color-mix(in srgb, var(--warn) 14%, var(--bg-elev2)); }
+.hwp-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin: -4px 0 12px; flex-wrap: wrap; }
+.hwp-tab { padding: 6px 12px; border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; background: none; color: var(--text-dim); cursor: pointer; font: inherit; margin-bottom: -1px; }
+.hwp-tab.active { background: var(--bg-elev); border-color: var(--border); color: var(--text); font-weight: 600; }
+.hwp-tab:disabled { opacity: 0.45; cursor: not-allowed; }
+.hwp-general { display: grid; gap: 12px; }
+.hwp-general .faint { min-width: 90px; }
+
+/* explorador: carpetas Equipo y Bloques dentro de cada proyecto */
+.ex-sub { display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 6px; border-radius: 6px; cursor: pointer; user-select: none; font-size: 12px; color: var(--text); }
+.ex-sub:hover { background: var(--proy-hover); }
+.ex-sub .ex-sub-icono { color: var(--accent); flex: none; }
+.ex-sub-name { font-weight: 600; }
+.ex-sub-items { padding: 0 0 4px 16px; border-radius: 6px; }
+.ex-sub.soltar, .ex-sub-items.soltar { background: var(--accent-bg); box-shadow: inset 0 0 0 1px var(--accent); }
+.ex-block .ex-lock { color: var(--text-dim); flex: none; }
+.ex-hw { cursor: default; }

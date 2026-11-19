@@ -225,11 +225,19 @@ export const es = {
 
 ## Proyectos (simulador libre)
 
-A la izquierda del simulador libre está el explorador de proyectos. **«Nuevo»** crea un proyecto (una carpeta) con el nombre que elijas; dentro creas el **OB1**, y si los necesitas, el OB100 y las FC. Con clic derecho en una carpeta puedes renombrar, duplicar, exportar o borrar el proyecto; con clic derecho en un bloque, borrarlo o renombrarlo. La flecha ‹ oculta el explorador.
+A la izquierda del simulador libre está el explorador de proyectos. **«Nuevo»** crea un proyecto (una carpeta) con el nombre que elijas. Dentro hay dos carpetas: **Equipo(1)**, con el **Hardware** de la CPU, y **Bloques**, donde creas el **OB1** y, si los necesitas, el OB100, las FC y las tablas de variables. Con clic derecho en un proyecto puedes renombrarlo, duplicarlo, exportarlo o borrarlo; con clic derecho en un bloque, borrarlo o renombrarlo. La flecha ‹ oculta el explorador.
 
 ## Hardware y marca de ciclo
 
-El botón **Hardware** (junto a RUN/STOP/MRES en el simulador libre) configura el hardware del proyecto. Con «Añadir» se pone la estación **CPU compacta**, y en sus propiedades se activa la **marca de ciclo** y se elige el byte de marcas (por defecto MB0). Cada bit de ese byte oscila solo, con pulso y pausa iguales:
+La marca de ciclo se activa en la configuración del hardware, como en la CPU real:
+
+1. En el explorador, abre **Equipo(1)** y haz **doble clic en Hardware** (o pulsa el botón **Hardware** de la barra, junto a RUN/STOP/MRES, que es un atajo). Se abre el bastidor con la fuente, la CPU y sus E/S integradas.
+2. **Doble clic en la CPU** (slot 2), o clic derecho → *Propiedades del objeto…*.
+3. En la pestaña **Ciclo/Marca de ciclo**, marca la casilla **Marca de ciclo**, escribe el **byte de marcas** (por ejemplo, 100) y pulsa **Aceptar**.
+4. **Equipo ▸ Guardar y compilar** (Ctrl+S).
+5. **Sistema de destino ▸ Cargar en módulo**. Si la CPU está en RUN, pide pasarla a STOP y, al terminar, vuelve a ponerla en RUN.
+
+Hasta que se carga, la CPU sigue con la configuración anterior, y la franja de estado lo avisa. Cada bit del byte oscila solo, con pulso y pausa iguales:
 
 | Bit | Marca (byte 0) | Periodo | Frecuencia |
 |---|---|---|---|
@@ -242,7 +250,17 @@ El botón **Hardware** (junto a RUN/STOP/MRES en el simulador libre) configura e
 | 6 | M 0.6 | 1,6 s | 0,625 Hz |
 | 7 | M 0.7 | 2 s | 0,5 Hz |
 
-Se usan como cualquier marca, por ejemplo un intermitente de 1 s: \`U M 0.5\` / \`= A 124.7\`. No escribas en ese byte desde el programa: la CPU lo sobrescribe en cada ciclo. La configuración se guarda con el proyecto.
+Se usan como cualquier marca, por ejemplo un intermitente de 1 s: \`U M 0.5\` / \`= A 124.7\`. No escribas en ese byte desde el programa: la CPU lo sobrescribe en cada ciclo. Tampoco lo incluyas en el rango de un FC 82. La configuración se guarda con el proyecto.
+
+## Biblioteca estándar (FC 82 y FC 83)
+
+El botón del libro del explorador (o clic derecho en **Bloques** → *Abrir la Biblioteca estándar…*) abre la biblioteca. En **Bloques de conversión ▸ Bloques** están el **FC 82 (RSET)**, que pone a 0 un rango de bits, y el **FC 83 (SSET)**, que lo pone a 1. Con un bloque seleccionado, **F1** abre su ayuda.
+
+- Para traerlo al proyecto, **arrástralo a la carpeta Bloques**, usa Ctrl+C en la biblioteca y Ctrl+V en la carpeta, o pulsa «Copiar al proyecto». Queda junto al OB1, protegido.
+- Se llama con \`CALL FC 82\` y sus parámetros, uno por línea: \`S_BIT := M 0.0\` (primer bit) y \`N := 8\` (cuántos bits). Al pulsar Intro detrás de \`CALL FC 82\`, el editor escribe los parámetros.
+- En KOP está en el catálogo, grupo **Bibliotecas**: al poner el cuadro en un segmento, el bloque se copia solo al proyecto.
+- Un \`CALL\` se ejecuta en cada ciclo: condiciónalo con \`SPBN\` o, en KOP, con un contacto delante de EN.
+- Si el bloque no está en el proyecto, el programa compila con un aviso, pero la CPU pasa a **STOP** al llamarlo.
 
 ## Entradas y salidas
 
@@ -321,6 +339,13 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
 
   libre: {
     descBloque: { OB1: 'programa cíclico', OB100: 'arranque' } as Record<string, string>,
+    carpetaBloques: 'Bloques',
+    hardware: 'Hardware',
+    hardwareTitulo: 'Doble clic: abrir la configuración del hardware (CPU, marca de ciclo)',
+    abrirHardware: 'Abrir el Hardware',
+    abrirObjeto: 'Abrir objeto',
+    hwSinCargar: 'sin cargar',
+    hwCiclo: (b: number) => `marca de ciclo MB ${b}`,
     proyectoN: (n: number) => `Proyecto ${n}`,
     copia: (nombre: string) => `${nombre} (copia)`,
     importado: 'Importado',
@@ -383,6 +408,10 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
   },
 
   wb: {
+    hardware: 'Hardware',
+    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · marca de ciclo MB${byte}` : ''}. Atajo de Equipo ▸ Hardware del explorador`,
+    hardwareConfigurar: 'Configurar el hardware (CPU, marca de ciclo). Atajo de Equipo ▸ Hardware del explorador',
+    hardwareSinCargar: 'Hardware: lo guardado no está cargado en la CPU (Sistema de destino ▸ Cargar en módulo)',
     confirmarBorrarSegmento: '¿Borrar este segmento?',
     sinKop: 'Este segmento no tiene representación en KOP (solo se convierten segmentos vacíos)',
     crearOb1: 'Crear OB1 (programa cíclico)',
@@ -390,9 +419,6 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     anadirOb100: 'Añadir OB100 (arranque)',
     confirmarBorrarBloque: (b: string) => `¿Borrar el bloque ${b}?`,
     convertirNemotecnia: (n: 'de' | 'en') => `¿Convertir también el código AWL a la nemotécnica ${n === 'en' ? 'inglesa (A, I, Q…)' : 'alemana (U, E, A…)'}?`,
-    hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · marca de ciclo MB${byte}` : ''}`,
-    hardwareConfigurar: 'Configurar el hardware (CPU, marca de ciclo)',
-    hardware: 'Hardware',
     senalesFueraTitulo: 'Las señales están en otra ventana: clic para traerla delante',
     senalesOcultar: 'Ocultar las señales de entradas y salidas',
     senalesVer: 'Ver las señales de entradas y salidas (cronograma de 0 y 1)',
@@ -433,8 +459,10 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
       irAlError: 'Ir al error',
       verTodos: 'Ver todos',
       cicloTitulo: 'Una marca que nadie escribe vale siempre 0. Las marcas de ciclo las escribe la CPU solo si se activan en la configuración del hardware.',
-      cicloTexto: (nombres: string) => `**${nombres} siempre vale 0**: tu programa la consulta pero no la escribe nunca. ¿Es una marca de ciclo? Actívala en Hardware.`,
-      activarCiclo: (byte: number) => `Activar marca de ciclo en MB${byte}`,
+      cicloTexto: (nombres: string) => `**${nombres} siempre vale 0**: tu programa la consulta pero no la escribe nunca. ¿Es una marca de ciclo? Actívala en el Hardware del equipo y cárgalo en la CPU.`,
+      activarCiclo: (byte: number) => `Configurar la marca de ciclo (MB${byte})…`,
+      hwSinCargar: '**El hardware guardado no está cargado en la CPU**: la CPU sigue con la configuración anterior. Ábrelo y usa Sistema de destino ▸ Cargar en módulo.',
+      abrirHw: 'Abrir el Hardware',
       stop: (porError: boolean) => `**CPU en STOP**${porError ? ' por un error de ejecución' : ''}: el programa no se ejecuta. Pulsa **RUN**.`,
       pausaCiclo: '**En pausa a mitad de ciclo** (paso a paso): «Instr.» ejecuta la siguiente instrucción, «Ciclo» termina el ciclo y ▶ sigue en tiempo real.',
       pausa: '**Simulación en pausa**: no se ejecutan ciclos, así que las entradas que cambies no llegan al programa. Pulsa ▶.',
@@ -619,19 +647,44 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
 
   hw: {
     cpuCompacta: 'CPU compacta',
-    cpuCompactaDesc: 'CPU con 2 acumuladores y E/S integrada (entradas EB124…, salidas AB124…)',
-    titulo: 'Hardware del proyecto',
-    estaciones: 'Estaciones',
-    anadir: 'Añadir',
-    marcaCicloMb: (b: number) => ` · marca de ciclo MB${b}`,
-    sinHardware: 'Sin hardware configurado.',
-    noTiene: 'El proyecto no tiene hardware',
-    anadeEstacion: 'Añade una estación para configurar la CPU (por ejemplo, la marca de ciclo).',
+    cpuCompactaDesc: 'CPU con 2 acumuladores y E/S integradas: entradas E 124.0–125.7 y salidas A 124.0–125.7',
+    equipo: 'Equipo(1)',
+    titulo: (equipo: string) => `Configuración del hardware — ${equipo}`,
+    menuEquipo: 'Equipo',
+    menuSistema: 'Sistema de destino',
+    guardarCompilar: 'Guardar y compilar',
+    cargarModulo: 'Cargar en módulo',
+    cerrar: 'Cerrar',
+    propiedadesObjeto: 'Propiedades del objeto…',
+    bastidor: '(0) Bastidor',
+    slot: 'Slot',
+    modulo: 'Módulo',
+    dirE: 'Dirección E',
+    dirA: 'Dirección A',
+    comentario: 'Comentario',
+    fuente: 'Fuente de alimentación (PS)',
+    esIntegradas: 'DI16/DO16 (E/S integradas)',
+    dobleClicCpu: 'Doble clic en la CPU (slot 2) para abrir sus propiedades: ahí está la marca de ciclo.',
+    sinGuardar: '**Hay cambios sin guardar**: Equipo ▸ Guardar y compilar (Ctrl+S).',
+    guardadoSinCargar: '**Guardado y compilado sin errores. Falta cargarlo en la CPU**: Sistema de destino ▸ Cargar en módulo.',
+    cargado: 'La configuración guardada es la que está cargada en la CPU.',
+    enCpu: (b: number | null) => (b === null ? 'En la CPU: sin marca de ciclo' : `En la CPU: marca de ciclo MB ${b}`),
+    guardado: (b: number | null) => (b === null ? 'Guardado: sin marca de ciclo' : `Guardado: marca de ciclo MB ${b}`),
+    confirmarCerrar: 'Hay cambios sin guardar en la configuración del hardware. ¿Cerrar sin guardarlos?',
+    guardarAntes: 'La configuración tiene cambios sin guardar. Para cargarla hay que guardarla y compilarla antes. ¿Guardar y compilar ahora?',
+    pasarAStop: (cpu: string) => `El módulo de destino (${cpu}) está en RUN. Para cargar la configuración hay que pasarlo a STOP. ¿Pasar a STOP?`,
+    arrancar: (cpu: string) => `Configuración cargada en ${cpu}. ¿Arrancar de nuevo el módulo (RUN)?`,
+    cargadoToast: 'Configuración del hardware cargada en la CPU',
+    guardadoToast: 'Guardado y compilado sin errores',
+    propiedades: (cpu: string) => `Propiedades — ${cpu} (R0/S2)`,
+    tabs: { general: 'General', arranque: 'Arranque', ciclo: 'Ciclo/Marca de ciclo', remanencia: 'Remanencia', alarmas: 'Alarmas' },
+    noDisponible: 'No disponible en el simulador',
     nombre: 'Nombre',
-    nombreEstacion: 'Nombre de la estación',
-    confirmarQuitar: (n: string) => `¿Quitar «${n}» del hardware?`,
-    quitar: 'Quitar',
-    cicloSec: 'Ciclo / marca de ciclo',
+    nombreEstacion: 'Nombre de la CPU',
+    tipo: 'Tipo',
+    descripcion: 'Descripción',
+    cicloSec: 'Ciclo',
+    tiempoCiclo: (ms: number) => `Tiempo de ciclo del simulador: ${ms} ms (se cambia en Ajustes).`,
     marcaCiclo: 'Marca de ciclo',
     byteMarcas: 'Byte de marcas',
     bit: 'Bit',
@@ -641,6 +694,86 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     ahora: 'Ahora',
     conflicto: (b: number) => `⚠ Tu programa escribe en MB${b}: la CPU sobrescribe ese byte en cada ciclo con la marca de ciclo.`,
     explicacion: (b: number) => `Cada bit oscila solo, con pulso y pausa iguales (la mitad del periodo a 1 y la otra mitad a 0). Úsalos en el programa como cualquier marca, por ejemplo **U M ${b}.5** para un intermitente de 1 s.`,
+    pasos: 'Después: **Aceptar**, **Equipo ▸ Guardar y compilar** y **Sistema de destino ▸ Cargar en módulo**. Hasta que se cargue, la CPU sigue con la configuración anterior.',
+  },
+
+  biblioteca: {
+    titulo: 'Biblioteca estándar',
+    raiz: 'Biblioteca estándar',
+    conversion: 'Bloques de conversión',
+    bloques: 'Bloques',
+    carpeta: 'Carpeta',
+    carpetas: 'Carpetas de la biblioteca',
+    contenido: (c: string) => `Contenido de ${c}`,
+    colNombre: 'Nombre del objeto',
+    colSimbolo: 'Nombre simbólico',
+    colLenguaje: 'Lenguaje',
+    colComentario: 'Comentario',
+    vacia: 'Esta carpeta está vacía.',
+    arrastraTitulo: 'Arrastra el bloque a la carpeta «Bloques» de tu proyecto (o Ctrl+C aquí y Ctrl+V en la carpeta). F1: ayuda',
+    estado: 'Abre **Bloques de conversión ▸ Bloques**, elige un bloque y arrástralo a la carpeta **Bloques** de tu proyecto.',
+    estadoSel: (b: string, id: string, r: string) => `**${b}** (${id}): ${r}. **F1**: ayuda · arrástralo a la carpeta **Bloques** o pulsa «Copiar al proyecto».`,
+    ayudaBoton: 'Ayuda (F1)',
+    ayudaDe: (fc: string) => `Ayuda de ${fc}`,
+    cerrarAyuda: 'Cerrar la ayuda',
+    copiar: 'Copiar',
+    copiarAlProyecto: 'Copiar al proyecto',
+    copiarTitulo: (p: string) => `Copiar el bloque elegido a la carpeta Bloques de «${p}»`,
+    parametro: 'Parámetro',
+    declaracion: 'Declaración',
+    tipo: 'Tipo',
+    significado: 'Significado',
+    ejemplo: 'Ejemplo (AWL):',
+    yaEsta: (fc: string, id: string, p: string) => `${fc} (${id}) ya está en «${p}»`,
+    sustituir: (fc: string, p: string) => `En «${p}» ya hay un ${fc} tuyo. Si copias el de la biblioteca, lo sustituye y su código se pierde. ¿Sustituirlo?\n\nPara conservar el tuyo, cancela y renómbralo antes.`,
+    copiado: (fc: string, id: string, p: string) => `${fc} (${id}) copiado a la carpeta Bloques de «${p}»`,
+    copiadoPortapapeles: (fc: string, id: string) => `${fc} (${id}) copiado: pégalo en la carpeta Bloques de tu proyecto con Ctrl+V`,
+    pegar: (fc: string, id: string) => `Pegar ${fc} (${id})`,
+    abrir: 'Abrir la Biblioteca estándar…',
+    soltar: 'Suelta para copiar el bloque a este proyecto',
+    protegido: (id: string) => `Bloque de biblioteca ${id} (protegido)`,
+    protegidoTexto: (fc: string) => `Este bloque viene de la **Biblioteca estándar**. Está protegido: su código no se ve ni se cambia. Se llama desde otro bloque con **CALL ${fc}** y sus parámetros (en KOP, con el cuadro ${fc} del catálogo, grupo «Bibliotecas»).`,
+    kopCopiado: (fc: string, id: string) => `${fc} (${id}) copiado de la Biblioteca estándar a la carpeta Bloques`,
+    kopOtro: (fc: string) => `En el proyecto ya hay un ${fc} tuyo, que no tiene parámetros: renómbralo y trae el ${fc} de la Biblioteca estándar.`,
+    ayuda: {
+      RSET: {
+        titulo: 'Poner a 0 un rango de bits',
+        resumen: 'pone a 0 N bits seguidos',
+        descripcion: 'Pone a **0** de una vez los **N** bits consecutivos que empiezan en **S_BIT**, sean salidas (A) o marcas (M). Uso típico: borrar las marcas de las etapas de un GRAFCET al arrancar o al reinicializar la secuencia, en lugar de un `R` para cada una, y después activar la etapa inicial.',
+        params: { S_BIT: 'Dirección del **primer bit**: `M 0.0`, `A 124.0`… Es un puntero, así que también vale `P#M 0.0`.', N: '**Cuántos bits** seguidos se ponen a 0. Una constante (`8`) o una palabra (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'Un `CALL` se ejecuta **en cada ciclo**, así que los bits estarían siempre a 0. Condiciónalo con un salto (`SPBN`), o en KOP con un contacto delante de **EN**. Otra opción es llamarlo en el **OB100**, que solo se ejecuta al arrancar.',
+          'Depende del **MCR**: dentro de una zona MCR desactivada no cambia nada.',
+          'Si **N** vale 0 o es negativo, no hace nada. Si el rango se sale del área, la CPU pasa a **STOP**.',
+          'Al volver, **BIE** = 1 (en KOP, **ENO** = 1).',
+          'Que el rango no incluya el byte de la **marca de ciclo**, o lo borrará.',
+        ],
+        ejemplo: `      U     E 0.0          // condición de reset
+      SPBN  m001           // si no se cumple, salta la llamada
+      CALL  FC 82
+        S_BIT := M 0.0     // primer bit
+        N     := 8         // cuántos bits: M 0.0 a M 0.7
+m001: NOP   0`,
+      },
+      SSET: {
+        titulo: 'Poner a 1 un rango de bits',
+        resumen: 'pone a 1 N bits seguidos',
+        descripcion: 'Es el contrario del FC 82: pone a **1** de una vez los **N** bits consecutivos que empiezan en **S_BIT**, sean salidas (A) o marcas (M). Por ejemplo, para encender a la vez un grupo de pilotos.',
+        params: { S_BIT: 'Dirección del **primer bit**: `M 0.0`, `A 124.0`… Es un puntero, así que también vale `P#A 124.0`.', N: '**Cuántos bits** seguidos se ponen a 1. Una constante (`4`) o una palabra (`MW 10`).' } as Record<string, string>,
+        notas: [
+          'Un `CALL` se ejecuta **en cada ciclo**: condiciónalo con un salto (`SPBN`), o en KOP con un contacto delante de **EN**.',
+          'Depende del **MCR**: dentro de una zona MCR desactivada no cambia nada.',
+          'Si **N** vale 0 o es negativo, no hace nada. Si el rango se sale del área, la CPU pasa a **STOP**.',
+          'Al volver, **BIE** = 1 (en KOP, **ENO** = 1).',
+        ],
+        ejemplo: `      U     E 0.1          // pulsador
+      SPBN  m002
+      CALL  FC 83
+        S_BIT := A 124.0   // primer bit
+        N     := 4         // A 124.0 a A 124.3
+m002: NOP   0`,
+      },
+    },
   },
 
   senales: {
@@ -823,7 +956,7 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
       bits: 'Operaciones lógicas con bits', comparacion: 'Comparación', temporizadores: 'Temporizadores', contadores: 'Contadores',
       Transferencia: 'Transferencia', Enteros: 'Enteros', 'Coma flotante': 'Coma flotante', 'Conversión': 'Conversión',
       'Lógica de palabras': 'Lógica de palabras', 'Desplazamiento y rotación': 'Desplazamiento y rotación',
-      saltos: 'Saltos', control: 'Control del programa', estado: 'Bits de estado',
+      Bibliotecas: 'Bibliotecas', saltos: 'Saltos', control: 'Control del programa', estado: 'Bits de estado',
     } as Record<string, string>,
     comparar: (t: 'I' | 'D' | 'R', r: string) => `Comparar ${t === 'I' ? 'enteros' : t === 'D' ? 'dobles enteros' : 'REAL'}: IN1 ${r} IN2`,
     d: {
@@ -865,6 +998,8 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     bitEstado: (s: string) => `Contacto del bit de estado ${s}`,
     /** Cuadros de función (MOVE, ADD_I…): lo que hace cada uno */
     cajas: {
+      FC82: 'Poner a 0 N bits seguidos desde S_BIT (RSET, de la Biblioteca estándar)',
+      FC83: 'Poner a 1 N bits seguidos desde S_BIT (SSET, de la Biblioteca estándar)',
       MOVE: 'Copiar IN en OUT',
       SHL_W: 'Desplazar palabra a la izquierda',
       SHR_W: 'Desplazar palabra a la derecha',
@@ -1111,6 +1246,17 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     constante255: (mn: string) => `${mn}: la constante va de 0 a 255`,
     aufDbDi: 'AUF solo abre DB o DI',
     soloFc: 'el intérprete de referencia solo llama a FC sin parámetros',
+    // CALL con parámetros (bloques de biblioteca)
+    parametroSinCall: (p: string) => `${p} := …: un parámetro va justo debajo de su CALL`,
+    parametroConMeta: 'un parámetro de CALL no lleva meta',
+    ucCcConParametros: (mn: string, fc: string) => `${mn} no puede llamar a ${fc}, que tiene parámetros: usa CALL ${fc}`,
+    sinParametros: (fc: string) => `${fc} no tiene parámetros (solo los llevan los bloques de la biblioteca, como FC 82 y FC 83)`,
+    parametroDesconocido: (p: string, fc: string, lista: string[]) => `${fc} no tiene el parámetro ${p} (sus parámetros son ${lista.join(' y ')})`,
+    parametroRepetido: (p: string) => `el parámetro ${p} está repetido`,
+    faltanParametros: (fc: string, lista: string[]) => `CALL ${fc}: ${lista.length > 1 ? 'faltan los parámetros' : 'falta el parámetro'} ${lista.join(' y ')}`,
+    parametroVacio: (p: string) => `falta el valor del parámetro ${p}`,
+    parametroPuntero: (p: string, v: string) => `${p} es un puntero: necesita la dirección de un bit (M 0.0, A 124.0, P#M 0.0…), no ${v}`,
+    parametroInt: (p: string, v: string) => `${p} es un INT: necesita un número entero o una palabra (8, MW 10…), no ${v}`,
     cierraSinAbrir: "')' sin paréntesis abierto",
     faltaCerrar: 'Falta cerrar paréntesis: hay más "(" que ")"',
     metaNoExiste: (m: string) => `la meta ${m} no existe`,
@@ -1138,6 +1284,7 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     // CPU
     cargarEnCiclo: 'No se puede cargar el programa en mitad de un ciclo',
     bloqueNoExiste: (n: string) => `Llamada a un bloque que no existe: ${n}`,
+    llamadaSinParametros: (fc: string) => `CALL ${fc} sin sus parámetros`,
     pilaBloques: 'Desbordamiento de la pila de bloques (demasiadas llamadas anidadas)',
     cicloExcedido: 'Tiempo de ciclo excedido (¿bucle infinito?)',
     sinDb: 'No hay ningún bloque de datos abierto (falta AUF DB n)',
@@ -1210,7 +1357,9 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     L09b: (op: string) => `el contador del LOOP se carga de ${op}: si vale 0, LOOP da 65 535 vueltas de más (compruébalo antes con un salto).`,
     B01: (fc: string, fcEsp: string) => `${fc} no se llama desde ningún bloque (falta UC/CC/CALL ${fcEsp} en el OB1): su código no se ejecuta.`,
     B02: 'el OB100 solo se ejecuta una vez, al pasar a RUN: las asignaciones que pongas aquí no se repiten en cada ciclo (¿querías escribirlas en el OB1?).',
-    B03: (m: string, byte: number) => `${m} se consulta pero el programa nunca la escribe, así que vale siempre 0. Si querías un intermitente, activa la marca de ciclo en Hardware (byte ${byte}).`,
+    B03: (m: string, byte: number) => `${m} se consulta pero el programa nunca la escribe, así que vale siempre 0. Si querías un intermitente, activa la marca de ciclo en el Hardware del equipo (byte ${byte}) y cárgalo en la CPU.`,
+    B04: (fc: string, sim: string) => `${fc} (${sim}) no está en el proyecto: tráelo desde la Biblioteca estándar. Si no, la CPU pasará a STOP al llamarlo.`,
+    B05: (fc: string, desde: string, hasta: string, byte: number, valor: number) => `${fc} pone a ${valor} de ${desde} a ${hasta}, que incluye la marca de ciclo (MB ${byte}): esos bits no parpadearán bien. Usa un rango que no la toque.`,
   },
 
   /** Corrección de los ejercicios (pruebas y equivalencia) */

@@ -9,7 +9,8 @@ export interface CatItem { kind: CatalogKind; label: string; desc: string; prese
 export interface CatGroup { name: string; items: CatItem[] }
 
 const cmp = (t: 'I' | 'D' | 'R'): CatItem[] => (['==', '<>', '>', '<', '>=', '<='] as const).map((r) => ({ kind: `CMP:${r}${t}` as CatalogKind, label: `CMP ${r}${t}`, desc: T.catalogo.comparar(t, r) }));
-const boxes = (grupo: string): CatItem[] => (Object.keys(BOX_DEFS) as FnBox[]).filter((f) => BOX_DEFS[f].grupo === grupo).map((f) => ({ kind: `BOX:${f}` as CatalogKind, label: f, desc: T.catalogo.cajas[f] ?? BOX_DEFS[f].desc }));
+const boxes = (grupo: string): CatItem[] => (Object.keys(BOX_DEFS) as FnBox[]).filter((f) => BOX_DEFS[f].grupo === grupo)
+  .map((f) => ({ kind: `BOX:${f}` as CatalogKind, label: BOX_DEFS[f].lib ? `${f.replace(/^FC/, 'FC ')} ${BOX_DEFS[f].lib}` : f, desc: T.catalogo.cajas[f] ?? BOX_DEFS[f].desc }));
 const D = T.catalogo.d;
 const G = T.catalogo.grupos;
 
@@ -61,6 +62,8 @@ export const CATALOG: CatGroup[] = [
     { kind: 'CALL', label: '---(CALL)', desc: D.CALL },
     { kind: 'RET', label: '---(RET)', desc: D.RET },
   ] },
+  // bloques de la Biblioteca estándar: al ponerlos en un segmento, el bloque se copia al proyecto
+  { name: G.Bibliotecas ?? 'Bibliotecas', items: boxes('Bibliotecas') },
   { name: G.estado, items: ['OV', 'OS', 'BIE', '==0', '<>0', '>0', '<0', '>=0', '<=0', 'UO'].map((s) => ({ kind: 'NA' as CatalogKind, label: `---| ${s} |---`, desc: T.catalogo.bitEstado(s), preset: s })) },
 ];
 

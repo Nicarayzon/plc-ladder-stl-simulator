@@ -1,16 +1,17 @@
 // Avisos didácticos (análisis estático)
 import type { Instr } from './compiler';
 import { CMP, JUMPS } from './mnemonics';
-import { clockByteOf, segId, segTitulo, type Programa, type ProgramCompile, type ProgramIssue } from './program';
+import { clockByteGuardado, clockByteOf, segId, segTitulo, type Programa, type ProgramCompile, type ProgramIssue } from './program';
 import type { CompiledProgram } from './compiler';
-import { analyzeUsage, bitKey } from './usage';
+import { analyzeUsage, bitKey, rangoDeCall } from './usage';
+import { BIBLIOTECA, conEspacio, libPorBloque } from './biblioteca';
 import { normBlockName } from './compiler';
 import { T } from '../i18n';
 
 export interface LintOptions { ncInputs?: string[] }
 
 export const LINT_REF: Record<string, string> = {
-  B01: '§5.4', B02: '§5.2', B03: '§2.4', L01: '§9.1', L02: '§7.11', L03: '§9.16', L04: '§6.6', L05: '§3.3', L06: '§9.17', L07: '§2.2', L08: '§1.3', L09: '§7.15', L10: '',
+  B01: '§5.4', B02: '§5.2', B03: '§2.4', B04: '§5.5', B05: '§5.5', L01: '§9.1', L02: '§7.11', L03: '§9.16', L04: '§6.6', L05: '§3.3', L06: '§9.17', L07: '§2.2', L08: '§1.3', L09: '§7.15', L10: '',
 };
 
 const opKey = (ins: Instr) => ins.op?.text.replace(/\s+/g, '') ?? '';
@@ -161,6 +162,22 @@ export function lintProgram(p: Programa, pc: ProgramCompile, opts: LintOptions =
     if (!first) continue;
     if (name.startsWith('FC') && !called.has(name)) add('B01', first, T.lint.B01(name, name.replace('FC', 'FC ')));
     if (name === 'OB100' && b.instrs.some((i) => i.mn === '=' || i.mn === 'T')) add('B02', first, T.lint.B02);
+  }
+  // B04: CALL a un bloque de biblioteca (FC 82, FC 83) que no está en el proyecto: la CPU pasará a STOP al llamarlo
+  // B05: el rango de FC 82/83 incluye el byte de la marca de ciclo
+  const ciclo = new Set([clockByteOf(p), clockByteGuardado(p)].filter((b): b is number => b !== null));
+  for (const { ins } of all) {
+    if (ins.mn !== 'CALL' || !ins.params?.length || ins.op?.kind !== 'block') continue;
+    const name = `${ins.op.name}${ins.op.n}`;
+    const blk = pc.cp.blocks.get(name);
+    const def = blk ? (blk.lib ? BIBLIOTECA[blk.lib] : undefined) : libPorBloque(name);
+    if (!def) continue;
+    if (!blk) add('B04', ins, T.lint.B04(conEspacio(name), def.id));
+    const r = rangoDeCall(ins);
+    if (r?.area === 'M') {
+      const b = [...ciclo].find((x) => x >= r.ini >> 3 && x <= r.fin >> 3);
+      if (b !== undefined) add('B05', ins, T.lint.B05(conEspacio(name), `M ${r.ini >> 3}.${r.ini & 7}`, `M ${r.fin >> 3}.${r.fin & 7}`, b, def.valor));
+    }
   }
   // B03: marcas que se consultan pero que el programa nunca escribe (¿marca de ciclo sin activar?)
   for (const m of marcasNuncaEscritas(pc.cp, clockByteOf(p))) {

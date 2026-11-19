@@ -84,7 +84,7 @@
 <p><strong>So wird er aktiviert</strong>:</p>
 <ul>
 <li>In der echten CPU: <em>Eigenschaften der CPU → Zyklus/Taktmerker</em>. Das Kästchen anhaken, das Byte wählen (zum Beispiel MB100) und die Hardwarekonfiguration laden.</li>
-<li>Im Simulator: Schaltfläche <strong>Hardware</strong> → CPU → <em>Ciclo / marca de ciclo</em> (die Oberfläche ist auf Spanisch). Standardmäßig wird MB0 verwendet, aber jedes Byte kann gewählt werden.</li>
+<li>Im Simulator genauso: im Explorer <strong>Station(1) ▸ Hardware</strong> (Doppelklick; die Schaltfläche <strong>Hardware</strong> in der Leiste ist eine Abkürzung) → Doppelklick auf die <strong>CPU</strong> → Register <em>Zyklus/Taktmerker</em>. Das Kästchen anhaken, das Byte eingeben und <em>OK</em> drücken. Danach <em>Station ▸ Speichern und übersetzen</em> und <em>Zielsystem ▸ Laden in Baugruppe</em>, das die CPU in STOP schalten will. Bis sie geladen ist, behält die CPU die vorige Konfiguration.</li>
 </ul>
 
 
@@ -136,7 +136,7 @@
 <p><strong>Achtung</strong>:</p>
 <ul>
 <li><strong>Das Programm darf dieses Byte nur lesen.</strong> Die CPU überschreibt es in jedem Zyklus, deshalb geht alles verloren, was das Programm hineinschreibt. Der Simulator warnt, wenn das Programm in dieses Byte schreibt.</li>
-<li>Das Byte muss frei bleiben: Verwende es für nichts anderes, auch nicht als Teil eines Wortes (<code>MW 99</code> und <code>MW 100</code> enthalten <code>MB 100</code>).</li>
+<li>Das Byte muss frei bleiben: Verwende es für nichts anderes, auch nicht als Teil eines Wortes (<code>MW 99</code> und <code>MW 100</code> enthalten <code>MB 100</code>) und auch nicht im Bereich eines FC 82 oder FC 83 (siehe <a href="../bausteine-ob-fc-fb-db/#bibliotheksbausteine-fc-82-rset-und-fc-83-sset">Bibliotheksbausteine: FC 82 (RSET) und FC 83 (SSET)</a>).</li>
 <li>Für genaue Zeitmessungen ist er nicht geeignet: Wenn die Bedingung erfüllt wird, kann das Bit mitten in seiner Periode stehen, deshalb kann das erste Blinken kürzer sein. Für genaue Verzögerungen verwendet man Zeiten (siehe <a href="../zeiten/#zeiten-in-kop">Zeiten in KOP</a>).</li>
 <li>Im Simulator wird das Byte zu Beginn jedes Zyklus aktualisiert, bevor die Eingänge gelesen werden. Wird der Taktmerker deaktiviert oder das Byte geändert, wird das alte Byte auf 0 gesetzt.</li>
 </ul></section>

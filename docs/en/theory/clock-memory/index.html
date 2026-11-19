@@ -84,7 +84,7 @@
 <p><strong>How to enable it</strong>:</p>
 <ul>
 <li>On the real CPU: <em>CPU properties → Cycle/Clock memory</em>. Tick the box, choose the byte (for example, MB100) and download the hardware configuration.</li>
-<li>In the simulator: <strong>Hardware</strong> button → CPU → <em>Ciclo / marca de ciclo</em> (the interface is in Spanish). It uses MB0 by default, but any byte can be chosen.</li>
+<li>In the simulator, the same way: in the explorer, <strong>Station(1) ▸ Hardware</strong> (double-click; the <strong>Hardware</strong> button of the toolbar is a shortcut) → double-click the <strong>CPU</strong> → <em>Cycle/Clock Memory</em> tab. Tick the box, type the byte and press <em>OK</em>. Then <em>Station ▸ Save and Compile</em> and <em>PLC ▸ Download to Module</em>, which asks to switch the CPU to STOP. Until it is downloaded, the CPU keeps the previous configuration.</li>
 </ul>
 
 
@@ -136,7 +136,7 @@
 <p><strong>Watch out</strong>:</p>
 <ul>
 <li><strong>The program must only read that byte.</strong> The CPU overwrites it every cycle, so anything the program writes to it is lost. The simulator warns you if the program writes to it.</li>
-<li>The byte must stay free: do not use it for anything else, not even inside a word (<code>MW 99</code> and <code>MW 100</code> include <code>MB 100</code>).</li>
+<li>The byte must stay free: do not use it for anything else, not even inside a word (<code>MW 99</code> and <code>MW 100</code> include <code>MB 100</code>), nor inside the range of an FC 82 or FC 83 (see <a href="../blocks-ob-fc-fb-db/#library-blocks-fc-82-rset-and-fc-83-sset">Library blocks: FC 82 (RSET) and FC 83 (SSET)</a>).</li>
 <li>It is not suitable for accurate timing: when the condition becomes true, the bit may be halfway through its period, so the first flash can be shorter. For exact delays, use timers (see <a href="../timers/#timers-in-ladder">Timers in Ladder</a>).</li>
 <li>In the simulator, the byte is updated at the start of each cycle, before the inputs are read. If the clock memory is disabled or the byte is changed, the old byte is set to 0.</li>
 </ul></section>

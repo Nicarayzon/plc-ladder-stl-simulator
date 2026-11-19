@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { EditorState, StateEffect, StateField, RangeSetBuilder, type Extension } from '@codemirror/state';
+import { EditorState, Prec, StateEffect, StateField, RangeSetBuilder, type Extension } from '@codemirror/state';
 import { Decoration, type DecorationSet, EditorView, GutterMarker, WidgetType, gutter, keymap, lineNumbers, drawSelection, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { HighlightStyle, syntaxHighlighting, bracketMatching } from '@codemirror/language';
@@ -33,6 +33,33 @@ interface Props {
   minLines?: number;
   autoFocus?: boolean;
   onFocus?: () => void;
+  /** Parámetros de los bloques de biblioteca del proyecto (FC82 → S_BIT, N): Intro tras «CALL FC 82» los escribe */
+  interfaces?: Record<string, string[]>;
+}
+
+const CALL_LINE = /^(\s*)(?:([A-Za-z_][A-Za-z0-9_]{0,3})\s*:(?!=)\s*)?CALL\s+FC\s*(\d+)\s*;?$/i;
+
+/**
+ * Intro al final de «CALL FC 82» (un bloque de biblioteca del proyecto): escribe debajo sus parámetros vacíos, como el
+ * editor del entorno real, y deja el cursor detrás del primero.
+ */
+function escribirParametros(view: EditorView, interfaces: Record<string, string[]> | undefined): boolean {
+  if (!interfaces) return false;
+  const sel = view.state.selection.main;
+  if (!sel.empty) return false;
+  const line = view.state.doc.lineAt(sel.head);
+  if (sel.head !== line.to) return false;
+  const m = CALL_LINE.exec(line.text.replace(/\/\/.*$/, '').trimEnd());
+  if (!m) return false;
+  const params = interfaces[`FC${parseInt(m[3], 10)}`];
+  if (!params?.length) return false;
+  const next = line.number < view.state.doc.lines ? view.state.doc.line(line.number + 1).text : '';
+  if (/:=/.test(next)) return false; // ya los tiene
+  const ind = `${m[2] ? '      ' : m[1]}  `;
+  const ancho = Math.max(...params.map((p) => p.length));
+  const lineas = params.map((p) => `${ind}${p.padEnd(ancho)} := `);
+  view.dispatch({ changes: { from: line.to, insert: `\n${lineas.join('\n')}` }, selection: { anchor: line.to + 1 + lineas[0].length }, userEvent: 'input' });
+  return true;
 }
 
 const hl = HighlightStyle.define([
@@ -43,6 +70,8 @@ const hl = HighlightStyle.define([
   { tag: t.comment, color: 'var(--text-faint)', fontStyle: 'italic' },
   { tag: t.labelName, color: 'var(--cm-label)', fontWeight: '600' },
   { tag: t.meta, color: 'var(--text-faint)' },
+  { tag: t.propertyName, color: 'var(--cm-label)' },
+  { tag: t.operator, color: 'var(--text-faint)' },
 ]);
 
 // ───── Observar ─────
@@ -200,6 +229,7 @@ export function AwlEditor(props: Props) {
       syntaxHighlighting(hl),
       autocompletion({ override: [awlCompletion(() => propsRef.current.lang ?? 'de', () => propsRef.current.symbols ?? [])], icons: false }),
       linter(null),
+      Prec.high(keymap.of([{ key: 'Enter', run: (v) => escribirParametros(v, propsRef.current.interfaces) }])),
       keymap.of([...completionKeymap, ...defaultKeymap, ...historyKeymap, indentWithTab]),
       obsField,
       valField,

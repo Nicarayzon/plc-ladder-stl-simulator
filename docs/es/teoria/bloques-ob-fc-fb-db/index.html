@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bloques del programa: OB, FC, FB y DB · Automatizacion</title>
-  <meta name="description" content="Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes y cómo se llaman los bloques en AWL.">
+  <meta name="description" content="Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes, cómo se llaman los bloques en AWL y los bloques de biblioteca FC 82 y FC 83, que ponen a 0 o a 1 un rango de bits.">
   <meta name="author" content="Arzath">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e1013">
@@ -18,12 +18,12 @@
   <meta property="og:site_name" content="Automatizacion">
   <meta property="og:locale" content="es_ES">
   <meta property="og:title" content="Bloques del programa: OB, FC, FB y DB">
-  <meta property="og:description" content="Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes y cómo se llaman los bloques en AWL.">
+  <meta property="og:description" content="Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes, cómo se llaman los bloques en AWL y los bloques de biblioteca FC 82 y FC 83, que ponen a 0 o a 1 un rango de bits.">
   <meta property="og:url" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/">
   <meta property="og:image" content="https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
-  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Bloques del programa: OB, FC, FB y DB","description":"Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes y cómo se llaman los bloques en AWL.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué diferencia hay entre un FC y un FB?","acceptedAnswer":{"@type":"Answer","text":"El FB tiene memoria propia: un DB de instancia donde guarda sus variables estáticas (STAT), que conservan el valor entre llamadas. Un FC solo tiene variables temporales, que se pierden al terminar."}},{"@type":"Question","name":"¿Qué OB ejecuta el programa principal?","acceptedAnswer":{"@type":"Answer","text":"El OB1, que la CPU ejecuta cíclicamente. El OB100 es el arranque, el OB35 la alarma cíclica y el OB80 el error de tiempo."}},{"@type":"Question","name":"¿Qué pasa si hay un error y su OB no está programado?","acceptedAnswer":{"@type":"Answer","text":"La CPU pasa a STOP. Por ejemplo, un BCD no válido llama al OB121: si el OB121 no está cargado, la CPU se para."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Bloques OB, FC, FB y DB","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/"}]}]
+  [{"@context":"https://schema.org","@type":"TechArticle","headline":"Bloques del programa: OB, FC, FB y DB","description":"Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes, cómo se llaman los bloques en AWL y los bloques de biblioteca FC 82 y FC 83, que ponen a 0 o a 1 un rango de bits.","inLanguage":"es","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/","image":"https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png","author":{"@type":"Person","name":"Arzath"},"isPartOf":{"@type":"WebSite","name":"Automatizacion","url":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué diferencia hay entre un FC y un FB?","acceptedAnswer":{"@type":"Answer","text":"El FB tiene memoria propia: un DB de instancia donde guarda sus variables estáticas (STAT), que conservan el valor entre llamadas. Un FC solo tiene variables temporales, que se pierden al terminar."}},{"@type":"Question","name":"¿Qué OB ejecuta el programa principal?","acceptedAnswer":{"@type":"Answer","text":"El OB1, que la CPU ejecuta cíclicamente. El OB100 es el arranque, el OB35 la alarma cíclica y el OB80 el error de tiempo."}},{"@type":"Question","name":"¿Qué pasa si hay un error y su OB no está programado?","acceptedAnswer":{"@type":"Answer","text":"La CPU pasa a STOP. Por ejemplo, un BCD no válido llama al OB121: si el OB121 no está cargado, la CPU se para."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Automatizacion","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/"},{"@type":"ListItem","position":2,"name":"Teoría","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/"},{"@type":"ListItem","position":3,"name":"Bloques OB, FC, FB y DB","item":"https://nicarayzon.github.io/plc-ladder-stl-simulator/es/teoria/bloques-ob-fc-fb-db/"}]}]
   </script>
   <link rel="stylesheet" href="../../../estilos.css">
   <link rel="stylesheet" href="../../../teoria.css">
@@ -77,7 +77,7 @@
       </details>
       <nav class="migas" aria-label="Breadcrumb"><a href="../">Teoría</a><span aria-hidden="true">›</span><span>Bloques OB, FC, FB y DB</span></nav>
       <h1>Bloques del programa: OB, FC, FB y DB</h1>
-      <p class="articulo-entradilla">Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes y cómo se llaman los bloques en AWL.</p>
+      <p class="articulo-entradilla">Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes, cómo se llaman los bloques en AWL y los bloques de biblioteca FC 82 y FC 83, que ponen a 0 o a 1 un rango de bits.</p>
       <div class="articulo-cuerpo">
 <section><h2 id="tipos-de-bloque">Tipos de bloque</h2>
 
@@ -259,6 +259,86 @@ TITLE = Enclavamiento
       =     #Motor;
 END_FUNCTION</code></pre>
 <p>En KOP una llamada es un <strong>cuadro</strong> con EN/ENO y los parámetros como patillas.</p></section>
+<section><h2 id="bloques-de-biblioteca-fc-82-rset-y-fc-83-sset">Bloques de biblioteca: FC 82 (RSET) y FC 83 (SSET)</h2>
+<p>La <strong>biblioteca estándar</strong> trae bloques ya hechos que se copian al proyecto. Dos muy útiles son:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Bloque</th><th>Nombre simbólico</th><th>Qué hace</th></tr></thead><tbody><tr><td><strong>FC 82</strong></td><td>RSET</td><td>Pone a <strong>0</strong> de una vez N bits consecutivos</td></tr><tr><td><strong>FC 83</strong></td><td>SSET</td><td>Pone a <strong>1</strong> de una vez N bits consecutivos</td></tr></tbody></table></div>
+<p>Los dos tienen los mismos parámetros:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="tabla"><table><thead><tr><th>Parámetro</th><th>Declaración</th><th>Tipo</th><th>Significado</th></tr></thead><tbody><tr><td><code>S_BIT</code></td><td>IN</td><td>POINTER</td><td>Dirección del <strong>primer bit</strong> del rango: <code>M 0.0</code>, <code>A 4.0</code>… Es un puntero, así que también vale <code>P#M 0.0</code></td></tr><tr><td><code>N</code></td><td>IN</td><td>INT</td><td><strong>Cuántos bits</strong> seguidos: una constante (<code>8</code>) o una palabra (<code>MW 10</code>)</td></tr></tbody></table></div>
+<p><strong>Uso típico</strong>: borrar de una vez las marcas de las etapas de un GRAFCET al arrancar o al reinicializar la secuencia, en lugar de un <code>R</code> para cada etapa, y después activar la etapa inicial.</p>
+<p><strong>Cómo se trae al proyecto</strong>: se copia desde la biblioteca a la carpeta de bloques del programa, junto al OB1, y se carga en la CPU con el resto de bloques. Si la CPU tiene un OB1 que llama al FC 82 pero no tiene el FC 82, pasa a <strong>STOP</strong> al llamarlo (bloque inexistente, OB121 no cargado).</p>
+<ul>
+<li>En el simulador: botón del libro del explorador → <strong>Bloques de conversión ▸ Bloques</strong>, y se arrastra el FC 82 a la carpeta <strong>Bloques</strong> del proyecto. Con el bloque seleccionado, <strong>F1</strong> abre su ayuda. En el proyecto queda protegido: su código no se ve.</li>
+<li>En KOP también está en el catálogo, grupo <em>Bibliotecas</em>: al poner el cuadro en un segmento, el bloque se copia solo al proyecto.</li>
+</ul>
+<p><strong>Llamada en AWL</strong>: los parámetros van debajo del <code>CALL</code>, uno por línea. En el simulador, al escribir <code>CALL FC 82</code> y pulsar Intro, el editor añade los parámetros vacíos.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>          <span class="t-com">// condición de reset</span>
+      <span class="t-ins">SPBN</span>  <span class="t-op">m001</span>           <span class="t-com">// si no se cumple, salta la llamada</span>
+      <span class="t-ins">CALL</span>  <span class="t-op">FC 82</span>
+        <span class="t-ins">S_BIT</span> <span class="t-op">:= M 0.0</span>     <span class="t-com">// primer bit</span>
+        <span class="t-ins">N</span>     <span class="t-op">:= 8</span>         <span class="t-com">// cuántos bits: M 0.0 a M 0.7</span>
+<span class="t-meta">m001:</span> <span class="t-ins">NOP</span>   <span class="t-cte">0</span></code></pre>
+<p>Pone a 0 de M 0.0 a M 0.7, pero solo en los ciclos en que E 0.0 = 1.</p>
+<p><strong>En KOP</strong> es un cuadro con <code>EN</code>, <code>S_BIT</code> y <code>N</code> a la izquierda y <code>ENO</code> a la derecha. Para condicionarlo, basta con poner el contacto delante de <code>EN</code>.</p>
+<p><strong>Cuidado</strong>:</p>
+<ul>
+<li>Un <code>CALL</code> se ejecuta <strong>siempre</strong>, en cada ciclo, sin mirar el RLO: sin una condición, los bits estarían a 0 todo el rato. Se condiciona con un salto (<code>SPBN</code>) o, en KOP, con la entrada <code>EN</code>. Otra opción es llamarlo en el <strong>OB100</strong>, que solo se ejecuta al arrancar. <code>UC</code> y <code>CC</code> no sirven: solo llaman a bloques sin parámetros.</li>
+<li>Depende del <strong>MCR</strong> (ver <a href="../direccionamiento-indirecto-y-mcr/#mcr-master-control-relay">MCR (Master Control Relay)</a>): dentro de una zona MCR desactivada no cambia nada.</li>
+<li>Si <code>N</code> vale 0 o es negativo, no hace nada. Si el rango se sale del área, la CPU pasa a STOP.</li>
+<li>Al volver, <code>BIE</code> = 1 (en KOP, <code>ENO</code> = 1) y <code>/ER</code> = 0: la siguiente consulta empieza una cadena nueva.</li>
+<li>El rango no debe incluir el byte de la <strong>marca de ciclo</strong> (ver <a href="../marca-de-ciclo/#marca-de-ciclo">Marca de ciclo</a>), o lo borrará.</li>
+</ul>
+<p><strong>Ejemplo con GRAFCET</strong>: con el pulsador de inicialización E 0.0 se borran todas las etapas (M 0.0 … M 0.7) y se activa la inicial.</p>
+<pre class="codigo-awl"><code>      <span class="t-ins">U</span>     <span class="t-op">E 0.0</span>          <span class="t-com">// pulsador de inicialización</span>
+      <span class="t-ins">SPBN</span>  <span class="t-op">m002</span>
+      <span class="t-ins">CALL</span>  <span class="t-op">FC 82</span>          <span class="t-com">// borra todas las etapas</span>
+        <span class="t-ins">S_BIT</span> <span class="t-op">:= M 0.0</span>
+        <span class="t-ins">N</span>     <span class="t-op">:= 8</span>
+      <span class="t-ins">SET</span>
+      <span class="t-ins">S</span>     <span class="t-op">M 0.0</span>          <span class="t-com">// activa la etapa inicial</span>
+<span class="t-meta">m002:</span> <span class="t-ins">NOP</span>   <span class="t-cte">0</span></code></pre></section>
 <section><h2 id="fin-de-bloque-y-llamadas">Fin de bloque y llamadas</h2>
 
 
@@ -289,7 +369,7 @@ END_FUNCTION</code></pre>
 
 
 
-<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Efecto</th></tr></thead><tbody><tr><td><code>BE</code></td><td>Fin de bloque</td></tr><tr><td><code>BEA</code></td><td>Fin de bloque incondicional</td></tr><tr><td><code>BEB</code></td><td>Fin de bloque si RLO = 1. Si RLO = 0 sigue, con RLO := 1 y /ER := 0</td></tr><tr><td><code>CALL</code></td><td>Llamada con parámetros (ver <a href="#llamadas">Llamadas</a>)</td></tr><tr><td><code>UC</code> / <code>CC</code></td><td>Llamada incondicional / condicional, sin parámetros</td></tr></tbody></table></div></section>
+<div class="tabla"><table><thead><tr><th>Instrucción</th><th>Efecto</th></tr></thead><tbody><tr><td><code>BE</code></td><td>Fin de bloque</td></tr><tr><td><code>BEA</code></td><td>Fin de bloque incondicional</td></tr><tr><td><code>BEB</code></td><td>Fin de bloque si RLO = 1. Si RLO = 0 sigue, con RLO := 1 y /ER := 0</td></tr><tr><td><code>CALL</code></td><td>Llamada con parámetros (ver <a href="#llamadas">Llamadas</a>). Por ejemplo, a un bloque de biblioteca como el FC 82 (ver <a href="#bloques-de-biblioteca-fc-82-rset-y-fc-83-sset">Bloques de biblioteca: FC 82 (RSET) y FC 83 (SSET)</a>)</td></tr><tr><td><code>UC</code> / <code>CC</code></td><td>Llamada incondicional / condicional, sin parámetros</td></tr></tbody></table></div></section>
 <section><h2 id="bloques-de-datos">Bloques de datos</h2>
 <pre class="codigo-awl"><code>      <span class="t-ins">AUF</span>   <span class="t-op">DB 1</span>            <span class="t-com">// abre el DB1 como DB global</span>
       <span class="t-ins">L</span>     <span class="t-op">DBW 0</span>           <span class="t-com">// DB1.DBW0</span>

@@ -89,11 +89,11 @@ export const PAGINAS: Pagina[] = [
     titulo: { es: 'Bloques del programa: OB, FC, FB y DB', en: 'Program blocks: OB, FC, FB and DB', de: 'Bausteine: OB, FC, FB und DB' },
     corto: { es: 'Bloques OB, FC, FB y DB', en: 'Blocks: OB, FC, FB and DB', de: 'Bausteine OB, FC, FB, DB' },
     descripcion: {
-      es: 'Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes y cómo se llaman los bloques en AWL.',
-      en: 'How a PLC program is structured in blocks: organization blocks (OB), functions (FC), function blocks (FB) with their instance DB, and data blocks (DB). The most important OBs and how blocks are called in STL.',
-      de: 'Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs und wie Bausteine in AWL aufgerufen werden.',
+      es: 'Cómo se estructura un programa de autómata en bloques: OB de organización, funciones FC, bloques de función FB con su DB de instancia y bloques de datos DB. Los OB más importantes, cómo se llaman los bloques en AWL y los bloques de biblioteca FC 82 y FC 83, que ponen a 0 o a 1 un rango de bits.',
+      en: 'How a PLC program is structured in blocks: organization blocks (OB), functions (FC), function blocks (FB) with their instance DB, and data blocks (DB). The most important OBs, how blocks are called in STL and the library blocks FC 82 and FC 83, which reset or set a range of bits.',
+      de: 'Wie ein SPS-Programm in Bausteine gegliedert wird: Organisationsbausteine (OB), Funktionen (FC), Funktionsbausteine (FB) mit Instanz-DB und Datenbausteine (DB). Die wichtigsten OBs, wie Bausteine in AWL aufgerufen werden, und die Bibliotheksbausteine FC 82 und FC 83, die einen Bitbereich rücksetzen oder setzen.',
     },
-    secciones: [{ ref: '5.1' }, { ref: '5.2' }, { ref: '5.3' }, { ref: '5.4' }, { ref: '7.17' }, { ref: '7.18' }],
+    secciones: [{ ref: '5.1' }, { ref: '5.2' }, { ref: '5.3' }, { ref: '5.4' }, { ref: '5.5' }, { ref: '7.17' }, { ref: '7.18' }],
   },
   {
     id: 'kop',

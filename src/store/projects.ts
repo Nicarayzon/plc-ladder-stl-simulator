@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Programa } from '../core/program';
-import { emptyProgram, migrarHw } from '../core/program';
+import { emptyProgram, migrarHw, migrarHwCargado } from '../core/program';
 import { emptyWbState, migrarVat, type WbState } from '../ui/workbench/types';
 import { demoAntiguo } from './legacyDemo';
 
@@ -28,11 +28,15 @@ export function quitarDemo(st: { proyectos: Proyecto[]; actual: string | null })
   return { ...st, proyectos, actual };
 }
 
-/** Migraciones de los proyectos guardados: v2 quita el ejemplo antiguo, v3 pasa la pestaña «Variables» a la VAT_1, v4 renombra la CPU del hardware. */
+/**
+ * Migraciones de los proyectos guardados: v2 quita el ejemplo antiguo, v3 pasa la pestaña «Variables» a la VAT_1,
+ * v4 renombra la CPU del hardware y v5 da por cargado en la CPU el hardware guardado (antes no había que cargarlo).
+ */
 export function migrarProyectos(st: { proyectos: Proyecto[]; actual: string | null }, version: number) {
   let r = version < 2 ? quitarDemo(st) : st;
   if (version < 3) r = { ...r, proyectos: (r.proyectos ?? []).map((p) => ({ ...p, wb: migrarVat(p.wb ?? emptyWbState()) })) };
   if (version < 4) r = { ...r, proyectos: (r.proyectos ?? []).map((p) => (p.programa ? { ...p, programa: migrarHw(p.programa) } : p)) };
+  if (version < 5) r = { ...r, proyectos: (r.proyectos ?? []).map((p) => (p.programa ? { ...p, programa: migrarHwCargado(p.programa) } : p)) };
   return r;
 }
 
@@ -73,6 +77,6 @@ export const useProjects = create<ProjectsState>()(
       },
       setActual: (id) => set({ actual: id }),
     }),
-    { name: 'automatizacion.v1.projects', version: 4, migrate: (st, v) => migrarProyectos(st as { proyectos: Proyecto[]; actual: string | null }, v) as unknown as ProjectsState },
+    { name: 'automatizacion.v1.projects', version: 5, migrate: (st, v) => migrarProyectos(st as { proyectos: Proyecto[]; actual: string | null }, v) as unknown as ProjectsState },
   ),
 );

@@ -1,4 +1,5 @@
 // Modelo de datos KOP
+import type { LibId } from '../core/biblioteca';
 
 export type Operando = string; // texto AWL normalizado: "E 0.0", "MW 30", "T 1", "S5T#5S", '"Marcha"'
 export type Id = string;
@@ -24,7 +25,9 @@ export type FnBox = 'MOVE' | 'ADD_I' | 'SUB_I' | 'MUL_I' | 'DIV_I' | 'ADD_DI' | 
   | 'BCD_I' | 'I_BCD' | 'BCD_DI' | 'DI_BCD' | 'I_DI' | 'DI_R' | 'ROUND' | 'TRUNC' | 'CEIL' | 'FLOOR'
   | 'INV_I' | 'INV_DI' | 'NEG_I' | 'NEG_DI' | 'NEG_R'
   | 'WAND_W' | 'WOR_W' | 'WXOR_W' | 'WAND_DW' | 'WOR_DW' | 'WXOR_DW'
-  | 'SHL_W' | 'SHR_W' | 'SHR_I' | 'SHL_DW' | 'SHR_DW' | 'SHR_DI' | 'ROL_DW' | 'ROR_DW';
+  | 'SHL_W' | 'SHR_W' | 'SHR_I' | 'SHL_DW' | 'SHR_DW' | 'SHR_DI' | 'ROL_DW' | 'ROR_DW'
+  // bloques de biblioteca: el cuadro es la llamada (CALL con sus parámetros)
+  | 'FC82' | 'FC83';
 
 export type Cuadro =
   | { k: 'TEMP'; id: Id; tipo: TempTipo; t: Operando; tw: Operando; pinR?: Elem; dual?: Operando; dez?: Operando; q?: Rama[] }
@@ -71,7 +74,11 @@ export const TEMP_EN: Record<TempTipo, string> = { S_IMPULS: 'S_PULSE', S_VIMP: 
 export const CONT_EN: Record<ContTipo, string> = { Z_VORW: 'S_CU', Z_RUECK: 'S_CD', ZAEHLER: 'S_CUD' };
 
 export type BoxEnd = 'OV' | 'SET';
-export interface BoxDef { ins: string[]; outs: string[]; awl: string; end: BoxEnd; grupo: string; desc: string }
+export interface BoxDef {
+  ins: string[]; outs: string[]; awl: string; end: BoxEnd; grupo: string; desc: string;
+  /** Cuadro que llama a un bloque de biblioteca (FC 82 = RSET…): se compila a CALL con sus parámetros */
+  lib?: LibId;
+}
 
 const ar = (awl: string, end: BoxEnd, grupo: string, desc: string, two = true): BoxDef => ({ ins: two ? ['IN1', 'IN2'] : ['IN'], outs: ['OUT'], awl, end, grupo, desc });
 
@@ -109,7 +116,16 @@ export const BOX_DEFS: Record<FnBox, BoxDef> = {
   SHR_DI: { ins: ['IN', 'N'], outs: ['OUT'], awl: 'SSD', end: 'SET', grupo: 'Desplazamiento y rotación', desc: 'Desplazar DINT con signo' },
   ROL_DW: { ins: ['IN', 'N'], outs: ['OUT'], awl: 'RLD', end: 'SET', grupo: 'Desplazamiento y rotación', desc: 'Rotar a la izquierda' },
   ROR_DW: { ins: ['IN', 'N'], outs: ['OUT'], awl: 'RRD', end: 'SET', grupo: 'Desplazamiento y rotación', desc: 'Rotar a la derecha' },
+  FC82: { ins: ['S_BIT', 'N'], outs: [], awl: 'CALL', end: 'SET', grupo: 'Bibliotecas', desc: 'Poner a 0 un rango de bits (RSET)', lib: 'RSET' },
+  FC83: { ins: ['S_BIT', 'N'], outs: [], awl: 'CALL', end: 'SET', grupo: 'Bibliotecas', desc: 'Poner a 1 un rango de bits (SSET)', lib: 'SSET' },
 };
+
+/** Bloques de biblioteca que llama un segmento KOP (sus cuadros FC 82, FC 83…). */
+export function libsDeSegmento(seg: SegmentoKOP): LibId[] {
+  const out: LibId[] = [];
+  walkSegment(seg, () => {}, (s) => { if (s.k === 'BOX' && BOX_DEFS[s.fn].lib) out.push(BOX_DEFS[s.fn].lib!); });
+  return out;
+}
 
 export const isSalidaCuadro = (s: Salida): s is Cuadro => s.k === 'TEMP' || s.k === 'CONT' || s.k === 'BIEST' || s.k === 'BOX';
 

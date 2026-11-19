@@ -26,10 +26,19 @@ export function operandEnToDe(op: string): string {
 
 const LINE_RE = /^(\s*)((?:[A-Za-z_][A-Za-z0-9_]{0,3})\s*:(?!=)\s*)?(\S+)(\s*)(.*)$/;
 
+/** Parámetro de un CALL: `  S_BIT := A 124.0` */
+const PARAM_LINE_RE = /^(\s*[A-Za-z_][A-Za-z0-9_]*\s*:=\s*)(P#\s*)?(.*?)(\s*)$/i;
+
 /** Traduce una línea conservando la meta, la sangría y el comentario. */
 export function translateLine(line: string, to: 'de' | 'en'): string {
   const code = stripComment(line);
   const comment = line.slice(code.length);
+  const pm = PARAM_LINE_RE.exec(code);
+  if (pm && /:=/.test(code)) {
+    const [, head, ptr = '', val, trailing] = pm;
+    const out = val ? (to === 'en' ? operandDeToEn(val) : operandEnToDe(val)) : val;
+    return `${head}${ptr}${out}${trailing}${comment}`;
+  }
   const m = LINE_RE.exec(code);
   if (!m) return line;
   const [, ind, label = '', mnRaw, sp, restRaw] = m;

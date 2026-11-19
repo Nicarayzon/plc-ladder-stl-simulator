@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { marcaCiclo } from './hardware';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const banco = JSON.parse(fs.readFileSync(path.resolve(HERE, '../../src/content/banco_ejercicios.json'), 'utf-8'));
@@ -38,7 +39,7 @@ test('arranca en el simulador libre sin los modos de práctica', async () => {
 test('inicio y versión', async () => {
   await goto('inicio');
   const { version } = JSON.parse(fs.readFileSync(path.resolve(HERE, '../../package.json'), 'utf-8'));
-  expect(version).toBe('0.27.0');
+  expect(version).toBe('0.29.0');
   await expect(win.locator('.brand')).toContainText(`v${version}`);
   await expect(win.locator('h1')).toHaveText('Automatizacion');
 });
@@ -217,12 +218,21 @@ test('simulador libre: proyectos, OB1, interruptores E124 y teclas', async () =>
   await expect(win.locator('.sw.on', { hasText: '124.1' })).toBeVisible();
   await win.keyboard.press('Digit2');
   await expect(win.locator('.sw.on')).toHaveCount(0);
-  // hardware: CPU con marca de ciclo en MB0 → M0.5 (1 s) parpadea en A124.6
-  await win.locator('button', { hasText: 'Hardware' }).click();
-  await win.locator('.modal button', { hasText: 'CPU compacta' }).click();
+  // hardware: Equipo ▸ Hardware ▸ CPU ▸ marca de ciclo en MB0, guardar y cargar → M0.5 (1 s) parpadea en A124.6
+  // el botón «Hardware» de la barra es un atajo: abre la misma configuración que el explorador
+  await win.locator('.wb-toolbar button', { hasText: 'Hardware' }).click();
+  await expect(win.locator('.vflot.hwc')).toHaveCount(1);
+  await win.locator('.vflot.hwc .vflot-head button[aria-label="Cerrar"]').click();
+  await expect(win.locator('.vflot.hwc')).toHaveCount(0);
+  await win.locator('.ex-hw').dblclick();
+  await win.locator('.hwc-tabla tr', { hasText: 'CPU compacta' }).dblclick();
+  await win.locator('.hwp-tab', { hasText: 'Ciclo/Marca de ciclo' }).click();
+  await win.locator('.modal label.check', { hasText: 'Marca de ciclo' }).locator('input').check();
   await expect(win.locator('.hw-table tbody tr')).toHaveCount(8);
   await expect(win.locator('.hw-table tbody tr').nth(3)).toContainText('0,5 s');
-  await win.locator('.modal-foot button', { hasText: 'Cerrar' }).click();
+  await win.locator('.modal-foot button', { hasText: 'Cancelar' }).click();
+  await win.locator('.vflot.hwc .vflot-head button[aria-label="Cerrar"]').click();
+  await marcaCiclo(win, true, 0);
   await win.locator('.cm-content').first().click();
   await win.keyboard.press('Meta+ArrowDown');
   await win.keyboard.press('Enter');
@@ -237,10 +247,8 @@ test('simulador libre: proyectos, OB1, interruptores E124 y teclas', async () =>
   await expect(win.locator('.panel-sec', { hasText: 'Marcas' }).locator('.sw-cap').first()).toHaveText('M 0 · marca de ciclo');
   await expect(filaCiclo.locator('.sw-addr')).toHaveText(['0.5']);
   await expect(filaCiclo.locator('.lamp')).toHaveCSS('grid-column-start', '6');
-  // quitar la marca de ciclo en Hardware: MB0 vuelve a 0 y no se queda ningún bit encendido
-  await win.locator('.wb-toolbar button', { hasText: 'Hardware' }).click();
-  await win.locator('.modal label.check', { hasText: 'Marca de ciclo' }).locator('input').uncheck();
-  await win.locator('.modal-foot button', { hasText: 'Cerrar' }).click();
+  // quitar la marca de ciclo en Hardware (y cargar): MB0 vuelve a 0 y no se queda ningún bit encendido
+  await marcaCiclo(win, false);
   await expect(win.locator('.panel-sec', { hasText: 'Marcas' }).locator('.sw-cap').first()).toHaveText('M 0');
   for (let i = 0; i < 12; i++) {
     await expect(filaCiclo.locator('.lamp.on')).toHaveCount(0);

@@ -172,7 +172,7 @@ La **marca de ciclo** es un byte de marcas que escribe la propia CPU: cada uno d
 
 **Cómo se activa**:
 - En la CPU real: *Propiedades de la CPU → Ciclo/marca de ciclo*. Se marca la casilla, se elige el byte (por ejemplo, MB100) y se carga la configuración del hardware.
-- En el simulador: botón **Hardware** → CPU → *Ciclo / marca de ciclo*. Por defecto usa MB0, pero se puede elegir cualquier byte.
+- En el simulador, igual: en el explorador, **Equipo(1) ▸ Hardware** (doble clic; el botón **Hardware** de la barra es un atajo) → doble clic en la **CPU** → pestaña *Ciclo/Marca de ciclo*. Se marca la casilla, se escribe el byte y se pulsa *Aceptar*. Después, *Equipo ▸ Guardar y compilar* y *Sistema de destino ▸ Cargar en módulo*, que pide pasar la CPU a STOP. Hasta que se carga, la CPU sigue con la configuración anterior.
 
 | Bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |---|---|---|---|---|---|---|---|---|
@@ -190,7 +190,7 @@ Con MB100 como marca de ciclo, `M 100.5` tiene un periodo de 1 s: 0,5 s a 0 y 0,
 
 **Cuidado**:
 - **El programa solo debe leer ese byte.** La CPU lo sobrescribe en cada ciclo, así que lo que escriba el programa se pierde. El simulador avisa si el programa escribe en él.
-- El byte tiene que quedar libre: no lo uses para otra cosa, tampoco dentro de una palabra (`MW 99` y `MW 100` incluyen `MB 100`).
+- El byte tiene que quedar libre: no lo uses para otra cosa, tampoco dentro de una palabra (`MW 99` y `MW 100` incluyen `MB 100`), ni dentro del rango de un FC 82 o un FC 83 (§5.5).
 - No sirve para medir tiempos con precisión: cuando se cumple la condición, el bit puede estar a mitad de su periodo, así que el primer parpadeo puede ser más corto. Para retardos exactos se usan los temporizadores (§6.6).
 - En el simulador, el byte se actualiza al empezar cada ciclo, antes de leer las entradas. Si se desactiva la marca de ciclo o se cambia de byte, el byte anterior se pone a 0.
 
@@ -352,6 +352,63 @@ END_FUNCTION
 ```
 
 En KOP una llamada es un **cuadro** con EN/ENO y los parámetros como patillas.
+
+### 5.5 Bloques de biblioteca: FC 82 (RSET) y FC 83 (SSET)
+
+La **biblioteca estándar** trae bloques ya hechos que se copian al proyecto. Dos muy útiles son:
+
+| Bloque | Nombre simbólico | Qué hace |
+|---|---|---|
+| **FC 82** | RSET | Pone a **0** de una vez N bits consecutivos |
+| **FC 83** | SSET | Pone a **1** de una vez N bits consecutivos |
+
+Los dos tienen los mismos parámetros:
+
+| Parámetro | Declaración | Tipo | Significado |
+|---|---|---|---|
+| `S_BIT` | IN | POINTER | Dirección del **primer bit** del rango: `M 0.0`, `A 4.0`… Es un puntero, así que también vale `P#M 0.0` |
+| `N` | IN | INT | **Cuántos bits** seguidos: una constante (`8`) o una palabra (`MW 10`) |
+
+**Uso típico**: borrar de una vez las marcas de las etapas de un GRAFCET al arrancar o al reinicializar la secuencia, en lugar de un `R` para cada etapa, y después activar la etapa inicial.
+
+**Cómo se trae al proyecto**: se copia desde la biblioteca a la carpeta de bloques del programa, junto al OB1, y se carga en la CPU con el resto de bloques. Si la CPU tiene un OB1 que llama al FC 82 pero no tiene el FC 82, pasa a **STOP** al llamarlo (bloque inexistente, OB121 no cargado).
+- En el simulador: botón del libro del explorador → **Bloques de conversión ▸ Bloques**, y se arrastra el FC 82 a la carpeta **Bloques** del proyecto. Con el bloque seleccionado, **F1** abre su ayuda. En el proyecto queda protegido: su código no se ve.
+- En KOP también está en el catálogo, grupo *Bibliotecas*: al poner el cuadro en un segmento, el bloque se copia solo al proyecto.
+
+**Llamada en AWL**: los parámetros van debajo del `CALL`, uno por línea. En el simulador, al escribir `CALL FC 82` y pulsar Intro, el editor añade los parámetros vacíos.
+
+```awl
+      U     E 0.0          // condición de reset
+      SPBN  m001           // si no se cumple, salta la llamada
+      CALL  FC 82
+        S_BIT := M 0.0     // primer bit
+        N     := 8         // cuántos bits: M 0.0 a M 0.7
+m001: NOP   0
+```
+
+Pone a 0 de M 0.0 a M 0.7, pero solo en los ciclos en que E 0.0 = 1.
+
+**En KOP** es un cuadro con `EN`, `S_BIT` y `N` a la izquierda y `ENO` a la derecha. Para condicionarlo, basta con poner el contacto delante de `EN`.
+
+**Cuidado**:
+- Un `CALL` se ejecuta **siempre**, en cada ciclo, sin mirar el RLO: sin una condición, los bits estarían a 0 todo el rato. Se condiciona con un salto (`SPBN`) o, en KOP, con la entrada `EN`. Otra opción es llamarlo en el **OB100**, que solo se ejecuta al arrancar. `UC` y `CC` no sirven: solo llaman a bloques sin parámetros.
+- Depende del **MCR** (§7.20): dentro de una zona MCR desactivada no cambia nada.
+- Si `N` vale 0 o es negativo, no hace nada. Si el rango se sale del área, la CPU pasa a STOP.
+- Al volver, `BIE` = 1 (en KOP, `ENO` = 1) y `/ER` = 0: la siguiente consulta empieza una cadena nueva.
+- El rango no debe incluir el byte de la **marca de ciclo** (§2.6), o lo borrará.
+
+**Ejemplo con GRAFCET**: con el pulsador de inicialización E 0.0 se borran todas las etapas (M 0.0 … M 0.7) y se activa la inicial.
+
+```awl
+      U     E 0.0          // pulsador de inicialización
+      SPBN  m002
+      CALL  FC 82          // borra todas las etapas
+        S_BIT := M 0.0
+        N     := 8
+      SET
+      S     M 0.0          // activa la etapa inicial
+m002: NOP   0
+```
 
 ---
 
@@ -1026,7 +1083,7 @@ SIG:  T     MW 10           // contador del bucle
 | `BE` | Fin de bloque |
 | `BEA` | Fin de bloque incondicional |
 | `BEB` | Fin de bloque si RLO = 1. Si RLO = 0 sigue, con RLO := 1 y /ER := 0 |
-| `CALL` | Llamada con parámetros (§5.4) |
+| `CALL` | Llamada con parámetros (§5.4). Por ejemplo, a un bloque de biblioteca como el FC 82 (§5.5) |
 | `UC` / `CC` | Llamada incondicional / condicional, sin parámetros |
 
 ### 7.18 Bloques de datos

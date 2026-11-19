@@ -53,7 +53,8 @@ Trae la teoría completa y 31 ejemplos resueltos que se ejecutan, para estudiar 
 - RUN, STOP y MRES; ciclo a ciclo o instrucción a instrucción; a ×1, ×10 o ×100.
 - CPU de dos acumuladores con palabra de estado, temporizadores, contadores, saltos y aritmética.
 - Bloques OB1, funciones FC y OB100 de arranque.
-- **Marca de ciclo** activable en «Hardware», en el byte que elijas (de 0,1 s a 2 s).
+- **Biblioteca estándar** con el FC 82 (RSET) y el FC 83 (SSET), que ponen a 0 o a 1 un rango de bits: se arrastran al proyecto y se llaman con `CALL` y sus parámetros, en AWL o con su cuadro en KOP.
+- **Marca de ciclo** en el Hardware del equipo, en el byte que elijas (de 0,1 s a 2 s): se activa en las propiedades de la CPU y funciona al «Cargar en módulo», como en la CPU real.
 
 **Entradas, salidas y señales**
 - Entradas como **interruptores de palanca** y salidas como **pilotos**: `E 124.0`–`E 125.7` y `A 124.0`–`A 125.7` siempre a la vista, más las que use tu programa.
@@ -68,7 +69,7 @@ Trae la teoría completa y 31 ejemplos resueltos que se ejecutan, para estudiar 
 - **En español, inglés y alemán:** la interfaz, los menús, la teoría y los ejemplos. La primera vez se abre en el idioma del sistema y se cambia en «Ajustes ▸ Idioma».
 
 **Tus proyectos**
-- Cada proyecto es una carpeta con sus bloques y sus tablas de variables.
+- Cada proyecto es una carpeta con su equipo (el Hardware) y sus bloques y tablas de variables.
 - Renombra, duplica y exporta proyectos (`.json`) o su fuente AWL (`.awl`), e impórtalos en otro equipo.
 - Todo se guarda en tu ordenador: sin cuentas y sin conexión.
 

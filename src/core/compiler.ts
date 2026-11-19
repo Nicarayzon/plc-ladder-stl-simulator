@@ -2,6 +2,7 @@
 import { CompileError } from './errors';
 import { EN2DE, JUMPS, MNEMONICS, NEST_OPEN, NO_OPERAND, BITLOGIC, TSTART, WORDLOG, SHIFTS } from './mnemonics';
 import { type Op, type Symbols, parseOperand } from './operands';
+import { BIBLIOTECA, conEspacio, libPorBloque, type LibDef, type LibId } from './biblioteca';
 import { T } from '../i18n';
 
 export type Lang = 'de' | 'en';
@@ -15,6 +16,18 @@ export interface Origin {
   role?: 'key' | 'q' | 'eno' | 'pin' | 'aux';
 }
 
+/** Parámetro de un CALL (`S_BIT := M 0.0`), en su propia línea debajo del CALL. */
+export interface CallParam {
+  name: string;
+  /** Valor tal como se escribió */
+  text: string;
+  op: Op | null;
+  line: number;
+  origin?: Origin;
+  /** Nemotecnia de la línea (para leer el valor) */
+  lang?: Lang;
+}
+
 export interface Instr {
   mn: string;
   op: Op | null;
@@ -23,12 +36,16 @@ export interface Instr {
   target: number;
   splCount: number;
   origin?: Origin;
+  /** Parámetros de un CALL a un bloque de biblioteca */
+  params?: CallParam[];
 }
 
 export interface CBlock {
   name: string;
   instrs: Instr[];
   labels: Map<string, number>;
+  /** Bloque de biblioteca (sin código: la CPU lo ejecuta directamente) */
+  lib?: LibId;
 }
 
 export interface SourceLine {
@@ -46,6 +63,8 @@ export interface CompileIssue {
 }
 
 const LABEL_RE = /^([A-Za-z_][A-Za-z0-9_]{0,3})\s*:(?!=)\s*(.*)$/;
+/** Línea de parámetro de un CALL: `S_BIT := M 0.0` */
+export const PARAM_RE = /^([A-Za-z_][A-Za-z0-9_]*)\s*:=\s*(.*)$/;
 const LABEL_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,3}$/;
 const SKIP_PREFIX = ['NETWORK', 'SEGMENTO', 'TITLE', 'BEGIN', 'END_'];
 
@@ -100,6 +119,12 @@ export interface CompileOptions {
   /** true: recoge todos los errores (editor). false: lanza el primero (como la referencia). */
   collect?: boolean;
   name?: string;
+  /**
+   * Bloques del proyecto: nombre → bloque de biblioteca que es, o null si es un bloque del alumno. Sirve para
+   * comprobar los parámetros de cada CALL. Sin esta lista, un CALL con parámetros se comprueba con la biblioteca
+   * (FC 82, FC 83…) y los demás bloques se tratan como bloques sin parámetros.
+   */
+  bloques?: Map<string, LibId | null>;
 }
 
 export interface CompileResult {
@@ -111,8 +136,12 @@ class LineErr extends Error {}
 
 /** compile_block sobre una lista de líneas con origen. */
 export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): CompileResult {
-  const { symbols, lang = 'de', collect = false, name = 'OB1' } = opts;
+  const { symbols, lang = 'de', collect = false, name = 'OB1', bloques } = opts;
   const instrs: Instr[] = [];
+  /** CALL al que se le pueden añadir parámetros (el último, si no ha venido otra instrucción ni una meta detrás) */
+  let lastCall: Instr | null = null;
+  /** El último CALL tenía un error: sus parámetros no se miran */
+  let skipParams = false;
   const labels = new Map<string, number>();
   let pending: string[] = [];
   const pendingSet = new Set<string>();
@@ -132,14 +161,26 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       if (!line) continue;
       const up = line.toUpperCase();
       if (SKIP_PREFIX.some((p) => up.startsWith(p))) continue;
+      const pm0 = PARAM_RE.exec(line);
+      if (pm0) {
+        // los parámetros van en el mismo segmento que su CALL
+        if (lastCall && lastCall.origin?.seg !== sl.origin?.seg) lastCall = null;
+        if (!lastCall && skipParams) continue;
+        if (!lastCall) fail(sl, T.motor.parametroSinCall(pm0[1]));
+        lastCall!.params!.push({ name: pm0[1].toUpperCase(), text: pyStrip(pm0[2]), op: null, line: sl.line, origin: sl.origin, lang: sl.lang ?? lang });
+        continue;
+      }
+      skipParams = false;
       const lm = LABEL_RE.exec(line);
       if (lm) {
         const lname = lm[1].toUpperCase();
         if (labels.has(lname) || pendingSet.has(lname)) fail(sl, T.motor.metaDuplicada(lname));
         pending.push(lname);
         pendingSet.add(lname);
+        lastCall = null;
         line = pyStrip(lm[2]);
         if (!line) continue;
+        if (PARAM_RE.test(line)) fail(sl, T.motor.parametroConMeta);
       }
       let [mn, rest] = splitMnemonic(line);
       const llang = sl.lang ?? lang;
@@ -218,11 +259,19 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
       pending = [];
       pendingSet.clear();
       instrs.push(ins);
+      lastCall = mn === 'CALL' ? ins : null;
+      if (lastCall) ins.params = [];
     } catch (e) {
-      if (e instanceof LineErr) continue;
+      if (e instanceof LineErr) {
+        lastCall = null;
+        skipParams = /^\s*(?:[A-Za-z_][A-Za-z0-9_]{0,3}\s*:(?!=)\s*)?CALL\b/i.test(cleanLine(sl.text));
+        continue;
+      }
       throw e;
     }
   }
+
+  checkCalls(instrs, { symbols, collect, bloques }, errors);
 
   if (pending.length) {
     for (const p of pending) labels.set(p, instrs.length);
@@ -260,6 +309,77 @@ export function compileLines(lines: SourceLine[], opts: CompileOptions = {}): Co
     }
   }
   return { block: { name, instrs, labels }, errors };
+}
+
+/**
+ * Comprueba las llamadas: los parámetros de cada CALL frente a la interfaz del bloque llamado (solo los bloques de
+ * biblioteca tienen parámetros), que estén todos y que UC/CC no llamen a un bloque con parámetros.
+ */
+function checkCalls(instrs: Instr[], ctx: { symbols?: Symbols; collect: boolean; bloques?: Map<string, LibId | null> }, errors: CompileIssue[]) {
+  const report = (line: number, origin: Origin | undefined, msg: string) => {
+    if (!ctx.collect) throw new CompileError(T.motor.linea(line, msg));
+    errors.push({ line, msg, origin });
+  };
+  for (const ins of instrs) {
+    if ((ins.mn !== 'CALL' && ins.mn !== 'UC' && ins.mn !== 'CC') || ins.op?.kind !== 'block') continue;
+    const name = `${ins.op.name}${ins.op.n}`;
+    const fc = conEspacio(name);
+    const enProyecto = !!ctx.bloques?.has(name);
+    const libProyecto = enProyecto ? ctx.bloques!.get(name) : null;
+    if (ins.mn !== 'CALL') {
+      if (libProyecto) report(ins.line, ins.origin, T.motor.ucCcConParametros(ins.mn, fc));
+      continue;
+    }
+    const params = ins.params ?? [];
+    // interfaz del bloque llamado: la del bloque del proyecto o, si no está, la de la biblioteca
+    let def: LibDef | undefined;
+    if (enProyecto) def = libProyecto ? BIBLIOTECA[libProyecto] : undefined;
+    else if (params.length) def = libPorBloque(name);
+    if (!def) {
+      if (params.length) report(params[0].line, params[0].origin, T.motor.sinParametros(fc));
+      else delete ins.params; // un CALL de siempre
+      continue;
+    }
+    const vistos = new Set<string>();
+    for (const p of params) {
+      if (!def.params.some((x) => x.nombre === p.name)) {
+        report(p.line, p.origin, T.motor.parametroDesconocido(p.name, fc, def.params.map((x) => x.nombre)));
+        continue;
+      }
+      if (vistos.has(p.name)) {
+        report(p.line, p.origin, T.motor.parametroRepetido(p.name));
+        continue;
+      }
+      vistos.add(p.name);
+      const err = leerParametro(p, def.params.find((x) => x.nombre === p.name)!.tipo, ctx.symbols);
+      if (err) report(p.line, p.origin, err);
+    }
+    const faltan = def.params.filter((x) => !vistos.has(x.nombre)).map((x) => x.nombre);
+    if (faltan.length) report(ins.line, ins.origin, T.motor.faltanParametros(fc, faltan));
+  }
+}
+
+/** Lee el valor de un parámetro (deja el operando en `p.op`). Devuelve el error o null. */
+function leerParametro(p: CallParam, tipo: 'POINTER' | 'INT', symbols?: Symbols): string | null {
+  if (!p.text) return T.motor.parametroVacio(p.name);
+  // un puntero se puede escribir con P# o sin él: «P#M 0.0» y «M 0.0» son lo mismo
+  const txt = tipo === 'POINTER' ? p.text.replace(/^P#\s*/i, '') : p.text;
+  let op: Op | null;
+  try {
+    op = parseOperand(txt, symbols, p.lang ?? 'de');
+  } catch (e) {
+    if (e instanceof CompileError) return e.message;
+    throw e;
+  }
+  if (tipo === 'POINTER') {
+    if (!op || op.kind !== 'bit' || op.ind || op.area === 'DI') return T.motor.parametroPuntero(p.name, p.text);
+  } else {
+    const okConst = op?.kind === 'const' && op.ctype === 'INT';
+    const okMem = op?.kind === 'mem' && op.size === 2 && !op.ind && op.area !== 'PA';
+    if (!okConst && !okMem) return T.motor.parametroInt(p.name, p.text);
+  }
+  p.op = op;
+  return null;
 }
 
 export function textToLines(text: string, origin?: Origin): SourceLine[] {

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { marcaCiclo } from './hardware';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
 test('señales E/S: botón, ventana aparte, teclas y simulación con la principal minimizada', async () => {
@@ -42,9 +43,7 @@ test('señales E/S: botón, ventana aparte, teclas y simulación con la principa
   await win.locator('.wb-bottom .tab', { hasText: 'Mensajes' }).click();
   await expect(win.locator('.wb-bottom-body')).toContainText('M 0.5 se consulta');
   // marca de ciclo para que M 0.5 parpadee
-  await win.locator('.wb-toolbar button', { hasText: 'Hardware' }).click();
-  await win.locator('.modal button', { hasText: 'CPU compacta' }).click();
-  await win.locator('.modal-foot button', { hasText: 'Cerrar' }).click();
+  await marcaCiclo(win, true, 0);
   await win.waitForTimeout(600);
   await win.locator('.wb-bottom button', { hasText: 'Ocultar' }).click();
   await expect(win.locator('.wb-bottom.collapsed')).toHaveCount(1);
