@@ -29,7 +29,7 @@
     "@type": "SoftwareApplication",
     "name": "Automatizacion",
     "alternateName": "PLC simulator for Ladder and STL",
-    "description": "Programmable logic controller (PLC) simulator to learn Ladder logic (LAD, KOP) and Statement List (STL, AWL) programming, with theory, worked examples, timers, counters and a logic analyzer. The interface is available in English, Spanish and German.",
+    "description": "Programmable logic controller (PLC) simulator to learn Ladder logic (LAD, KOP) and Statement List (STL, AWL) programming, with theory, worked examples, timers, counters, a logic analyzer, clock memory and library blocks (FC 82 and FC 83). The interface is available in English, Spanish and German.",
     "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/en/",
     "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
     "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
@@ -279,7 +279,7 @@
         <div class="encabezado">
           <p class="antetitulo">Features</p>
           <h2>Simulator features, screen by screen</h2>
-          <p>From the theory and the examples to your own projects with inputs, outputs, memory bits and timing charts. The screenshots show the app in Spanish; in Settings ▸ Language you can switch it to English.</p>
+          <p>From the theory and the examples to your own projects with inputs, outputs, memory bits, timing charts, the CPU hardware and the standard library. The screenshots show the app in Spanish; in Settings ▸ Language you can switch it to English.</p>
         </div>
 
         <div class="pasos">
@@ -364,7 +364,7 @@
               <div>
                 <p class="paso-num">05</p>
                 <h3>Your projects, organized in folders</h3>
-                <p>In the free simulator, each project is a folder with its blocks. You create it in four steps, and then you can add whatever you need.</p>
+                <p>In the free simulator, each project is a folder with two parts: «Equipo(1)» (Station(1)), with the CPU hardware, and «Bloques» (Blocks), with OB1, the functions, the library blocks and the variable tables. You create it in four steps, and then you can add whatever you need.</p>
               </div>
               <ul class="lista">
                 <li>Rename, duplicate and export projects (<code>.json</code>) or their STL source (<code>.awl</code>), and import them on another computer.</li>
@@ -444,7 +444,7 @@
                 <p>The memory bits used by the program are grouped by byte, with their eight bits in a row; the ones it does not use are dimmed.</p>
               </div>
               <ul class="lista">
-                <li>Enable the clock memory in «Hardware» and its byte appears at the top: each bit oscillates by itself, from 0.1 s to 2 s, with its period below it.</li>
+                <li>Enable it in the station hardware (step 09) and its byte appears at the top: each bit oscillates by itself, from 0.1 s to 2 s, with its period below it.</li>
                 <li>Perfect for flashing lights: <code>A M 0.5</code> / <code>= Q 124.7</code> makes an output flash with a 1 s period.</li>
               </ul>
             </div>
@@ -460,11 +460,37 @@
             </div>
           </article>
 
-          <!-- img15 -->
+          <!-- img28, img29 -->
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
                 <p class="paso-num">09</p>
+                <h3>Station hardware: the clock memory, as on the real CPU</h3>
+                <p>In the explorer, <b>Equipo(1) ▸ Hardware</b> (Station(1) ▸ Hardware) opens the rack with the power supply, the compact CPU and its integrated inputs and outputs. Double-click the CPU to open its properties: the «Ciclo/Marca de ciclo» (Cycle/Clock memory) tab enables the clock memory and sets its byte.</p>
+              </div>
+              <ul class="lista">
+                <li>As on the real CPU, it works after «Guardar y compilar» (Save and compile) and «Cargar en módulo» (Download to module), which asks to switch the CPU to STOP and then back to RUN.</li>
+                <li>If what is saved is not downloaded yet, the status strip tells you.</li>
+                <li>The «Hardware» button of the toolbar is a shortcut to the same window.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img28">
+                <div class="captura-marco"><img alt="Hardware configuration window with the rack: power supply, compact CPU and integrated I/O at 124…125" width="780" height="460" loading="lazy"></div>
+                <figcaption>The rack: double-click the CPU to open its properties.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img29">
+                <div class="captura-marco"><img alt="CPU properties, Cycle/Clock memory tab, with the box ticked on byte 0 and the period of each bit" width="680" height="656" loading="lazy"></div>
+                <figcaption>«Ciclo/Marca de ciclo» (Cycle/Clock memory): the box, the byte and the period of each bit.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
                 <h3>I/O signals: the timing chart</h3>
                 <p>In the bottom panel, a timing chart draws how the inputs, outputs, memory bits, timers and counters you choose change over time. Here, <code>M 0.2</code> is the 0.4 s clock memory bit.</p>
               </div>
@@ -484,7 +510,7 @@
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
-                <p class="paso-num">10</p>
+                <p class="paso-num">11</p>
                 <h3>Variable table: monitor and modify</h3>
                 <p>Right-click OB1 → «Insertar nuevo objeto» → «Tabla de variables» (Insert new object → Variable table) to open <code>VAT_1</code> in a window inside the app, which stays on top while you keep programming. The glasses read the CPU values live.</p>
               </div>
@@ -502,6 +528,32 @@
               <figure class="captura" data-captura="img17">
                 <div class="captura-marco"><img alt="Variable table VAT_1 docked in the bottom panel, next to the I/O signals, with MD 30 and MD 100 in REAL" width="702" height="184" loading="lazy"></div>
                 <figcaption>Or docked at the bottom, next to «Señales E/S» (I/O signals).</figcaption>
+              </figure>
+            </div>
+          </article>
+          <!-- img26, img27 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">12</p>
+                <h3>Standard Library: FC 82 and FC 83</h3>
+                <p>The «Biblioteca estándar» (Standard Library) window brings ready-made blocks: <b>FC 82 (RSET)</b> resets a range of bits to 0 in one go and <b>FC 83 (SSET)</b> sets it to 1. For example, to clear all the steps of a GRAFCET when the sequence restarts.</p>
+              </div>
+              <ul class="lista">
+                <li>Bring them into the project by dragging them to the «Bloques» (Blocks) folder. With a block selected, <kbd>F1</kbd> opens its help.</li>
+                <li>In STL, call them with <code>CALL FC 82</code> and its parameters, <code>S_BIT</code> (first bit) and <code>N</code> (how many bits). Pressing Enter after the <code>CALL</code> makes the editor write them.</li>
+                <li>In LAD, the box is in the catalog, «Bibliotecas» (Libraries) group.</li>
+                <li>If you call one that is not in the project, the CPU goes to STOP, as on the real one.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img26">
+                <div class="captura-marco"><img alt="Standard Library window with FC 82 RSET and FC 83 SSET, and the help of FC 82 with its parameters S_BIT and N" width="760" height="520" loading="lazy"></div>
+                <figcaption>The library, with the help of FC 82 open (<kbd>F1</kbd>).</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img27">
+                <div class="captura-marco"><img alt="STL editor in RUN with CALL FC 83 and CALL FC 82 and their parameters, and the explorer with both protected blocks in the Blocks folder" width="871" height="419" loading="lazy"></div>
+                <figcaption>The calls with their parameters, and both blocks, protected, in «Bloques» (Blocks).</figcaption>
               </figure>
             </div>
           </article>

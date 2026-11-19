@@ -29,7 +29,7 @@
     "@type": "SoftwareApplication",
     "name": "Automatizacion",
     "alternateName": "SPS-Simulator für KOP und AWL",
-    "description": "Simulator einer speicherprogrammierbaren Steuerung (SPS) zum Lernen von Kontaktplan (KOP) und Anweisungsliste (AWL), mit Theorie, gelösten Beispielen, Zeiten, Zählern und Logikanalysator. Die Oberfläche gibt es auf Deutsch, Englisch und Spanisch.",
+    "description": "Simulator einer speicherprogrammierbaren Steuerung (SPS) zum Lernen von Kontaktplan (KOP) und Anweisungsliste (AWL), mit Theorie, gelösten Beispielen, Zeiten, Zählern, Logikanalysator, Taktmerker und Bibliotheksbausteinen (FC 82 und FC 83). Die Oberfläche gibt es auf Deutsch, Englisch und Spanisch.",
     "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/de/",
     "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
     "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
@@ -279,7 +279,7 @@
         <div class="encabezado">
           <p class="antetitulo">Funktionen</p>
           <h2>Die Funktionen des Simulators, Bildschirm für Bildschirm</h2>
-          <p>Von der Theorie und den Beispielen bis zu deinen eigenen Projekten mit Ein- und Ausgängen, Merkern und Zeitdiagrammen. Die Bildschirmfotos zeigen die App auf Spanisch; unter Einstellungen ▸ Sprache stellst du sie auf Deutsch um.</p>
+          <p>Von der Theorie und den Beispielen bis zu deinen eigenen Projekten mit Ein- und Ausgängen, Merkern, Zeitdiagrammen, der Hardware der CPU und der Standardbibliothek. Die Bildschirmfotos zeigen die App auf Spanisch; unter Einstellungen ▸ Sprache stellst du sie auf Deutsch um.</p>
         </div>
 
         <div class="pasos">
@@ -364,7 +364,7 @@
               <div>
                 <p class="paso-num">05</p>
                 <h3>Deine Projekte, in Ordnern organisiert</h3>
-                <p>Im freien Simulator ist jedes Projekt ein Ordner mit seinen Bausteinen. Du legst es in vier Schritten an und kannst danach hinzufügen, was du brauchst.</p>
+                <p>Im freien Simulator ist jedes Projekt ein Ordner mit zwei Teilen: «Equipo(1)» (Station(1)) mit der Hardware der CPU und «Bloques» (Bausteine) mit OB1, Funktionen, Bibliotheksbausteinen und Variablentabellen. Du legst es in vier Schritten an und kannst danach hinzufügen, was du brauchst.</p>
               </div>
               <ul class="lista">
                 <li>Projekte umbenennen, duplizieren und exportieren (<code>.json</code>) oder ihre AWL-Quelle (<code>.awl</code>), und auf einem anderen Computer importieren.</li>
@@ -444,7 +444,7 @@
                 <p>Die Merker, die das Programm verwendet, sind nach Bytes gruppiert, mit ihren acht Bits in einer Reihe; die unbenutzten erscheinen abgeblendet.</p>
               </div>
               <ul class="lista">
-                <li>Aktiviere den Taktmerker unter «Hardware», und sein Byte erscheint oben: Jedes Bit schwingt von selbst, von 0,1 s bis 2 s, mit seiner Periode darunter.</li>
+                <li>Aktiviere ihn in der Hardware der Station (Schritt 09), und sein Byte erscheint oben: Jedes Bit schwingt von selbst, von 0,1 s bis 2 s, mit seiner Periode darunter.</li>
                 <li>Ideal für Blinklichter: <code>U M 0.5</code> / <code>= A 124.7</code> lässt einen Ausgang mit 1 s Periode blinken.</li>
               </ul>
             </div>
@@ -460,11 +460,37 @@
             </div>
           </article>
 
-          <!-- img15 -->
+          <!-- img28, img29 -->
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
                 <p class="paso-num">09</p>
+                <h3>Hardware der Station: der Taktmerker wie bei der echten CPU</h3>
+                <p>Im Explorer öffnet <b>Equipo(1) ▸ Hardware</b> (Station(1) ▸ Hardware) den Baugruppenträger mit Stromversorgung, Kompakt-CPU und ihren integrierten Ein- und Ausgängen. Ein Doppelklick auf die CPU öffnet ihre Eigenschaften: Im Register «Ciclo/Marca de ciclo» (Zyklus/Taktmerker) aktivierst du den Taktmerker und wählst sein Byte.</p>
+              </div>
+              <ul class="lista">
+                <li>Wie bei der echten CPU funktioniert er nach «Guardar y compilar» (Speichern und übersetzen) und «Cargar en módulo» (Laden in Baugruppe), das die CPU in STOP und danach wieder in RUN schalten will.</li>
+                <li>Ist das Gespeicherte noch nicht geladen, weist dich der Statusstreifen darauf hin.</li>
+                <li>Die Schaltfläche «Hardware» in der Leiste ist eine Abkürzung zum selben Fenster.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img28">
+                <div class="captura-marco"><img alt="Fenster Hardwarekonfiguration mit dem Baugruppenträger: Stromversorgung, Kompakt-CPU und integrierte E/A bei 124…125" width="780" height="460" loading="lazy"></div>
+                <figcaption>Der Baugruppenträger: Doppelklick auf die CPU öffnet ihre Eigenschaften.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img29">
+                <div class="captura-marco"><img alt="Eigenschaften der CPU, Register Zyklus/Taktmerker, mit angehaktem Kästchen bei Byte 0 und der Periode jedes Bits" width="680" height="656" loading="lazy"></div>
+                <figcaption>«Ciclo/Marca de ciclo» (Zyklus/Taktmerker): das Kästchen, das Byte und die Periode jedes Bits.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
                 <h3>E/A-Signale: das Zeitdiagramm</h3>
                 <p>Im unteren Feld zeichnet ein Zeitdiagramm, wie sich die gewählten Eingänge, Ausgänge, Merker, Zeiten und Zähler mit der Zeit ändern. Hier ist <code>M 0.2</code> das 0,4-s-Bit des Taktmerkers.</p>
               </div>
@@ -484,7 +510,7 @@
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
-                <p class="paso-num">10</p>
+                <p class="paso-num">11</p>
                 <h3>Variablentabelle: beobachten und steuern</h3>
                 <p>Rechtsklick auf OB1 → «Insertar nuevo objeto» → «Tabla de variables» (Neues Objekt einfügen → Variablentabelle) öffnet <code>VAT_1</code> in einem Fenster innerhalb der App, das oben bleibt, während du weiterprogrammierst. Die Brille liest die Werte der CPU live.</p>
               </div>
@@ -502,6 +528,32 @@
               <figure class="captura" data-captura="img17">
                 <div class="captura-marco"><img alt="Variablentabelle VAT_1 unten im Feld neben den E/A-Signalen angedockt, mit MD 30 und MD 100 in REAL" width="702" height="184" loading="lazy"></div>
                 <figcaption>Oder unten angedockt, neben «Señales E/S» (E/A-Signale).</figcaption>
+              </figure>
+            </div>
+          </article>
+          <!-- img26, img27 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">12</p>
+                <h3>Standardbibliothek: FC 82 und FC 83</h3>
+                <p>Das Fenster «Biblioteca estándar» (Standardbibliothek) bringt fertige Bausteine mit: <b>FC 82 (RSET)</b> setzt einen Bitbereich auf einmal auf 0 und <b>FC 83 (SSET)</b> auf 1. Zum Beispiel, um alle Schritte einer GRAFCET-Schrittkette beim Neustart der Sequenz zu löschen.</p>
+              </div>
+              <ul class="lista">
+                <li>Du holst sie ins Projekt, indem du sie in den Ordner «Bloques» (Bausteine) ziehst. Mit einem markierten Baustein öffnet <kbd>F1</kbd> seine Hilfe.</li>
+                <li>In AWL rufst du sie mit <code>CALL FC 82</code> und seinen Parametern auf, <code>S_BIT</code> (erstes Bit) und <code>N</code> (wie viele Bits). Drückst du nach dem <code>CALL</code> die Eingabetaste, schreibt der Editor sie.</li>
+                <li>In KOP ist die Box im Katalog, Gruppe «Bibliotecas» (Bibliotheken).</li>
+                <li>Rufst du einen auf, der nicht im Projekt ist, geht die CPU in STOP, wie die echte.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img26">
+                <div class="captura-marco"><img alt="Fenster Standardbibliothek mit FC 82 RSET und FC 83 SSET und der Hilfe zu FC 82 mit seinen Parametern S_BIT und N" width="760" height="520" loading="lazy"></div>
+                <figcaption>Die Bibliothek mit geöffneter Hilfe zu FC 82 (<kbd>F1</kbd>).</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img27">
+                <div class="captura-marco"><img alt="AWL-Editor in RUN mit CALL FC 83 und CALL FC 82 und ihren Parametern, und der Explorer mit beiden geschützten Bausteinen im Ordner Bausteine" width="871" height="419" loading="lazy"></div>
+                <figcaption>Die Aufrufe mit ihren Parametern und beide Bausteine, geschützt, in «Bloques» (Bausteine).</figcaption>
               </figure>
             </div>
           </article>

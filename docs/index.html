@@ -30,7 +30,7 @@
     "@type": "SoftwareApplication",
     "name": "Automatizacion",
     "alternateName": "Simulador de PLC en KOP y AWL",
-    "description": "Simulador de autómatas programables (PLC) para aprender a programar en KOP (esquema de contactos, Ladder) y AWL (lista de instrucciones, STL), con teoría, ejemplos resueltos, temporizadores, contadores y analizador lógico.",
+    "description": "Simulador de autómatas programables (PLC) para aprender a programar en KOP (esquema de contactos, Ladder) y AWL (lista de instrucciones, STL), con teoría, ejemplos resueltos, temporizadores, contadores, analizador lógico, marca de ciclo y bloques de biblioteca (FC 82 y FC 83).",
     "url": "https://nicarayzon.github.io/plc-ladder-stl-simulator/",
     "downloadUrl": "https://github.com/Nicarayzon/plc-ladder-stl-simulator/releases/latest",
     "screenshot": "https://nicarayzon.github.io/plc-ladder-stl-simulator/images/img5.png",
@@ -280,7 +280,7 @@
         <div class="encabezado">
           <p class="antetitulo">Funciones</p>
           <h2>Funciones del simulador, pantalla a pantalla</h2>
-          <p>De la teoría y los ejemplos a tus propios proyectos con entradas, salidas, marcas y cronogramas.</p>
+          <p>De la teoría y los ejemplos a tus propios proyectos con entradas, salidas, marcas, cronogramas, el hardware de la CPU y la biblioteca estándar.</p>
         </div>
 
         <div class="pasos">
@@ -365,7 +365,7 @@
               <div>
                 <p class="paso-num">05</p>
                 <h3>Tus proyectos, organizados en carpetas</h3>
-                <p>En el simulador libre, cada proyecto es una carpeta con sus bloques. Se crea en cuatro pasos, y después puedes añadirle todo lo que necesites.</p>
+                <p>En el simulador libre, cada proyecto es una carpeta con dos partes: «Equipo(1)», con el hardware de la CPU, y «Bloques», con el OB1, las funciones, los bloques de biblioteca y las tablas de variables. Se crea en cuatro pasos, y después puedes añadirle todo lo que necesites.</p>
               </div>
               <ul class="lista">
                 <li>Renombra, duplica y exporta proyectos (<code>.json</code>) o su fuente AWL (<code>.awl</code>), e impórtalos en otro equipo.</li>
@@ -445,7 +445,7 @@
                 <p>Las marcas que usa el programa se agrupan por byte, con sus ocho bits en fila; los que no usa salen atenuados.</p>
               </div>
               <ul class="lista">
-                <li>Activa la marca de ciclo en «Hardware» y su byte aparece arriba: cada bit oscila solo, de 0,1 s a 2 s, con su periodo debajo.</li>
+                <li>Actívala en el hardware del equipo (paso 09) y su byte aparece arriba: cada bit oscila solo, de 0,1 s a 2 s, con su periodo debajo.</li>
                 <li>Perfecta para intermitentes: <code>U M 0.5</code> / <code>= A 124.7</code> hace parpadear una salida con periodo de 1 s.</li>
               </ul>
             </div>
@@ -461,11 +461,37 @@
             </div>
           </article>
 
-          <!-- img15 -->
+          <!-- img28, img29 -->
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
                 <p class="paso-num">09</p>
+                <h3>Hardware del equipo: la marca de ciclo, como en la CPU real</h3>
+                <p>En el explorador, <b>Equipo(1) ▸ Hardware</b> abre el bastidor con la fuente, la CPU compacta y sus entradas y salidas integradas. Doble clic en la CPU abre sus propiedades: en «Ciclo/Marca de ciclo» se activa la marca de ciclo y se elige su byte.</p>
+              </div>
+              <ul class="lista">
+                <li>Como en la CPU real, funciona después de «Guardar y compilar» y «Cargar en módulo», que pide pasar la CPU a STOP y luego a RUN.</li>
+                <li>Si lo guardado aún no está cargado, la franja de estado te lo avisa.</li>
+                <li>El botón «Hardware» de la barra es un atajo a la misma ventana.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img28">
+                <div class="captura-marco"><img alt="Ventana «Configuración del hardware» con el bastidor: fuente, CPU compacta y E/S integradas en 124…125" width="780" height="460" loading="lazy"></div>
+                <figcaption>El bastidor: doble clic en la CPU para abrir sus propiedades.</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img29">
+                <div class="captura-marco"><img alt="Propiedades de la CPU, pestaña «Ciclo/Marca de ciclo», con la casilla marcada en el byte 0 y el periodo de cada bit" width="680" height="656" loading="lazy"></div>
+                <figcaption>«Ciclo/Marca de ciclo»: la casilla, el byte y el periodo de cada bit.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <!-- img15 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">10</p>
                 <h3>Señales E/S: el cronograma</h3>
                 <p>En el panel de abajo, un cronograma dibuja cómo cambian con el tiempo las entradas, salidas, marcas, temporizadores y contadores que elijas. Aquí, <code>M 0.2</code> es la marca de ciclo de 0,4 s.</p>
               </div>
@@ -485,7 +511,7 @@
           <article class="paso paso-ancho">
             <div class="paso-texto">
               <div>
-                <p class="paso-num">10</p>
+                <p class="paso-num">11</p>
                 <h3>Tabla de variables: observar y forzar</h3>
                 <p>Con clic derecho en el OB1 → «Insertar nuevo objeto» → «Tabla de variables» se abre <code>VAT_1</code> en una ventana dentro de la app, que se queda encima mientras sigues programando. Las lentes leen los valores de la CPU en vivo.</p>
               </div>
@@ -503,6 +529,32 @@
               <figure class="captura" data-captura="img17">
                 <div class="captura-marco"><img alt="Tabla de variables VAT_1 acoplada en el panel de abajo, junto a Señales E/S, con MD 30 y MD 100 en REAL" width="702" height="184" loading="lazy"></div>
                 <figcaption>O acoplada abajo, junto a «Señales E/S».</figcaption>
+              </figure>
+            </div>
+          </article>
+          <!-- img26, img27 -->
+          <article class="paso paso-ancho">
+            <div class="paso-texto">
+              <div>
+                <p class="paso-num">12</p>
+                <h3>Biblioteca estándar: FC 82 y FC 83</h3>
+                <p>La ventana «Biblioteca estándar» trae bloques ya hechos: el <b>FC 82 (RSET)</b> pone a 0 de una vez un rango de bits y el <b>FC 83 (SSET)</b> lo pone a 1. Por ejemplo, para borrar todas las etapas de un GRAFCET al reiniciar la secuencia.</p>
+              </div>
+              <ul class="lista">
+                <li>Se traen al proyecto arrastrándolos a la carpeta «Bloques». Con un bloque seleccionado, <kbd>F1</kbd> abre su ayuda.</li>
+                <li>En AWL se llaman con <code>CALL FC 82</code> y sus parámetros, <code>S_BIT</code> (primer bit) y <code>N</code> (cuántos bits). Al pulsar Intro detrás del <code>CALL</code>, el editor los escribe.</li>
+                <li>En KOP, el cuadro está en el catálogo, en el grupo «Bibliotecas».</li>
+                <li>Si llamas a uno que no está en el proyecto, la CPU pasa a STOP, como en la real.</li>
+              </ul>
+            </div>
+            <div class="galeria galeria-2">
+              <figure class="captura" data-captura="img26">
+                <div class="captura-marco"><img alt="Ventana «Biblioteca estándar» con el FC 82 RSET y el FC 83 SSET, y la ayuda del FC 82 con sus parámetros S_BIT y N" width="760" height="520" loading="lazy"></div>
+                <figcaption>La biblioteca, con la ayuda del FC 82 abierta (<kbd>F1</kbd>).</figcaption>
+              </figure>
+              <figure class="captura" data-captura="img27">
+                <div class="captura-marco"><img alt="Editor AWL en RUN con CALL FC 83 y CALL FC 82 y sus parámetros, y el explorador con los dos bloques protegidos en la carpeta Bloques" width="871" height="419" loading="lazy"></div>
+                <figcaption>Las llamadas con sus parámetros, y los dos bloques, protegidos, en «Bloques».</figcaption>
               </figure>
             </div>
           </article>
