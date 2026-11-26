@@ -12,6 +12,8 @@ import { figuras } from './figuras';
 import { ejemplo, preguntasDe, seccion, type Bloque } from './fuentes';
 import { ancla, enLinea, esc, kop, markdown } from './html';
 import { pagina, rutaPortada, WEB, type Alternativa } from './plantilla';
+import { paginaInstalacion, rutaInstalacion } from './instalacion';
+import { INSTALACION } from '../../web/instalacion/textos';
 import { datosDePruebas, type DatosVivo } from './vivo-datos';
 
 const IDIOMAS: Idioma[] = ['es', 'en', 'de'];
@@ -432,8 +434,23 @@ export function generar(raiz: string): void {
     console.log(`${idioma}: índice y ${pags.length} páginas`);
   }
 
+  // Instalación: una página por idioma que la tenga (web/instalacion/textos.ts)
+  const conInstalacion: Alternativa[] = idiomas
+    .filter((i) => INSTALACION[i])
+    .map((i) => ({ idioma: i, nombre: TEXTOS[i]!.nombre, ruta: rutaInstalacion(i)! }));
+  for (const idioma of idiomas) {
+    const r = paginaInstalacion(idioma, TEXTOS[idioma]!, conInstalacion);
+    if (!r) continue;
+    const fichero = path.join(docs, r.ruta, 'index.html');
+    const igual = fs.existsSync(fichero) && fs.readFileSync(fichero, 'utf8') === r.html;
+    salida.set(fichero, r.html);
+    urls.push({ ruta: r.ruta, lastmod: (igual && fechas.get(WEB + r.ruta)) || hoy(), alternos: conInstalacion });
+    console.log(`${idioma}: instalación`);
+  }
+
   // Se rehacen las carpetas de teoría enteras, para que no queden páginas viejas
   for (const idioma of idiomas) fs.rmSync(path.join(docs, idioma, TEXTOS[idioma]!.carpeta), { recursive: true, force: true });
+  for (const idioma of idiomas) { const r = rutaInstalacion(idioma); if (r) fs.rmSync(path.join(docs, r), { recursive: true, force: true }); }
   for (const [fichero, html] of salida) {
     fs.mkdirSync(path.dirname(fichero), { recursive: true });
     fs.writeFileSync(fichero, html);

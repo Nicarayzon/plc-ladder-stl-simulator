@@ -14,6 +14,8 @@
 /* ───────── Cabecera ───────── */
 
 .menu a.activo { color: var(--text); background: var(--bg-elev2); }
+/* en la propia página de instalación sigue destacado, con el borde más marcado */
+.menu a.menu-destacado.activo { color: var(--text); background: var(--accent-bg); box-shadow: inset 0 0 0 1.5px var(--accent); }
 
 
 /* ───────── Distribución: índice a la izquierda y artículo ───────── */
@@ -307,3 +309,49 @@
 .temas b { font-size: 1.02rem; }
 .tema-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
 @media (max-width: 400px) { .temas { grid-template-columns: minmax(0, 1fr); } }
+
+/* ───────── Instalación (docs/<idioma>/instalacion/) ───────── */
+
+.instalacion { max-width: 880px; padding-top: clamp(40px, 7vw, 76px); padding-bottom: 88px; }
+.inst-cabeza { margin-bottom: 44px; }
+.inst-cabeza h1 { margin-bottom: 16px; font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 750; }
+.inst-pasos { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.inst-paso { position: relative; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 20px; padding-bottom: 44px; scroll-margin-top: 80px; }
+/* la línea que une los pasos */
+.inst-paso::before { content: ''; position: absolute; left: 31px; top: 64px; bottom: 6px; width: 2px; background: var(--border); }
+.inst-paso:last-child::before { display: none; }
+.inst-num {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 64px;
+  border: 1px solid var(--border-strong); border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent-bg), transparent 75%), var(--bg-elev);
+}
+.inst-num span { color: var(--text-faint); font: 600 0.62rem var(--mono); letter-spacing: 0.12em; text-transform: uppercase; }
+.inst-num b { color: var(--accent); font: 750 1.55rem/1.1 var(--mono); }
+.inst-contenido { min-width: 0; padding-top: 6px; }
+.inst-contenido h2 { margin-bottom: 12px; font-size: 1.35rem; font-weight: 700; }
+.inst-contenido p { margin: 0 0 16px; color: var(--text-dim); }
+.inst-contenido p strong { color: var(--text); font-weight: 650; }
+.inst-captura { margin: 4px 0 0; }
+.inst-captura img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg-elev2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+.inst-recuadro {
+  margin-top: 22px; padding: 16px 20px;
+  border: 1px solid color-mix(in srgb, var(--power) 45%, var(--border)); border-left-width: 4px; border-radius: 12px;
+  background: color-mix(in srgb, var(--power) 8%, var(--bg-elev));
+}
+.inst-recuadro h3 { margin-bottom: 6px; font-size: 1.02rem; }
+.inst-recuadro p { margin: 0; color: var(--text-dim); }
+.inst-extra { margin-top: 12px; padding: 24px 28px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-elev); }
+.inst-extra h2 { margin-bottom: 14px; font-size: 1.25rem; }
+.inst-extra ul { display: grid; gap: 12px; margin: 0; padding-left: 1.2em; color: var(--text-dim); }
+.inst-extra strong { color: var(--text); font-weight: 650; }
+@media (max-width: 600px) {
+  .inst-paso { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .inst-paso::before { display: none; }
+  .inst-num { flex-direction: row; gap: 8px; width: auto; height: auto; padding: 6px 12px; justify-self: start; border-radius: 999px; }
+  .inst-num b { font-size: 1.05rem; }
+  .inst-extra { padding: 20px; }
+}

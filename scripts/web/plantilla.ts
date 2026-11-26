@@ -1,6 +1,7 @@
 // Esqueleto HTML de las páginas de teoría: cabecera, pie y metadatos, con el mismo aspecto que la portada.
 import type { Idioma } from '../../web/teoria/paginas';
 import type { Textos } from '../../web/teoria/textos';
+import { INSTALACION } from '../../web/instalacion/textos';
 import { esc } from './html';
 
 export const WEB = 'https://nicarayzon.github.io/plc-ladder-stl-simulator/';
@@ -28,6 +29,8 @@ export interface DatosPagina {
   /** Objetos JSON-LD */
   datos: object[];
   cuerpo: string;
+  /** Enlace de la cabecera que va marcado (la teoría, si no se dice) */
+  activo?: 'teoria' | 'instalacion';
 }
 
 const ICONOS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -42,6 +45,12 @@ export function pagina(p: DatosPagina): string {
   const url = WEB + p.ruta;
   const indice = `${raiz}${p.idioma}/${t.carpeta}/`;
   const inicio = raiz + rutaPortada(p.idioma);
+  const activo = p.activo ?? 'teoria';
+  const marca = (x: typeof activo) => (x === activo ? ' class="activo"' : '');
+  // «Instalación», solo en los idiomas que tienen esa página
+  const inst = INSTALACION[p.idioma];
+  // va destacado sobre los demás enlaces (menu-destacado), para que se encuentre
+  const enlaceInst = inst ? `\n        <a href="${raiz}${p.idioma}/${inst.carpeta}/" class="menu-destacado${activo === 'instalacion' ? ' activo' : ''}">${esc(inst.menu)}</a>` : '';
   const alternos = p.alternativas.map((a) => `  <link rel="alternate" hreflang="${a.idioma}" href="${WEB}${a.ruta}">`);
   const porDefecto = p.alternativas.find((a) => a.idioma === 'es');
   if (porDefecto) alternos.push(`  <link rel="alternate" hreflang="x-default" href="${WEB}${porDefecto.ruta}">`);
@@ -93,7 +102,7 @@ ${alternos.join('\n')}
       </a>
       <nav class="menu" aria-label="${esc(t.teoria)}">
         <a href="${inicio}">${esc(t.simulador)}</a>
-        <a href="${indice}" class="activo">${esc(t.teoria)}</a>
+        <a href="${indice}"${marca('teoria')}>${esc(t.teoria)}</a>${enlaceInst}
       </nav>
       <div class="cabecera-acciones">
         ${selector}
