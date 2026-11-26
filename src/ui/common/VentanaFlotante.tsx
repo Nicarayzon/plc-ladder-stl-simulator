@@ -77,7 +77,7 @@ export function VentanaFlotante({ titulo, icono, clave, inicial, minW = 420, min
       <div className="vflot-head" onMouseDown={(e) => arrastrar(e, 'mover')}>
         <Icon name={icono} size={14} />
         <span className="tit">{titulo}</span>
-        <button type="button" className="btn small ghost icon" title={T.comun.cerrar} aria-label={T.comun.cerrar} onMouseDown={(e) => e.stopPropagation()} onClick={onCerrar}>
+        <button type="button" className="btn small ghost icon cerrar-ventana" title={T.comun.cerrar} aria-label={T.comun.cerrar} onMouseDown={(e) => e.stopPropagation()} onClick={onCerrar}>
           <Icon name="x" size={13} />
         </button>
       </div>

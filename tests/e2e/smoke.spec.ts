@@ -39,7 +39,7 @@ test('arranca en el simulador libre sin los modos de práctica', async () => {
 test('inicio y versión', async () => {
   await goto('inicio');
   const { version } = JSON.parse(fs.readFileSync(path.resolve(HERE, '../../package.json'), 'utf-8'));
-  expect(version).toBe('0.29.0');
+  expect(version).toBe('0.29.1');
   await expect(win.locator('.brand')).toContainText(`v${version}`);
   await expect(win.locator('h1')).toHaveText('Automatizacion');
 });
@@ -130,6 +130,29 @@ test('un tema guardado que ya no existe (Ámbar retro) pasa a Café al arrancar'
   await expect(tarjeta('Café')).toHaveAttribute('aria-pressed', 'true');
   await tarjeta('Automático').click();
   expect([await attr('data-theme'), await attr('data-paleta')]).toEqual([null, null]);
+});
+
+test('la X de cerrar ventanas es roja con la X blanca en cualquier tema', async () => {
+  const tarjeta = (t: string) => win.locator('.tema-card', { has: win.locator('b', { hasText: new RegExp(`^${t}$`) }) });
+  const colores = (sel: string) => win.locator(sel).first().evaluate((e) => [getComputedStyle(e).backgroundColor, getComputedStyle(e).color]);
+  for (const tema of ['Claro', 'Verde hacker']) {
+    await goto('temas');
+    await tarjeta(tema).click();
+    await goto('simulador');
+    await win.locator('.wb-toolbar button', { hasText: 'Hardware' }).click();
+    const hw = win.locator('.vflot.hwc');
+    await expect(hw).toHaveCount(1);
+    expect(await colores('.vflot.hwc .vflot-head .cerrar-ventana'), tema).toEqual(['rgb(212, 44, 44)', 'rgb(255, 255, 255)']);
+    // el diálogo de propiedades de la CPU, igual
+    await hw.locator('.hwc-tabla tr', { hasText: 'CPU compacta' }).dblclick();
+    expect(await colores('.modal .modal-head .cerrar-ventana'), tema).toEqual(['rgb(212, 44, 44)', 'rgb(255, 255, 255)']);
+    await win.locator('.modal .modal-head .cerrar-ventana').click();
+    await win.locator('.vflot.hwc .vflot-head .cerrar-ventana').click();
+    await expect(hw).toHaveCount(0);
+    if (await win.locator('.guia-burbuja').count()) await win.locator('.guia-burbuja button', { hasText: 'Saltar la guía' }).click();
+  }
+  await goto('temas');
+  await tarjeta('Automático').click();
 });
 
 test('la barra de la izquierda se pliega a iconos y se recuerda', async () => {

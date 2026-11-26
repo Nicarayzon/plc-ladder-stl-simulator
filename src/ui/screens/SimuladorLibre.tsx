@@ -17,12 +17,22 @@ import { BibliotecaVentana, copiarAlProyecto, esArrastreLib, libCopiado, libDeAr
 import { BIBLIOTECA, conEspacio } from '../../core/biblioteca';
 import { clockByteOf, hwSinCargar } from '../../core/program';
 import type { HwPedido } from '../workbench/HwConfig';
+import { useGuiaCiclo } from '../workbench/guiaCicloEstado';
+import { useGuiaVat } from '../workbench/guiaVatEstado';
+import { go } from '../router';
 import { T } from '../../i18n';
 
 const BLOCK_DESC: Record<string, string> = T.libre.descBloque;
 
-export function SimuladorLibre() {
+/** `guia`: se llega desde la Ayuda (#/simulador/guia-ciclo o #/simulador/guia-vat) para empezar una guía paso a paso */
+export function SimuladorLibre({ guia }: { guia?: string }) {
   const { proyectos, actual, crear, setActual } = useProjects();
+  useEffect(() => {
+    if (guia === 'guia-ciclo') useGuiaCiclo.getState().empezar();
+    else if (guia === 'guia-vat') useGuiaVat.getState().empezar();
+    else return;
+    go('simulador');
+  }, [guia]);
   const [block, setBlock] = useState('OB1');
   useEffect(() => {
     if (!proyectos.length) crear(T.libre.proyectoN(1), { ...emptyProgram(), nemotecnia: useSettings.getState().nemotecnia }, emptyWbState());
@@ -135,12 +145,12 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
   /** «Insertar nuevo objeto» */
   const insertarObjeto = (p: Proyecto): MenuItem => {
     const nombres = p.programa.bloques.map((b) => normBlockName(b.nombre));
-    return { label: T.libre.insertarObjeto, items: [
+    return { label: T.libre.insertarObjeto, guia: 'insertar-objeto', items: [
       ...(nombres.includes('OB1') ? [] : [{ label: T.libre.obj.ob1, onClick: () => crearBloque(p, 'OB1') }]),
       { label: T.libre.obj.fc(ops.nextFc(p.programa)), onClick: () => crearBloque(p, ops.nextFc(p.programa)) },
       { label: T.libre.obj.ob100, disabled: nombres.includes('OB100'), onClick: () => crearBloque(p, 'OB100') },
       { sep: true, label: '' },
-      { label: T.libre.obj.vat, onClick: () => crearVat(p) },
+      { label: T.libre.obj.vat, guia: 'nueva-vat', onClick: () => crearVat(p) },
     ] };
   };
 
@@ -229,7 +239,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
       <div className="explorer-head">
         <span>{T.libre.proyectos}</span>
         <span className="spacer" />
-        <button className="btn small" onClick={nuevoProyecto} title={T.libre.nuevoTitulo}><Icon name="plus" size={13} />{T.libre.nuevo}</button>
+        <button className="btn small" onClick={nuevoProyecto} title={T.libre.nuevoTitulo} aria-label={T.libre.nuevo}><Icon name="plus" size={13} /><span className="ex-nuevo-txt">{T.libre.nuevo}</span></button>
         <button className="btn small ghost icon" onClick={onBiblioteca} title={T.biblioteca.abrir} aria-label={T.biblioteca.titulo}><Icon name="book" size={14} /></button>
         <button className="btn small ghost icon" onClick={(e) => setMenu({ x: e.clientX, y: e.clientY, items: menuGeneral })} aria-label={T.libre.masOpciones}><Icon name="dots" size={14} /></button>
         <button className="btn small ghost icon" onClick={onCollapse} title={T.libre.ocultarExplorador} aria-label={T.libre.ocultarExplorador}><Icon name="left" size={14} /></button>
@@ -241,7 +251,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
           const bloques = p.programa.bloques.map((b) => normBlockName(b.nombre));
           return (
             <div key={p.id}>
-              <div className={`ex-folder ${isCur ? 'cur' : ''}`} role="button" tabIndex={0}
+              <div className={`ex-folder ${isCur ? 'cur' : ''}`} role="button" tabIndex={0} data-guia={isCur ? 'proyecto' : undefined}
                 onClick={() => { if (!isCur) onOpen(p.id, bloques[0] ?? 'OB1'); else setClosed((c) => { const n = new Set(c); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n; }); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') onOpen(p.id, bloques[0] ?? 'OB1'); }}
                 onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: menuProyecto(p) }); }}
@@ -255,7 +265,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
               {expanded && (
                 <div className="ex-blocks">
                   {/* Equipo(1) ▸ Hardware */}
-                  <div className="ex-sub" role="button" tabIndex={0} aria-expanded={!plegadas.has(`${p.id}:equipo`)}
+                  <div className="ex-sub" role="button" tabIndex={0} aria-expanded={!plegadas.has(`${p.id}:equipo`)} data-guia="equipo"
                     onClick={() => plegar(`${p.id}:equipo`)} onKeyDown={(e) => { if (e.key === 'Enter') plegar(`${p.id}:equipo`); }}
                     onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: [{ label: T.libre.abrirHardware, onClick: () => onOpenHw(p.id) }] }); }}>
                     <Icon name={plegadas.has(`${p.id}:equipo`) ? 'right' : 'down'} size={11} />
@@ -264,7 +274,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
                   </div>
                   {!plegadas.has(`${p.id}:equipo`) && (
                     <div className="ex-sub-items">
-                      <div className="ex-block ex-hw" role="button" tabIndex={0} title={T.libre.hardwareTitulo}
+                      <div className="ex-block ex-hw" role="button" tabIndex={0} title={T.libre.hardwareTitulo} data-guia="hw-fila"
                         onDoubleClick={() => onOpenHw(p.id)} onKeyDown={(e) => { if (e.key === 'Enter') onOpenHw(p.id); }}
                         onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: [{ label: T.libre.abrirObjeto, onClick: () => onOpenHw(p.id) }] }); }}>
                         <span className="ex-bicon">HW</span>
@@ -274,7 +284,7 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
                     </div>
                   )}
                   {/* Bloques: OB, FC, bloques de biblioteca y tablas de variables. Aquí se sueltan los bloques de la biblioteca */}
-                  <div className={`ex-sub ${soltar === p.id ? 'soltar' : ''}`} role="button" tabIndex={0} aria-expanded={!plegadas.has(`${p.id}:bloques`)}
+                  <div className={`ex-sub ${soltar === p.id ? 'soltar' : ''}`} role="button" tabIndex={0} aria-expanded={!plegadas.has(`${p.id}:bloques`)} data-guia="bloques"
                     title={soltar === p.id ? T.biblioteca.soltar : undefined}
                     onClick={() => plegar(`${p.id}:bloques`)}
                     onKeyDown={(e) => { if (e.key === 'Enter') plegar(`${p.id}:bloques`); else pegarTecla(p)(e); }}
@@ -298,8 +308,8 @@ function Explorer({ width, block, onOpen, onOpenVat, onOpenHw, onBiblioteca, onC
                           </div>
                         );
                       })}
-                      {(p.wb.vats ?? []).map((v) => (
-                        <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={T.libre.vatTitulo(v.nombre)}
+                      {(p.wb.vats ?? []).map((v, i) => (
+                        <div key={`vat:${v.nombre}`} className="ex-block" role="button" tabIndex={0} title={T.libre.vatTitulo(v.nombre)} data-guia={i === 0 ? 'vat-fila' : undefined}
                           onClick={() => onOpenVat(p.id, v.nombre)} onKeyDown={(e) => { if (e.key === 'Enter') onOpenVat(p.id, v.nombre); }}
                           onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY, items: menuVat(p, v.nombre) }); }}>
                           <span className="ex-bicon">VAT</span>
@@ -339,7 +349,7 @@ function ProjectWorkbench({ proj, block, onBlock, explorerHidden, onShowExplorer
       title={(
         <span className="row" style={{ gap: 6 }}>
           {explorerHidden
-            ? <button className="btn small icon abrir-proyectos" onClick={onShowExplorer} title={T.libre.mostrarExplorador} aria-label={T.libre.mostrarProyectos}><Icon name="folder" size={14} /></button>
+            ? <button className="btn small icon abrir-proyectos" data-guia="abrir-proyectos" onClick={onShowExplorer} title={T.libre.mostrarExplorador} aria-label={T.libre.mostrarProyectos}><Icon name="folder" size={14} /></button>
             : <Icon name="folder" size={14} className="carpeta" />}
           <span title={proj.nombre}>{proj.nombre}</span>
         </span>

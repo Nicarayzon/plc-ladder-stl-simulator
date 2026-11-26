@@ -216,7 +216,7 @@ export const en: Textos = {
 - **Runtime errors** (invalid BCD, access out of range, endless loop…): the CPU goes to STOP, **SF** lights up and the message gives the line.
 - **Monitor**: in STL you see the RLO, STA, ACCU 1 and ACCU 2 after each line executed in the last cycle (dimmed lines were not executed, for example because of a jump; “×n” means it was executed several times). In LAD, the thick green wire carries power, the dashed blue one does not, and the grey one was not executed.
 - **Breakpoints**: click in the left margin of an STL line, or on the dot in the header of a LAD network. The CPU stops *before* that instruction.
-- **Variable table** (right-click OB1 → Insert new object → Variable table): it opens in a “Var - VAT_1” window inside the app that stays on top while you keep writing code (drag its title to move it; it minimizes to its title bar), or at the bottom, next to **I/O signals**: the ↓ button in its title docks it at the bottom and the ⧉ button there takes it out again. The **glasses** (Monitor variable, Ctrl+F7) open the table and read the values every half second; another click pauses the reading. In “Modify value” you write the value in the format of the row: **Activate modify values** writes it once (inputs are written to the periphery, so they stay) and **Modify variable** (Ctrl+F9) keeps writing it in every cycle while it is pressed and lights up **FRCE**.
+- **Variable table** (right-click OB1 → Insert new object → Variable table): it opens in a “Var - VAT_1” window inside the app that stays on top while you keep writing code (drag its title to move it; it minimizes to its title bar), or at the bottom, next to **I/O signals**: the ↓ button in its title docks it at the bottom and the ⧉ button there takes it out again. The **glasses** (Monitor variable, Ctrl+F7) open the table and read the values every half second; another click pauses the reading. In “Modify value” you write the value in the format of the row: **Activate modify values** writes it once (inputs are written to the periphery, so they stay) and **Modify variable** (Ctrl+F9) keeps writing it in every cycle while it is pressed and lights up **FRCE**. **[▶ Guide me step by step](#/simulador/guia-vat)**: the app shows you where it is, like the **Variable table?** button of the bottom bar.
 - **Logic analyzer**: add signals (bits, words, \`T 1\`, \`T 1:VALUE\`, \`C 1:VALUE\`, \`MD 4:REAL\`). Click = cursor A, Shift + click = cursor B (Δt is shown), wheel = zoom, drag = scroll. It can pause automatically with a trigger, and export to CSV or PNG.
 
 ## Projects (free simulator)
@@ -226,6 +226,8 @@ The project explorer is on the left of the free simulator. **“New”** creates
 ## Hardware and clock memory
 
 The clock memory is enabled in the hardware configuration, as on the real CPU:
+
+**[▶ Guide me step by step](#/simulador/guia-ciclo)**: at each step the app shows where to click, with a pulsing outline and a bubble that explains what to do, and moves on by itself. The guide also opens with the **Hardware** button of the toolbar (if the clock memory is not downloaded to the CPU yet) and with the notice in the status strip when the program reads a memory bit it never writes; then it also tells you which byte to use.
 
 1. In the explorer, open **Station(1)** and **double-click Hardware** (or press the **Hardware** button of the toolbar, next to RUN/STOP/MRES, which is a shortcut). The rack opens with the power supply, the CPU and its integrated I/O.
 2. **Double-click the CPU** (slot 2), or right-click → *Object Properties…*.
@@ -406,7 +408,7 @@ The app is not signed by Apple. If macOS does not let you open it the first time
   wb: {
     hardware: 'Hardware',
     hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · clock memory MB${byte}` : ''}. Shortcut to Station ▸ Hardware in the explorer`,
-    hardwareConfigurar: 'Configure the hardware (CPU, clock memory). Shortcut to Station ▸ Hardware in the explorer',
+    hardwareConfigurar: 'Configure the hardware (CPU, clock memory), with a step-by-step guide. Shortcut to Station ▸ Hardware in the explorer',
     hardwareSinCargar: 'Hardware: what is saved is not downloaded to the CPU (PLC ▸ Download to Module)',
     confirmarBorrarSegmento: 'Delete this network?',
     sinKop: 'This network cannot be shown in LAD (only empty networks are converted)',
@@ -456,7 +458,7 @@ The app is not signed by Apple. If macOS does not let you open it the first time
       verTodos: 'Show all',
       cicloTitulo: 'A memory bit that nothing writes is always 0. The CPU only writes the clock memory bits if they are enabled in the hardware configuration.',
       cicloTexto: (nombres: string) => `**${nombres} is always 0**: your program reads it but never writes it. Is it a clock memory bit? Enable it in the station's Hardware and download it to the CPU.`,
-      activarCiclo: (byte: number) => `Configure the clock memory (MB${byte})…`,
+      activarCiclo: (byte: number) => `Enable it step by step (MB${byte})`,
       hwSinCargar: '**The saved hardware is not downloaded to the CPU**: the CPU keeps the previous configuration. Open it and use PLC ▸ Download to Module.',
       abrirHw: 'Open Hardware',
       stop: (porError: boolean) => `**CPU in STOP**${porError ? ' because of a runtime error' : ''}: the program is not running. Press **RUN**.`,
@@ -690,6 +692,41 @@ The app is not signed by Apple. If macOS does not let you open it the first time
     conflicto: (b: number) => `⚠ Your program writes to MB${b}: the CPU overwrites that byte with the clock memory in every cycle.`,
     explicacion: (b: number) => `Each bit toggles on its own, with equal pulse and pause (half the period at 1 and the other half at 0). Use them in the program like any memory bit, for example **A M ${b}.5** for a 1 s flasher.`,
     pasos: 'Then: **OK**, **Station ▸ Save and Compile** and **PLC ▸ Download to Module**. Until it is downloaded, the CPU keeps the previous configuration.',
+  },
+
+  guia: {
+    titulo: 'Enable the clock memory',
+    pasoDe: (n: number, total: number) => `Step ${n} of ${total}`,
+    hecho: 'Done!',
+    saltar: 'Skip the guide',
+    cerrar: 'Close',
+    hwFila: '**Double-click Hardware**, inside **Station(1)**, in the project explorer.',
+    equipo: 'Click **Station(1)** to expand it: the **Hardware** is inside.',
+    proyecto: 'Click your project folder to open it.',
+    explorador: 'Click here to show the **project explorer**.',
+    cpu: '**Double-click the Compact CPU** (slot 2) to open its properties.',
+    pestana: 'Open the **Cycle/Clock Memory** tab.',
+    casilla: 'Tick the **Clock memory** box.',
+    byte: (b: number) => `Type **${b}** in **Memory byte**: your program uses the bits of **M ${b}**.`,
+    aceptar: (b: number) => `Click **OK**. The clock memory will be byte **MB ${b}**.`,
+    guardar: 'Click **Save and Compile** (or Ctrl+S).',
+    cargar: 'Click **Download to Module** so the CPU uses it. If it is in RUN, it asks to switch it to STOP and then back to RUN.',
+    reabrir: 'It is saved, but not downloaded to the CPU yet: double-click **Hardware** again.',
+    listo: (b: number) => `The clock memory **MB ${b}** now works in the CPU: each bit, from **M ${b}.0** to **M ${b}.7**, blinks on its own.`,
+  },
+
+  guiaVat: {
+    titulo: 'Open the variable table',
+    boton: 'Variable table?',
+    botonTitulo: 'Shows you step by step where the variable table is created and opened',
+    bloques: '**Right-click** the **Blocks** folder in the explorer (OB1 works too).',
+    insertar: 'Point to **Insert new object**.',
+    nueva: 'Click **Variable table**: it is created (VAT_1, VAT_2…) and opens in its window.',
+    abrir: (v: string) => `You already have the table **${v}**: click it, inside **Blocks**, to open it.`,
+    desplegar: (v: string) => `Click the **Blocks** folder to expand it: your table **${v}** is inside.`,
+    gafas: 'Click the **glasses** (**Monitor variable**, Ctrl+F7) to see the CPU values live.',
+    operando: 'Type an address in the **Address** column, for example `M 10.0` or `MW 10`, and press Enter.',
+    listo: (v: string) => `**${v}** now shows the values live. To change one, type the new value in **Modify value** and click **Activate modify values**.`,
   },
 
   biblioteca: {

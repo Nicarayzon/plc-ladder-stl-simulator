@@ -54,14 +54,14 @@ Trae la teoría completa y 31 ejemplos resueltos que se ejecutan, para estudiar 
 - CPU de dos acumuladores con palabra de estado, temporizadores, contadores, saltos y aritmética.
 - Bloques OB1, funciones FC y OB100 de arranque.
 - **Biblioteca estándar** con el FC 82 (RSET) y el FC 83 (SSET), que ponen a 0 o a 1 un rango de bits: se arrastran al proyecto y se llaman con `CALL` y sus parámetros, en AWL o con su cuadro en KOP.
-- **Marca de ciclo** en el Hardware del equipo, en el byte que elijas (de 0,1 s a 2 s): se activa en las propiedades de la CPU y funciona al «Cargar en módulo», como en la CPU real.
+- **Marca de ciclo** en el Hardware del equipo, en el byte que elijas (de 0,1 s a 2 s): se activa en las propiedades de la CPU y funciona al «Cargar en módulo», como en la CPU real. Una guía señala en la app, paso a paso, dónde pulsar.
 
 **Entradas, salidas y señales**
 - Entradas como **interruptores de palanca** y salidas como **pilotos**: `E 124.0`–`E 125.7` y `A 124.0`–`A 125.7` siempre a la vista, más las que use tu programa.
 - `E 124.0`–`E 124.7` también con las teclas <kbd>1</kbd>–<kbd>8</kbd>. Con <kbd>Mayús</kbd>, la entrada funciona como **pulsador**: vale 1 solo mientras la mantienes.
 - **Marcas** agrupadas por byte, con sus ocho bits en fila.
 - **Cronograma de señales** (analizador lógico): seguimiento en tiempo real, zoom, cursores A y B para medir Δt, disparo y exportación a CSV o PNG. Se puede abrir en otra ventana para llevarlo a otro monitor.
-- **Tabla de variables** para observar y forzar, con formatos BOOL, BIN, HEX, DEC, REAL, S5TIME, TIME y CHAR. Flota sobre el código o se acopla abajo.
+- **Tabla de variables** para observar y forzar, con formatos BOOL, BIN, HEX, DEC, REAL, S5TIME, TIME y CHAR. Flota sobre el código o se acopla abajo. El botón «¿Tabla de variables?» de abajo enseña, paso a paso, dónde se crea y se abre.
 
 **Aprender y practicar**
 - **Teoría** por capítulos, con índice y buscador: ciclo de scan, áreas de memoria, tipos de datos, bloques, KOP, AWL, equivalencias entre los dos, errores típicos y trampas de examen.

@@ -212,12 +212,16 @@
 .libre { display: flex; height: 100%; min-height: 0; }
 .libre-main { flex: 1; min-width: 0; min-height: 0; }
 /* lleva su propia intensidad del color del tema (--zona-proy), para no confundirse con la barra lateral ni con el programa */
-.explorer { flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--zona-proy); border-right: 1px solid var(--border); }
-.explorer-head { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+.explorer { flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--zona-proy); border-right: 1px solid var(--border); container-type: inline-size; }
+.explorer-head { display: flex; align-items: center; gap: 3px; padding: 8px 6px 8px 10px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
 /* sobre el color del explorador, la letra atenuada (título, pie, descripciones) es la secundaria, que se lee mejor que la tenue */
 .explorer .faint { color: var(--text-dim); }
 .explorer .btn.ghost:hover:not(:disabled) { background: var(--proy-hover); }
-.explorer-head .btn { text-transform: none; letter-spacing: 0; color: var(--text); font-weight: 500; }
+.explorer-head .btn { text-transform: none; letter-spacing: 0; color: var(--text); font-weight: 500; flex: none; }
+/* los botones no se encogen (con el de la biblioteca no cabían y el de ocultar quedaba debajo de la barra): si falta sitio,
+   «Nuevo» se queda en su «+» y el título se corta con puntos suspensivos */
+.explorer-head > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@container (max-width: 250px) { .explorer-head .ex-nuevo-txt { display: none; } }
 .explorer-list { flex: 1; overflow-y: auto; padding: 6px 4px; }
 .explorer-foot { padding: 6px 12px; font-size: 10.5px; border-top: 1px solid var(--border); }
 .ex-folder { display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 2px 0 6px; border-radius: 6px; cursor: pointer; color: var(--text-dim); user-select: none; }
@@ -371,3 +375,32 @@
 .ex-sub.soltar, .ex-sub-items.soltar { background: var(--accent-bg); box-shadow: inset 0 0 0 1px var(--accent); }
 .ex-block .ex-lock { color: var(--text-dim); flex: none; }
 .ex-hw { cursor: default; }
+
+/* ───────── Guía «Activar la marca de ciclo» (0.29.1, GuiaCiclo.tsx) ─────────
+   Por encima de todo (menús 70, modales 50). El contorno no recoge clics; la burbuja va a un lado del elemento señalado. */
+.guia-aro { position: fixed; z-index: 90; pointer-events: none; border: 2.5px solid var(--accent); border-radius: 9px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 55%, transparent); }
+.guia-aro::after { content: ''; position: absolute; inset: -3px; border-radius: 11px; border: 2px solid var(--accent); animation: guia-latido 1.3s ease-out infinite; }
+@keyframes guia-latido { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.18, 1.35); opacity: 0; } }
+.guia-aro-num { position: absolute; top: -11px; left: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-text); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); }
+.guia-burbuja { position: fixed; z-index: 91; background: var(--bg-elev); color: var(--text); border: 1.5px solid var(--accent); border-radius: 10px; box-shadow: var(--shadow); padding: 9px 11px 9px; font-size: 12.5px; }
+.guia-burbuja.hecho { border-color: var(--ok); }
+.guia-burbuja::before { content: ''; position: absolute; width: 10px; height: 10px; background: var(--bg-elev); border: inherit; border-width: 0 0 1.5px 1.5px; }
+.guia-burbuja.lado-derecha::before { left: -6.5px; top: 28px; transform: rotate(45deg); }
+.guia-burbuja.lado-izquierda::before { right: -6.5px; top: 28px; transform: rotate(-135deg); }
+.guia-burbuja.lado-debajo::before { top: -6.5px; left: 18px; transform: rotate(135deg); }
+.guia-burbuja.lado-encima::before { bottom: -6.5px; left: 18px; transform: rotate(-45deg); }
+.guia-burbuja.lado-nada::before { display: none; }
+.guia-cab { display: flex; align-items: center; gap: 6px; color: var(--accent); }
+.guia-burbuja.hecho .guia-cab { color: var(--ok); }
+.guia-cab b { color: var(--text); font-size: 12.5px; }
+.guia-paso { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin: 3px 0 2px 20px; }
+.guia-texto { margin: 4px 0 8px; line-height: 1.45; }
+.guia-pie { display: flex; align-items: center; gap: 6px; }
+.guia-puntos { display: flex; gap: 4px; }
+.guia-puntos i { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); }
+.guia-puntos i.hecho { background: color-mix(in srgb, var(--accent) 55%, var(--border-strong)); }
+.guia-puntos i.ahora { background: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+@media (prefers-reduced-motion: reduce) { .guia-aro::after { animation: none; opacity: 0; } }
+/* botón «¿Tabla de variables?» de la franja de abajo: si no cabe, solo el icono (el título lo explica) */
+.wb-bottom { container-type: inline-size; }
+@container (max-width: 620px) { .guia-vat-txt { display: none; } }

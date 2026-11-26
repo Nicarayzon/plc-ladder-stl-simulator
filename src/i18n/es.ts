@@ -220,7 +220,7 @@ export const es = {
 - **Errores de ejecución** (BCD no válido, acceso fuera de rango, bucle infinito…): la CPU pasa a STOP, se enciende **SF** y el mensaje indica la línea.
 - **Observar**: en AWL se ve RLO, STA, ACU1 y ACU2 tras cada línea ejecutada en el último ciclo (las líneas atenuadas no se ejecutaron, por ejemplo por un salto; «×n» indica que se ejecutó varias veces). En KOP, el cable verde y grueso tiene corriente, el azul discontinuo no, y el gris no se ejecutó.
 - **Puntos de parada**: clic en el margen izquierdo de una línea AWL, o en el punto del encabezado de un segmento KOP. La CPU se para *antes* de esa instrucción.
-- **Tabla de variables** (clic derecho en OB1 → Insertar nuevo objeto → Tabla de variables): se abre en una ventana «Var - VAT_1» dentro de la app, que se queda encima aunque sigas escribiendo código (se mueve arrastrando su título y se minimiza a la barra de título), o abajo, junto a **Señales E/S**: el botón ↓ de su título la acopla abajo y el botón ⧉ de abajo la vuelve a sacar. Las **lentes** (Observar variable, Ctrl+F7) abren la tabla y leen los valores cada medio segundo; otro clic pausa la lectura. En «Valor de forzado» se escribe el valor en el formato de la fila: **Activar valores de forzado** lo escribe una vez (las entradas se escriben en la periferia, así que se mantienen) y **Forzar variable** (Ctrl+F9) lo mantiene en cada ciclo mientras está pulsado y enciende **FRCE**.
+- **Tabla de variables** (clic derecho en OB1 → Insertar nuevo objeto → Tabla de variables): se abre en una ventana «Var - VAT_1» dentro de la app, que se queda encima aunque sigas escribiendo código (se mueve arrastrando su título y se minimiza a la barra de título), o abajo, junto a **Señales E/S**: el botón ↓ de su título la acopla abajo y el botón ⧉ de abajo la vuelve a sacar. Las **lentes** (Observar variable, Ctrl+F7) abren la tabla y leen los valores cada medio segundo; otro clic pausa la lectura. En «Valor de forzado» se escribe el valor en el formato de la fila: **Activar valores de forzado** lo escribe una vez (las entradas se escriben en la periferia, así que se mantienen) y **Forzar variable** (Ctrl+F9) lo mantiene en cada ciclo mientras está pulsado y enciende **FRCE**. **[▶ Guíame paso a paso](#/simulador/guia-vat)**: la app te señala dónde está, igual que el botón **¿Tabla de variables?** de la barra de abajo.
 - **Analizador lógico**: añade señales (bits, palabras, \`T 1\`, \`T 1:VALOR\`, \`Z 1:VALOR\`, \`MD 4:REAL\`). Clic = cursor A, Mayús + clic = cursor B (se muestra Δt), rueda = zoom, arrastrar = desplazar. Se puede pausar automáticamente con un disparo y exportar a CSV o PNG.
 
 ## Proyectos (simulador libre)
@@ -230,6 +230,8 @@ A la izquierda del simulador libre está el explorador de proyectos. **«Nuevo»
 ## Hardware y marca de ciclo
 
 La marca de ciclo se activa en la configuración del hardware, como en la CPU real:
+
+**[▶ Guíame paso a paso](#/simulador/guia-ciclo)**: la app señala en cada paso dónde pulsar, con un contorno que parpadea y una burbuja que explica qué hacer, y avanza sola. La guía también se abre con el botón **Hardware** de la barra (si la marca de ciclo aún no está cargada en la CPU) y con el aviso de la franja de estado cuando el programa consulta una marca que nunca escribe; en ese caso te dice además qué byte poner.
 
 1. En el explorador, abre **Equipo(1)** y haz **doble clic en Hardware** (o pulsa el botón **Hardware** de la barra, junto a RUN/STOP/MRES, que es un atajo). Se abre el bastidor con la fuente, la CPU y sus E/S integradas.
 2. **Doble clic en la CPU** (slot 2), o clic derecho → *Propiedades del objeto…*.
@@ -410,7 +412,7 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
   wb: {
     hardware: 'Hardware',
     hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · marca de ciclo MB${byte}` : ''}. Atajo de Equipo ▸ Hardware del explorador`,
-    hardwareConfigurar: 'Configurar el hardware (CPU, marca de ciclo). Atajo de Equipo ▸ Hardware del explorador',
+    hardwareConfigurar: 'Configurar el hardware (CPU, marca de ciclo), con una guía paso a paso. Atajo de Equipo ▸ Hardware del explorador',
     hardwareSinCargar: 'Hardware: lo guardado no está cargado en la CPU (Sistema de destino ▸ Cargar en módulo)',
     confirmarBorrarSegmento: '¿Borrar este segmento?',
     sinKop: 'Este segmento no tiene representación en KOP (solo se convierten segmentos vacíos)',
@@ -460,7 +462,7 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
       verTodos: 'Ver todos',
       cicloTitulo: 'Una marca que nadie escribe vale siempre 0. Las marcas de ciclo las escribe la CPU solo si se activan en la configuración del hardware.',
       cicloTexto: (nombres: string) => `**${nombres} siempre vale 0**: tu programa la consulta pero no la escribe nunca. ¿Es una marca de ciclo? Actívala en el Hardware del equipo y cárgalo en la CPU.`,
-      activarCiclo: (byte: number) => `Configurar la marca de ciclo (MB${byte})…`,
+      activarCiclo: (byte: number) => `Activarla paso a paso (MB${byte})`,
       hwSinCargar: '**El hardware guardado no está cargado en la CPU**: la CPU sigue con la configuración anterior. Ábrelo y usa Sistema de destino ▸ Cargar en módulo.',
       abrirHw: 'Abrir el Hardware',
       stop: (porError: boolean) => `**CPU en STOP**${porError ? ' por un error de ejecución' : ''}: el programa no se ejecuta. Pulsa **RUN**.`,
@@ -695,6 +697,41 @@ La aplicación no está firmada por Apple. Si macOS no deja abrirla la primera v
     conflicto: (b: number) => `⚠ Tu programa escribe en MB${b}: la CPU sobrescribe ese byte en cada ciclo con la marca de ciclo.`,
     explicacion: (b: number) => `Cada bit oscila solo, con pulso y pausa iguales (la mitad del periodo a 1 y la otra mitad a 0). Úsalos en el programa como cualquier marca, por ejemplo **U M ${b}.5** para un intermitente de 1 s.`,
     pasos: 'Después: **Aceptar**, **Equipo ▸ Guardar y compilar** y **Sistema de destino ▸ Cargar en módulo**. Hasta que se cargue, la CPU sigue con la configuración anterior.',
+  },
+
+  guia: {
+    titulo: 'Activar la marca de ciclo',
+    pasoDe: (n: number, total: number) => `Paso ${n} de ${total}`,
+    hecho: '¡Hecho!',
+    saltar: 'Saltar la guía',
+    cerrar: 'Cerrar',
+    hwFila: 'Haz **doble clic en Hardware**, dentro de **Equipo(1)**, en el explorador de proyectos.',
+    equipo: 'Despliega **Equipo(1)** con un clic: dentro está el **Hardware**.',
+    proyecto: 'Abre la carpeta de tu proyecto con un clic.',
+    explorador: 'Pulsa aquí para ver el **explorador de proyectos**.',
+    cpu: 'Haz **doble clic en la CPU compacta** (slot 2) para abrir sus propiedades.',
+    pestana: 'Abre la pestaña **Ciclo/Marca de ciclo**.',
+    casilla: 'Marca la casilla **Marca de ciclo**.',
+    byte: (b: number) => `Escribe **${b}** en **Byte de marcas**: tu programa usa los bits de **M ${b}**.`,
+    aceptar: (b: number) => `Pulsa **Aceptar**. La marca de ciclo será el byte **MB ${b}**.`,
+    guardar: 'Pulsa **Guardar y compilar** (o Ctrl+S).',
+    cargar: 'Pulsa **Cargar en módulo** para que la CPU la use. Si está en RUN, te pedirá pasarla a STOP y luego volver a RUN.',
+    reabrir: 'Ya está guardada, pero falta cargarla en la CPU: abre otra vez el **Hardware** con doble clic.',
+    listo: (b: number) => `La marca de ciclo **MB ${b}** ya funciona en la CPU: cada bit, de **M ${b}.0** a **M ${b}.7**, parpadea solo.`,
+  },
+
+  guiaVat: {
+    titulo: 'Abrir la tabla de variables',
+    boton: '¿Tabla de variables?',
+    botonTitulo: 'Te enseña paso a paso dónde se crea y se abre la tabla de variables',
+    bloques: 'Haz **clic derecho** en la carpeta **Bloques** del explorador (también vale sobre el OB1).',
+    insertar: 'Pasa el ratón por **Insertar nuevo objeto**.',
+    nueva: 'Pulsa **Tabla de variables**: se crea (VAT_1, VAT_2…) y se abre en su ventana.',
+    abrir: (v: string) => `Ya tienes la tabla **${v}**: haz clic en ella, dentro de **Bloques**, para abrirla.`,
+    desplegar: (v: string) => `Despliega la carpeta **Bloques** con un clic: dentro está tu tabla **${v}**.`,
+    gafas: 'Pulsa las **lentes** (**Observar variable**, Ctrl+F7) para ver los valores de la CPU en vivo.',
+    operando: 'Escribe una dirección en la columna **Operando**, por ejemplo `E 124.0` o `MW 10`, y pulsa Intro.',
+    listo: (v: string) => `**${v}** ya muestra los valores en vivo. Para cambiar uno, escribe el nuevo en **Valor de forzado** y pulsa **Activar valores de forzado**.`,
   },
 
   biblioteca: {

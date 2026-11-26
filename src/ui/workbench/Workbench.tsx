@@ -20,6 +20,10 @@ import type { VatFila, WbState } from './types';
 import { kopToAwlText } from '../../kop/compile';
 import { askText } from '../common/ask';
 import { HwConfig, type HwPedido } from './HwConfig';
+import { GuiaCiclo } from './GuiaCiclo';
+import { useGuiaCiclo } from './guiaCicloEstado';
+import { GuiaVat } from './GuiaVat';
+import { useGuiaVat } from './guiaVatEstado';
 import { clockByteOf, hwSinCargar } from '../../core/program';
 import { BIBLIOTECA, conEspacio, type LibId } from '../../core/biblioteca';
 import { libsDeSegmento } from '../../kop/model';
@@ -139,6 +143,13 @@ export function Workbench(props: WorkbenchProps) {
     props.onHwAtendido?.();
   }, [hwPedido?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   const clockByte = clockByteOf(programa);
+  const guia = useGuiaCiclo((g) => g.activa);
+  const guiaVat = useGuiaVat((g) => g.activa);
+  /** Guía paso a paso para activar la marca de ciclo (si ya está en marcha, sigue con el byte que propuso) */
+  const empezarGuia = (sugerido?: number) => {
+    const g = useGuiaCiclo.getState();
+    if (!g.activa || sugerido !== undefined) g.empezar(sugerido ?? g.sugerido);
+  };
   /** Marcas consultadas que nunca se escriben: probable marca de ciclo sin activar */
   const pistaCiclo = useMemo(() => (props.hardware && sim.compiled.cp ? marcasNuncaEscritas(sim.compiled.cp, clockByte) : []), [sim.compiled, clockByte, props.hardware]);
   const [rightW, startRight] = useSplit(`${props.layoutKey ?? 'wb'}-right`, props.compact ? 290 : 360, 220, 720);
@@ -294,8 +305,10 @@ export function Workbench(props: WorkbenchProps) {
         afterMres={props.hardware || senales ? (
           <>
             {props.hardware && (
-              // atajo de Equipo ▸ Hardware del explorador: abre la misma configuración del hardware
-              <button className={`btn small ${programa.hw?.estaciones.length ? 'active' : ''}`} onClick={() => setHw({ n: Date.now() })}
+              // atajo de Equipo ▸ Hardware del explorador: abre la misma configuración del hardware y, si la marca de ciclo
+              // no está activa en la CPU, la guía que señala los pasos para activarla
+              <button className={`btn small ${programa.hw?.estaciones.length ? 'active' : ''}`} data-guia="boton-hw"
+                onClick={() => { setHw({ n: Date.now() }); if (clockByte === null || hwSinCargar(programa)) empezarGuia(); }}
                 title={hwSinCargar(programa) ? T.wb.hardwareSinCargar : programa.hw?.estaciones.length ? T.wb.hardwareTitulo(programa.hw.estaciones.map((e) => e.nombre).join(', '), clockByte) : T.wb.hardwareConfigurar}>
                 <Icon name="cpu" size={13} />{T.wb.hardware}
               </button>
@@ -339,7 +352,8 @@ export function Workbench(props: WorkbenchProps) {
             </span>
           </div>
           <LoadStatus sim={sim} onErrors={() => showBottom('msg')} onGoto={gotoSeg} pistaCiclo={pistaCiclo} hwPendiente={!!props.hardware && hwSinCargar(programa)}
-            onAbrirHw={props.hardware ? (ciclo) => setHw({ n: Date.now(), ciclo }) : undefined} />
+            onAbrirHw={props.hardware ? () => { setHw({ n: Date.now() }); empezarGuia(); } : undefined}
+            onGuiaCiclo={props.hardware ? empezarGuia : undefined} />
           {stop && (
             <div className="stop-banner" role="alert">
               <Icon name="alert" />
@@ -403,10 +417,20 @@ export function Workbench(props: WorkbenchProps) {
           { id: 'msg', label: <>{T.wb.mensajes} {sim.compiled.errors.length > 0 ? <span className="badge err">{sim.compiled.errors.length}</span> : warnings.length > 0 ? <span className="badge warn">{warnings.length}</span> : null}</> },
           { id: 'awl', label: T.wb.awlGenerado },
           { id: 'trace', label: T.wb.trazaCiclo },
-        ]} right={senales ? (
-          <button className="btn small ghost" onClick={() => setBottomOpen(!bottomOpen)} title={bottomOpen ? T.wb.ocultarAbajo : T.wb.mostrarAbajo}>
-            <Icon name={bottomOpen ? 'down' : 'up'} size={13} />{bottomOpen ? T.wb.ocultar : T.wb.mostrar}
-          </button>
+        ]} right={senales || vatEnVentana ? (
+          <>
+            {/* guía paso a paso: dónde se crea y se abre la tabla de variables (está en el explorador, no aquí) */}
+            {vatEnVentana && (
+              <button className="btn small ghost guia-vat-boton" onClick={() => useGuiaVat.getState().empezar()} title={T.guiaVat.botonTitulo}>
+                <Icon name="table" size={13} /><span className="guia-vat-txt">{T.guiaVat.boton}</span>
+              </button>
+            )}
+            {senales && (
+              <button className="btn small ghost" onClick={() => setBottomOpen(!bottomOpen)} title={bottomOpen ? T.wb.ocultarAbajo : T.wb.mostrarAbajo}>
+                <Icon name={bottomOpen ? 'down' : 'up'} size={13} />{bottomOpen ? T.wb.ocultar : T.wb.mostrar}
+              </button>
+            )}
+          </>
         ) : undefined} />
         {bottomOpen && (
           <div className="wb-bottom-body">
@@ -445,14 +469,19 @@ export function Workbench(props: WorkbenchProps) {
           </VatFlotante>
         );
       })}
-      {hw && props.hardware && <HwConfig sim={sim} programa={programa} pedido={hw} onChange={(p) => change(p)} onCerrar={() => setHw(null)} />}
+      {hw && props.hardware && <HwConfig sim={sim} programa={programa} onChange={(p) => change(p)} onCerrar={() => setHw(null)} />}
+      {guia && props.hardware && <GuiaCiclo programa={programa} />}
+      {guiaVat && vatEnVentana && <GuiaVat existente={vats[0]?.nombre} />}
       {blockMenu && <ContextMenu x={blockMenu.x} y={blockMenu.y} items={blockItems(blockMenu.name)} onClose={() => setBlockMenu(null)} />}
     </div>
   );
 }
 
 /** Franja de estado siempre visible: ¿lo que ves está cargado y ejecutándose en la CPU? */
-function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], hwPendiente, onAbrirHw }: { sim: SimController; onErrors: () => void; onGoto: (b: string, seg?: string) => void; pistaCiclo?: { key: string; byte: number }[]; hwPendiente?: boolean; onAbrirHw?: (ciclo?: number) => void }) {
+function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], hwPendiente, onAbrirHw, onGuiaCiclo }: {
+  sim: SimController; onErrors: () => void; onGoto: (b: string, seg?: string) => void; pistaCiclo?: { key: string; byte: number }[];
+  hwPendiente?: boolean; onAbrirHw?: () => void; onGuiaCiclo?: (byte: number) => void;
+}) {
   useSimTick(sim, 8, () => [sim.rev, sim.cpu.state, sim.playing, sim.cpu.phase]);
   const cpu = sim.cpu;
   const errs = sim.compiled.errors;
@@ -481,7 +510,7 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], hwPendiente, onAbr
         <button className="btn small" onClick={() => onAbrirHw()}>{T.wb.estado.abrirHw}</button>
       </>
     );
-  } else if (pistaCiclo.length && onAbrirHw) {
+  } else if (pistaCiclo.length && onGuiaCiclo) {
     cls = 'warn';
     const byte = pistaCiclo[0].byte;
     const nombres = pistaCiclo.slice(0, 3).map((m) => m.key.replace('M', 'M ')).join(', ');
@@ -489,7 +518,7 @@ function LoadStatus({ sim, onErrors, onGoto, pistaCiclo = [], hwPendiente, onAbr
       <>
         <Icon name="clock" size={13} />
         <span className="grow" title={T.wb.estado.cicloTitulo}><Rico t={T.wb.estado.cicloTexto(nombres + (pistaCiclo.length > 3 ? '…' : ''))} /></span>
-        <button className="btn small" onClick={() => onAbrirHw(byte)}>{T.wb.estado.activarCiclo(byte)}</button>
+        <button className="btn small" onClick={() => onGuiaCiclo(byte)}>{T.wb.estado.activarCiclo(byte)}</button>
       </>
     );
   } else if (cpu.state === 'STOP') {

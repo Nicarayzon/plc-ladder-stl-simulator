@@ -6,6 +6,7 @@ import rehypeSlug from 'rehype-slug';
 import { AwlHighlight } from './AwlHighlight';
 import { Icon } from './Icon';
 import { T } from '../../i18n';
+import { go } from '../router';
 
 export function Markdown({ text, onTry, className }: { text: string; onTry?: (code: string) => void; className?: string }) {
   const components: Components = {
@@ -32,6 +33,8 @@ export function Markdown({ text, onTry, className }: { text: string; onTry?: (co
     },
     a(props) {
       const href = props.href ?? '';
+      // «#/ruta»: una pantalla de la app (la Ayuda abre así la guía de la marca de ciclo en el simulador)
+      if (href.startsWith('#/')) return <a href={href} onClick={(e) => { e.preventDefault(); go(href.slice(2)); }}>{props.children}</a>;
       if (href.startsWith('#')) {
         return <a href={href} onClick={(e) => { e.preventDefault(); document.getElementById(decodeURIComponent(href.slice(1)))?.scrollIntoView({ behavior: 'smooth' }); }}>{props.children}</a>;
       }

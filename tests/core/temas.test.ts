@@ -238,6 +238,22 @@ describe('paletas', () => {
     }
   });
 
+  it('la X de cerrar ventanas: fondo rojo y X blanca, iguales en todos los temas, y se distinguen del fondo de la ventana', () => {
+    const acabado = fs.readFileSync(path.resolve(HERE, '../../src/styles/acabado.css'), 'utf-8');
+    const regla = acabado.match(/\.btn\.cerrar-ventana, \.btn\.ghost\.cerrar-ventana \{ background: (#[0-9a-f]{6}); border-color: #[0-9a-f]{6}; color: (#[0-9a-f]{6});/);
+    expect(regla, 'regla en acabado.css').not.toBeNull();
+    const [, rojo, x] = regla!;
+    expect(esRojo(rojo)).toBe(true);
+    expect(contraste(x, rojo), 'X sobre el rojo').toBeGreaterThanOrEqual(4.5);
+    for (const { id, c } of PALETAS) {
+      // las barras de título de las ventanas (--bg-elev2) y los diálogos (--bg-elev)
+      for (const t of ['bg-elev', 'bg-elev2'] as const) expect(contraste(rojo, c[t]), `${id} rojo / ${t}`).toBeGreaterThanOrEqual(2.5);
+      // y no se confunde con el acento del tema: otro tono (el más cercano es el frambuesa de Rosa claro, a 25°) o muy distinto
+      const dTono = Math.abs(((tono(rojo).h - tono(c.accent).h + 540) % 360) - 180);
+      expect(dTono >= 20 || distancia(rojo, c.accent) >= 90, `${id} rojo / acento`).toBe(true);
+    }
+  });
+
   it('«Automático» es la oscura o la clara según el sistema; un valor guardado desconocido no rompe nada', () => {
     expect(paletaDe('system', true).id).toBe('dark');
     expect(paletaDe('system', false).id).toBe('light');

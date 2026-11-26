@@ -216,7 +216,7 @@ export const de: Textos = {
 - **Laufzeitfehler** (ungültige BCD-Zahl, Zugriff außerhalb des Bereichs, Endlosschleife…): Die CPU geht in STOP, **SF** leuchtet, und die Meldung nennt die Zeile.
 - **Beobachten**: In AWL siehst du VKE, STA, AKKU1 und AKKU2 nach jeder Zeile, die im letzten Zyklus bearbeitet wurde (abgeblendete Zeilen wurden nicht bearbeitet, zum Beispiel wegen eines Sprungs; „×n“ heißt, dass sie mehrmals bearbeitet wurde). In KOP führt die dicke grüne Leitung Strom, die gestrichelte blaue nicht, und die graue wurde nicht bearbeitet.
 - **Haltepunkte**: Klick auf den linken Rand einer AWL-Zeile oder auf den Punkt im Kopf eines KOP-Netzwerks. Die CPU hält *vor* dieser Anweisung an.
-- **Variablentabelle** (Rechtsklick auf OB1 → Neues Objekt einfügen → Variablentabelle): Sie öffnet sich in einem Fenster „Var - VAT_1“ innerhalb der App, das im Vordergrund bleibt, während du weiter Code schreibst (zum Verschieben am Titel ziehen; es minimiert sich auf seine Titelleiste), oder unten, neben **E/A-Signale**: Die Schaltfläche ↓ im Titel dockt sie unten an, und die Schaltfläche ⧉ dort holt sie wieder heraus. Die **Brille** (Variable beobachten, Strg+F7) öffnet die Tabelle und liest die Werte jede halbe Sekunde; ein weiterer Klick pausiert das Lesen. In „Steuerwert“ schreibst du den Wert im Format der Zeile: **Steuerwerte aktivieren** schreibt ihn einmal (Eingänge werden in die Peripherie geschrieben und bleiben deshalb so), und **Variable steuern** (Strg+F9) schreibt ihn in jedem Zyklus, solange es gedrückt ist, und lässt **FRCE** leuchten.
+- **Variablentabelle** (Rechtsklick auf OB1 → Neues Objekt einfügen → Variablentabelle): Sie öffnet sich in einem Fenster „Var - VAT_1“ innerhalb der App, das im Vordergrund bleibt, während du weiter Code schreibst (zum Verschieben am Titel ziehen; es minimiert sich auf seine Titelleiste), oder unten, neben **E/A-Signale**: Die Schaltfläche ↓ im Titel dockt sie unten an, und die Schaltfläche ⧉ dort holt sie wieder heraus. Die **Brille** (Variable beobachten, Strg+F7) öffnet die Tabelle und liest die Werte jede halbe Sekunde; ein weiterer Klick pausiert das Lesen. In „Steuerwert“ schreibst du den Wert im Format der Zeile: **Steuerwerte aktivieren** schreibt ihn einmal (Eingänge werden in die Peripherie geschrieben und bleiben deshalb so), und **Variable steuern** (Strg+F9) schreibt ihn in jedem Zyklus, solange es gedrückt ist, und lässt **FRCE** leuchten. **[▶ Schritt für Schritt anleiten](#/simulador/guia-vat)**: Die App zeigt dir, wo sie ist, wie die Schaltfläche **Variablentabelle?** in der unteren Leiste.
 - **Logikanalysator**: Füge Signale hinzu (Bits, Wörter, \`T 1\`, \`T 1:WERT\`, \`Z 1:WERT\`, \`MD 4:REAL\`). Klick = Cursor A, Umschalt + Klick = Cursor B (Δt wird angezeigt), Mausrad = Zoom, Ziehen = Verschieben. Er kann mit einem Trigger automatisch pausieren und nach CSV oder PNG exportieren.
 
 ## Projekte (freier Simulator)
@@ -226,6 +226,8 @@ Links im freien Simulator ist der Projekt-Explorer. **„Neu“** legt ein Proje
 ## Hardware und Taktmerker
 
 Der Taktmerker wird in der Hardwarekonfiguration aktiviert, wie bei der echten CPU:
+
+**[▶ Schritt für Schritt anleiten](#/simulador/guia-ciclo)**: Bei jedem Schritt zeigt die App mit einem pulsierenden Rahmen, wo du klicken musst, eine Sprechblase erklärt, was zu tun ist, und es geht von selbst weiter. Die Anleitung öffnet sich auch mit der Schaltfläche **Hardware** in der Leiste (wenn der Taktmerker noch nicht in die CPU geladen ist) und mit dem Hinweis in der Statusleiste, wenn das Programm einen Merker abfragt, den es nie schreibt; dann sagt sie dir auch, welches Byte du eintragen sollst.
 
 1. Öffne im Explorer **Station(1)** und mach einen **Doppelklick auf Hardware** (oder drück die Schaltfläche **Hardware** in der Leiste neben RUN/STOP/MRES, eine Abkürzung). Es öffnet sich der Baugruppenträger mit Stromversorgung, CPU und ihrer integrierten E/A.
 2. **Doppelklick auf die CPU** (Steckplatz 2) oder Rechtsklick → *Objekteigenschaften…*.
@@ -406,7 +408,7 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
   wb: {
     hardware: 'Hardware',
     hardwareTitulo: (estaciones: string, byte: number | null) => `Hardware: ${estaciones}${byte !== null ? ` · Taktmerker MB${byte}` : ''}. Abkürzung zu Station ▸ Hardware im Explorer`,
-    hardwareConfigurar: 'Hardware konfigurieren (CPU, Taktmerker). Abkürzung zu Station ▸ Hardware im Explorer',
+    hardwareConfigurar: 'Hardware konfigurieren (CPU, Taktmerker), mit einer Schritt-für-Schritt-Anleitung. Abkürzung zu Station ▸ Hardware im Explorer',
     hardwareSinCargar: 'Hardware: Das Gespeicherte ist nicht in die CPU geladen (Zielsystem ▸ Laden in Baugruppe)',
     confirmarBorrarSegmento: 'Dieses Netzwerk löschen?',
     sinKop: 'Dieses Netzwerk lässt sich nicht in KOP darstellen (nur leere Netzwerke werden umgewandelt)',
@@ -456,7 +458,7 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
       verTodos: 'Alle anzeigen',
       cicloTitulo: 'Ein Merker, den nichts schreibt, ist immer 0. Die CPU schreibt die Bits des Taktmerkers nur, wenn er in der Hardwarekonfiguration aktiviert ist.',
       cicloTexto: (nombres: string) => `**${nombres} ist immer 0**: Dein Programm liest den Merker, schreibt ihn aber nie. Ist es ein Taktmerker? Aktiviere ihn in der Hardware der Station und lade sie in die CPU.`,
-      activarCiclo: (byte: number) => `Taktmerker konfigurieren (MB${byte})…`,
+      activarCiclo: (byte: number) => `Schritt für Schritt aktivieren (MB${byte})`,
       hwSinCargar: '**Die gespeicherte Hardware ist nicht in die CPU geladen**: Die CPU behält die vorige Konfiguration. Öffne sie und nimm Zielsystem ▸ Laden in Baugruppe.',
       abrirHw: 'Hardware öffnen',
       stop: (porError: boolean) => `**CPU in STOP**${porError ? ' wegen eines Laufzeitfehlers' : ''}: Das Programm läuft nicht. Drücke **RUN**.`,
@@ -690,6 +692,41 @@ Die App ist nicht von Apple signiert. Wenn macOS sie beim ersten Mal nicht öffn
     conflicto: (b: number) => `⚠ Dein Programm schreibt in MB${b}: Die CPU überschreibt dieses Byte in jedem Zyklus mit dem Taktmerker.`,
     explicacion: (b: number) => `Jedes Bit wechselt von selbst, mit gleich langem Puls und Pause (die halbe Periode 1, die andere Hälfte 0). Nimm sie im Programm wie jeden Merker, zum Beispiel **U M ${b}.5** für einen Blinker mit 1 s.`,
     pasos: 'Danach: **OK**, **Station ▸ Speichern und übersetzen** und **Zielsystem ▸ Laden in Baugruppe**. Bis sie geladen ist, behält die CPU die vorige Konfiguration.',
+  },
+
+  guia: {
+    titulo: 'Taktmerker aktivieren',
+    pasoDe: (n: number, total: number) => `Schritt ${n} von ${total}`,
+    hecho: 'Fertig!',
+    saltar: 'Anleitung überspringen',
+    cerrar: 'Schließen',
+    hwFila: '**Doppelklicke auf Hardware**, in **Station(1)** im Projekt-Explorer.',
+    equipo: 'Klappe **Station(1)** mit einem Klick auf: darin ist die **Hardware**.',
+    proyecto: 'Öffne den Ordner deines Projekts mit einem Klick.',
+    explorador: 'Klicke hier, um den **Projekt-Explorer** einzublenden.',
+    cpu: '**Doppelklicke auf die Kompakt-CPU** (Steckplatz 2), um ihre Eigenschaften zu öffnen.',
+    pestana: 'Öffne die Registerkarte **Zyklus/Taktmerker**.',
+    casilla: 'Aktiviere das Kästchen **Taktmerker**.',
+    byte: (b: number) => `Gib **${b}** bei **Merkerbyte** ein: dein Programm verwendet die Bits von **M ${b}**.`,
+    aceptar: (b: number) => `Klicke auf **OK**. Der Taktmerker ist dann das Byte **MB ${b}**.`,
+    guardar: 'Klicke auf **Speichern und übersetzen** (oder Strg+S).',
+    cargar: 'Klicke auf **Laden in Baugruppe**, damit die CPU ihn verwendet. Ist sie in RUN, fragt sie, ob sie in STOP und danach wieder in RUN gehen soll.',
+    reabrir: 'Er ist gespeichert, aber noch nicht in die CPU geladen: doppelklicke noch einmal auf **Hardware**.',
+    listo: (b: number) => `Der Taktmerker **MB ${b}** funktioniert jetzt in der CPU: jedes Bit von **M ${b}.0** bis **M ${b}.7** blinkt von selbst.`,
+  },
+
+  guiaVat: {
+    titulo: 'Variablentabelle öffnen',
+    boton: 'Variablentabelle?',
+    botonTitulo: 'Zeigt dir Schritt für Schritt, wo die Variablentabelle erstellt und geöffnet wird',
+    bloques: '**Rechtsklick** auf den Ordner **Bausteine** im Explorer (auf OB1 geht es auch).',
+    insertar: 'Zeige auf **Neues Objekt einfügen**.',
+    nueva: 'Klicke auf **Variablentabelle**: Sie wird erstellt (VAT_1, VAT_2…) und öffnet sich in ihrem Fenster.',
+    abrir: (v: string) => `Du hast schon die Tabelle **${v}**: Klicke im Ordner **Bausteine** darauf, um sie zu öffnen.`,
+    desplegar: (v: string) => `Klappe den Ordner **Bausteine** mit einem Klick auf: Darin ist deine Tabelle **${v}**.`,
+    gafas: 'Klicke auf die **Brille** (**Variable beobachten**, Strg+F7), um die Werte der CPU live zu sehen.',
+    operando: 'Gib in der Spalte **Operand** eine Adresse ein, zum Beispiel `E 124.0` oder `MW 10`, und drücke die Eingabetaste.',
+    listo: (v: string) => `**${v}** zeigt die Werte jetzt live. Um einen zu ändern, trag den neuen Wert bei **Steuerwert** ein und klicke auf **Steuerwerte aktivieren**.`,
   },
 
   biblioteca: {

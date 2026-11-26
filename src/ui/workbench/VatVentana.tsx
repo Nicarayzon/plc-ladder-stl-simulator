@@ -136,8 +136,8 @@ export function VatFlotante({ nombre, ses, z, onFrente, onAcoplar, onCerrar, chi
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
   };
-  const boton = (titulo: string, icono: string, on: () => void) => (
-    <button type="button" className="btn small ghost icon" title={titulo} aria-label={titulo} onMouseDown={(e) => e.stopPropagation()} onClick={on}>
+  const boton = (titulo: string, icono: string, on: () => void, clase = '') => (
+    <button type="button" className={`btn small ghost icon ${clase}`} title={titulo} aria-label={titulo} onMouseDown={(e) => e.stopPropagation()} onClick={on}>
       <Icon name={icono} size={13} />
     </button>
   );
@@ -149,7 +149,7 @@ export function VatFlotante({ nombre, ses, z, onFrente, onAcoplar, onCerrar, chi
         <span className="tit">Var - {nombre}</span>
         {boton(T.vatv.acoplar, 'down', onAcoplar)}
         {boton(g.min ? T.vatv.mostrarTabla : T.vatv.minimizar, g.min ? 'up' : 'minus', () => poner({ ...ses.flot, min: !ses.flot.min }))}
-        {boton(T.vatv.cerrarTabla, 'x', onCerrar)}
+        {boton(T.vatv.cerrarTabla, 'x', onCerrar, 'cerrar-ventana')}
       </div>
       {!g.min && <div className="vatf-body">{children}</div>}
       {!g.min && <div className="vatf-tam" onMouseDown={(e) => arrastrar(e, 'tamano')} aria-hidden />}
@@ -771,7 +771,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   const botones2 = (
     <>
           <B icono="disparo" titulo={T.vatv.disparoPuntos} onClick={() => setDialogo('disparo')} />
-          <B icono="gafas" titulo={T.vatv.b.observar} activo={observando} apagado={!online} onClick={lentes} />
+          <B icono="gafas" titulo={T.vatv.b.observar} activo={observando} apagado={!online} onClick={lentes} guia="vat-gafas" />
           <B icono="rayo" titulo={T.vatv.b.forzar} activo={forzando} onClick={sinEnlaceOSub ? undefined : forzar} />
           <span className="sep" />
           <B icono="gafas1" titulo={T.vatv.b.actualizar} onClick={sinEnlaceOSub ? undefined : actualizar} />
@@ -789,6 +789,8 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
     return {
       'data-f': f,
       'data-c': c,
+      // la guía de la tabla de variables señala aquí dónde escribir el primer operando
+      'data-guia': f === 0 && c === 'op' ? 'vat-operando' : undefined,
       className: `${c}${esSel ? ' sel' : ''}${editando ? ' editando' : ''}`,
       onMouseDown: (e: React.MouseEvent) => {
         if (e.button !== 0 || editando) return;
@@ -802,7 +804,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
 
   /** La cuadrícula: dentro de la subventana (flotante) o directamente en el panel de abajo */
   const tabla = (clase: string) => (
-    <div className={clase} ref={rejilla} tabIndex={0} onKeyDown={teclaRejilla} onMouseDown={cerrarEdicionFuera}>
+    <div className={clase} ref={rejilla} tabIndex={0} onKeyDown={teclaRejilla} onMouseDown={cerrarEdicionFuera} data-guia="vat-tabla">
       <table className="vatw-grid">
         <colgroup>{ANCHOS.map((w, i) => <col key={i} style={{ width: w }} />)}</colgroup>
         <thead>
@@ -877,7 +879,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   // abajo: una sola barra con los dos grupos de botones y la tabla debajo
   if (modo === 'abajo') {
     return (
-      <div ref={raiz} className={`vatw abajo${ayudaCtx ? ' ayuda' : ''}`} onKeyDown={teclaRaiz}>
+      <div ref={raiz} className={`vatw abajo${ayudaCtx ? ' ayuda' : ''}`} onKeyDown={teclaRaiz} data-guia="vat-ventana" data-vat={nombre}>
         <div className="vatw-tools" role="toolbar" aria-label={T.vatv.tablaDeVariables}>
           {botones1}
           <span className="sep" />
@@ -896,7 +898,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
   }
 
   return (
-    <div ref={raiz} className={`vatw${ayudaCtx ? ' ayuda' : ''}`} onKeyDown={teclaRaiz}>
+    <div ref={raiz} className={`vatw${ayudaCtx ? ' ayuda' : ''}`} onKeyDown={teclaRaiz} data-guia="vat-ventana" data-vat={nombre}>
       <div className="vatw-menubar" role="menubar">
         {menus.map((m, i) => (
           <button key={m.t} type="button" role="menuitem" className={menuBarra?.i === i ? 'open' : undefined}
@@ -932,7 +934,7 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
               <button type="button" className="btn small ghost icon" title={sub.modo === 'max' ? T.vatv.restaurar : T.vatv.maximizar} aria-label={sub.modo === 'max' ? T.vatv.restaurar : T.vatv.maximizar} onMouseDown={(e) => e.stopPropagation()} onClick={() => modoSub('max')}>
                 <Icon name={sub.modo === 'max' ? 'copy' : 'stop'} size={12} stroke={1.6} />
               </button>
-              <button type="button" className="btn small ghost icon" title={T.vatv.cerrar} aria-label={T.vatv.cerrarLaTabla} onMouseDown={(e) => e.stopPropagation()} onClick={cerrarSub}><Icon name="x" size={13} /></button>
+              <button type="button" className="btn small ghost icon cerrar-ventana" title={T.vatv.cerrar} aria-label={T.vatv.cerrarLaTabla} onMouseDown={(e) => e.stopPropagation()} onClick={cerrarSub}><Icon name="x" size={13} /></button>
             </div>
             {sub.modo !== 'min' && tabla('vatw-sub-body')}
             {sub.modo === 'normal' && <div className="vatw-sub-tam" onMouseDown={(e) => arrastrar(e, 'tamano')} aria-hidden />}
@@ -956,10 +958,11 @@ export function VatVista({ sim, ses, modo, nombre, proyecto, filas, onFilas, sym
 }
 
 
-/** Botón de las barras de herramientas. Sin `onClick` está desactivado; con `apagado` se ve desactivado pero responde (las lentes sin enlace avisan). */
-function BotonBarra({ icono, titulo, onClick, activo, apagado }: { icono: string; titulo: string; onClick?: () => void; activo?: boolean; apagado?: boolean }) {
+/** Botón de las barras de herramientas. Sin `onClick` está desactivado; con `apagado` se ve desactivado pero responde (las lentes sin enlace avisan).
+ *  `guia`: lo que la guía de la tabla de variables busca (las gafas) */
+function BotonBarra({ icono, titulo, onClick, activo, apagado, guia }: { icono: string; titulo: string; onClick?: () => void; activo?: boolean; apagado?: boolean; guia?: string }) {
   return (
-    <button type="button" className={`btn small ghost icon ${activo ? 'active' : ''}`} title={titulo} aria-label={titulo} aria-pressed={activo === undefined ? undefined : activo}
+    <button type="button" className={`btn small ghost icon ${activo ? 'active' : ''}`} title={titulo} aria-label={titulo} aria-pressed={activo === undefined ? undefined : activo} data-guia={guia}
       aria-disabled={apagado || !onClick ? true : undefined} onClick={() => onClick?.()}>
       <Icon name={icono} size={16} stroke={1.6} />
     </button>

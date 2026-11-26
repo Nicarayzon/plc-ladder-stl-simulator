@@ -132,6 +132,14 @@ test('KOP: el cuadro FC 82 del catálogo copia el bloque si falta', async () => 
   await win.locator('.modal .cat-item', { hasText: 'FC 82 RSET' }).click();
   await expect(win.locator('.ex-block', { hasText: 'FC82' })).toContainText('RSET');
   await expect(win.locator('.kop-svg .boxtxt', { hasText: 'FC82' })).toHaveCount(1);
+  // el cuadro sin operandos no compila: se borra el segmento para que la prueba siguiente empiece con el programa bien
+  // (si no, según lo que tarde en compilarse, la franja enseña ese error en lugar del aviso del hardware)
+  win.once('dialog', (d) => d.accept());
+  await win.locator('.seg').last().locator('button[aria-label="Opciones del segmento"]').click();
+  await win.locator('.menu button', { hasText: 'Borrar segmento' }).click();
+  await expect(win.locator('.kop-svg .boxtxt', { hasText: 'FC82' })).toHaveCount(0);
+  await win.waitForTimeout(700);
+  await expect(win.locator('.load-status')).not.toHaveClass(/err/);
 });
 
 test('hardware: guardado sin cargar avisa; al cargarlo, la marca de ciclo funciona', async () => {

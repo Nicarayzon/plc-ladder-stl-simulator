@@ -132,3 +132,12 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
   .modal-back, .modal, .menu, .toast { animation: none; }
   .btn, .input, .seg, .tile, .lamp, .io-out, .io-in, .sw, .tema-card, .papel-card { transition: none; }
 }
+
+/* ───────── Cerrar ventanas (0.29.1) ─────────
+   La X de las ventanas (Hardware, biblioteca, tabla de variables y su subventana) y de los diálogos (propiedades de la
+   CPU…) va con fondo rojo y la X en blanco, con los mismos colores en todos los temas, para que se distinga del tema.
+   Va al final de acabado.css porque tiene que ganar a `.btn.ghost` (transparente) en reposo y al pasar el ratón. */
+.btn.cerrar-ventana, .btn.ghost.cerrar-ventana { background: #d42c2c; border-color: #b02020; color: #ffffff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
+.btn.cerrar-ventana:hover:not(:disabled), .btn.ghost.cerrar-ventana:hover:not(:disabled) { background: #b81f1f; border-color: #951818; color: #ffffff; }
+.btn.cerrar-ventana:active:not(:disabled) { background: #9e1a1a; }
+.btn.cerrar-ventana:focus-visible { outline: 2px solid #ffffff; outline-offset: -4px; }

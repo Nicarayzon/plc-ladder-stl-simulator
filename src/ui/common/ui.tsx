@@ -18,7 +18,7 @@ export function Modal({ title, onClose, children, footer, width = 560 }: { title
         <div className="modal-head">
           <h3>{title}</h3>
           <span className="spacer" />
-          <button className="btn ghost icon" onClick={onClose} aria-label={T.comun.cerrar}><Icon name="x" /></button>
+          <button className="btn ghost icon cerrar-ventana" onClick={onClose} aria-label={T.comun.cerrar}><Icon name="x" /></button>
         </div>
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-foot">{footer}</div>}
@@ -28,7 +28,9 @@ export function Modal({ title, onClose, children, footer, width = 560 }: { title
 }
 
 /** `items`: submenú (por ejemplo, «Insertar nuevo objeto ▸» del explorador de proyectos). `checked`: opción elegida de un desplegable (✓) */
-export interface MenuItem { label: string; onClick?: () => void; disabled?: boolean; sep?: boolean; hint?: string; items?: MenuItem[]; checked?: boolean }
+export interface MenuItem { label: string; onClick?: () => void; disabled?: boolean; sep?: boolean; hint?: string; items?: MenuItem[]; checked?: boolean;
+  /** `data-guia` del botón: lo que señalan las guías paso a paso (Guia.tsx) */
+  guia?: string }
 
 /** `encima`: borde superior del control que abre el menú; si no cabe debajo, se abre encima.
  *  Escucha en la ventana del propio menú, que puede ser la de Señales E/S (portal a otro documento). */
@@ -68,7 +70,7 @@ function MenuList({ x, y, items, onClose, sub, encima }: { x: number; y: number;
     <div className="menu" ref={ref} style={{ left: pos.x, top: pos.y }} role="menu">
       {items.map((it, i) => it.sep ? <hr key={i} /> : (
         <button key={i} disabled={it.disabled} role={it.checked !== undefined ? 'menuitemradio' : 'menuitem'} aria-checked={it.checked} aria-haspopup={it.items ? 'menu' : undefined} aria-expanded={it.items ? open?.i === i : undefined}
-          className={it.items && open?.i === i ? 'open' : undefined}
+          className={it.items && open?.i === i ? 'open' : undefined} data-guia={it.guia}
           onMouseEnter={(e) => { if (it.items && !it.disabled) abrir(i, e.currentTarget); else setOpen(null); }}
           onClick={(e) => { if (it.items) { abrir(i, e.currentTarget); return; } onClose(); it.onClick?.(); }}
           style={it.disabled ? { opacity: 0.4 } : undefined}>

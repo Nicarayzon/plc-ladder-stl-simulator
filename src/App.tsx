@@ -71,7 +71,7 @@ const screens: Record<string, (route: string[]) => ReactNode> = {
   ajustes: () => <AjustesScreen />,
   temas: (r) => <TemasScreen pestana={r[1]} />,
   ayuda: () => <AyudaScreen />,
-  simulador: () => <SimuladorLibre />,
+  simulador: (r) => <SimuladorLibre guia={r[1]} />,
 };
 
 const NAV_VISIBLE = NAV.filter((n) => PRACTICA_ACTIVA || !GRUPOS_PRACTICA.has(n.group ?? ''));
